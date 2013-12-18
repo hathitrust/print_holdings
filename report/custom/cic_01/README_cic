@@ -1,0 +1,140 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EVERYTHING IN THIS DIRECTORY IS FROM MY FIRST ATTEMPT USING VOLUME_ID
+AND MAY BE DEPRECATED IF THE SECOND ATTEMPT WITH OCLC AND CLUSTERS WORK.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Steps:
+
+(all paths relative to this dir)
+
+1. Get the rawest data from the database, output to a file. Think of it as a gas.
+
+mysql> pager cat > cic_raw.tsv
+
+SELECT
+    h2.volume_id,
+    h3.member_id,
+    SUM(h3.copy_count) AS cc,
+    SUM(h3.access_count) AS ac
+FROM
+    holdings_htitem AS h2,
+    holdings_htitem_htmember_jn AS h3
+WHERE
+    h2.volume_id = h3.volume_id
+    AND
+    h3.member_id IN ('chi','ind','iowa','minn','msu','nwu','osu','psu','purd','uiuc','umd','unl','uom','wisc')
+    AND
+    h2.item_type = 'mono'
+GROUP BY
+    h2.volume_id,
+    h3.member_id;
+
+Wait.
+
+mysql> nopager
+
+2. Condense the data (gas) with an AWK script.
+
+>$ awk -f condense_mysql_outpt.awk cic_raw.tsv | sort -n > cic_condensed.tsv
+
+3. Lower the temperature and gather the condensate into a pool of liquid:
+
+>$ type flist
+flist is aliased to `sort | uniq -c | sort -nr'
+
+>$ egrep -o $'^([0-9]+\t[0-9]+)' cic_condensed.tsv | flist > cic_liquid.tsv
+
+4. Apply current and watch the liquid crystallize:
+
+>$ awk -f crystallize_liquid.awk cic_liquid.tsv | sort -n > cic_crystal.tsv
+
+5. Get averages among non-CIC members:
+
+>$ ruby non_cic_average.rb
+
+This reads cic_condensed.tsv and will tell you numbers like:
+"for the 185194 books held by 8" CIC members, 
+there are an average 27832 copies among non-CIC members".
+
+Took about 1h 20min to run 4821 queries with a IN()-size of max 1000 volume_ids.
+
+
+
+Aaaaand, if I just did fuck up with the volume_ids there is always the old cluster route:
+select 
+    hh.volume_id, hh.oclcs, c2.oclc 
+from 
+    holdings_htitem as hh, 
+    holdings_cluster_htitem_jn c1, 
+    holdings_cluster_oclc c2 
+where 
+    hh.volume_id = c1.volume_id 
+    and
+    c1.cluster_id = c2.cluster_id
+    and
+    hh.volume_id = 'mdp.39015054423457';
+
++--------------------+----------+----------+
+| volume_id          | oclcs    | oclc     |
++--------------------+----------+----------+
+| mdp.39015054423457 | 18558869 | 18558869 |
++--------------------+----------+----------+
+
+So, repeat but with oclc gotten this way as the fulcrum, not volume_id ??
+
+
+-- this works (?) but is sloooooow. 3 minutes for 10 rows.
+-- also 3 minutes for 100 rows. so. ok.
+-- how long for 1000 rows and 2 member_ids, you ask?
+
+SELECT
+    c2.oclc,
+    h3.member_id,
+    SUM(h3.copy_count) AS cc,
+    SUM(h3.access_count) AS ac
+FROM
+    holdings_htitem AS h2 
+    JOIN 
+    holdings_htitem_htmember_jn AS h3 ON (h2.volume_id = h3.volume_id)
+    JOIN
+    holdings_cluster_htitem_jn AS c1 ON (h2.volume_id = c1.volume_id)
+    JOIN
+    holdings_cluster_oclc AS c2 ON (c1.cluster_id = c2.cluster_id)
+WHERE
+    h3.member_id IN ('chi','ind','iowa','minn','msu','nwu','osu','psu','purd','uiuc','umd','unl','uom','wisc')
+    AND
+    h2.item_type = 'mono'
+GROUP BY
+    c2.oclc,
+    h3.member_id;

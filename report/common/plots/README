@@ -1,0 +1,12 @@
+Everything here is done by starting step_01.sh.
+It calls h_distribution_report-all.py and plot_H_histogram_stacked.py and puts the output into a .tgz file.
+
+h_distribution_report-all.py is still, at this writing, missing a python lib.
+
+plot_H_histogram_stacked.py has a hardcoded value for max_H which needs to be fixed.
+
+So, do:
+
+  >$ step_01.sh
+
+... and give it a minute. Copy tar file to machine, extract and upload images google drive, to a new dir under plots.

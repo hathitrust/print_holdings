@@ -1,0 +1,10 @@
+These volume_ids are from the very bottom of step_02_out.tsv, with 14 cic holding, 6 cic holding open.
+I.e. the most openly held books in all of cic.
+
+SELECT copy_count, access_count, member_id
+FROM holdings_htitem_htmember_jn
+WHERE volume_id IN ('mdp.39015038895879', 'mdp.39015038928274', 'mdp.39015046867852', 'mdp.39015054423457');
+
+300 hits on this segment. 256 closed, 44 open (32 x 1, 8 x 2, 4 x 3).
+
+44 / 300 = 0.14666, meaning %14.6 hathi members will have an open copy of the book.

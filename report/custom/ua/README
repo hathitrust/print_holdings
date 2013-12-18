@@ -1,0 +1,27 @@
+Hi Martin,
+
+I am wondering if you could produce a report for the University of Alabama with the following four columns:
+
+The first having a list of OCLC numbers for works that Alabama holds that are also in HathiTrust.
+The second having an indication of whether the work in HathiTrust is a spm, mpm, or serial.
+The third having an indication of whether items in HathiTrust associated with that OCLC number are pd, ic, or both (include open access works in pd).
+The fourth having an indication of whether Alabama listed the work as being lost or missing, or brittle, in the holdings data they provided.
+
+1  pd  copyright   public domain
+7  ic-world	   access    in-copyright and permitted as world viewable by the copyright holder
+9  pdus            copyright public domain only when viewed in the US
+10 cc-by           copyright Creative Commons Attribution license
+11 cc-by-nd        copyright Creative Commons Attribution-NoDerivatives license
+12 cc-by-nc-nd     copyright Creative Commons Attribution-NonCommercial-NoDerivatives license
+13 cc-by-nc        copyright Creative Commons Attribution-NonCommercial license
+14 cc-by-nc-sa     copyright Creative Commons Attribution-NonCommercial-ShareAlike license
+15 cc-by-sa        copyright Creative Commons Attribution-ShareAlike license
+17 cc-zero         copyright Creative Commons Zero license (implies pd)
+
+
+
+
+
+select hf.oclc, hf.rights from hathi_files hf join holdings_memberitem hm on (hf.oclc = hm.oclc) where hm.member_id = 'udel';
+
+Took only 48 minutes.

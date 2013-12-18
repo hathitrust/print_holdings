@@ -1,0 +1,50 @@
+Steps:
+
+(all paths relative to this dir)
+
+1. Get the rawest data from the database.
+
+   >$ sh step_01.sh
+
+   It will write to step_01_out.tsv, and took me 30min last time I ran it.
+
+2. Condense the data a little bit further with some AWK.
+
+   >$ sh step_02.sh
+
+   It will write to step_02_out.tsv. Takes a couple of minutes.
+
+   In theory, one could start step 5 at this point already, but the
+   intervening steps are so short and sweet that it may be pointless.
+
+3. Get a frequency list of cc-ac pairs.
+
+   >$ sh step_03.sh
+
+   It will write to step_03_out.tsv. A minute or so.
+
+4. Sum ac and cc grouped by #items
+
+   >$ sh step_04.sh
+
+    It will write to step_04_out.tsv, instantaneous.
+
+5. Get averages among all Hathi members:
+
+   >$ ruby hathi_cic_average.rb
+
+   This reads step_02_out.tsv and will tell you numbers like:
+   "for the 189354 open books held by 10 CIC members, 
+   there are 230000 among all of hathi, with an average 45.1 
+   members holding each item.
+
+   Took about 90 min to run 4821 queries with a IN()-size 
+   of max 1000 volume_ids.
+
+   Writes to hathi_cic_counts.tsv
+
+6. Generate pretty-printed text report.
+
+   >$ ruby prettyprint_report.rb
+
+   It will write to cic_report_pretty.tsv.

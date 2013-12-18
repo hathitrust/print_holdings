@@ -1,0 +1,12 @@
+All of these files came into being when I was generating stuff for the "PHDB Member Counts - November 2013" Google Doc.
+
+Some of it is crap. Need to clean up before I do anything else with these.
+Not all code needed lives here, some is still scattered in /htapps/pulintz/???.
+
+Gotta say the monthly was a bit confusing on some of these parts. Should be able to hack together a script
+that gets all of this going, writing to a couple of outfiles, then some perl or awk that compiles the outfiles
+to one uploadable .tsv per sheet.
+
+Annoyingly, most problems have been with oclc_matchcount_query.rb.
+
+Again, the need to separate the scripts and the data files becomes apparent.

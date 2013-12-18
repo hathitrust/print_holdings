@@ -1,0 +1,43 @@
+Steps:
+
+(all paths relative to this dir)
+
+1. Get the rawest data from the database.
+
+   >$ sh step_01.sh
+
+   It will write to step_01_out.tsv, and took me 30min last time I ran it.
+
+2. Condense the data a little bit further with some AWK.
+
+   >$ sh step_02.sh
+
+   It will write to step_02_out.tsv. Takes a couple of minutes.
+
+3. Get a frequency list of cc-ac pairs.
+
+   >$ sh step_03.sh
+
+   It will write to step_03_out.tsv. A minute or so.
+
+4. Sum ac and cc grouped by #items
+
+   >$ sh step_04.sh
+
+    It will write to step_04_out.tsv, instantaneous.
+
+5. Get averages among non-CIC members:
+
+   >$ ruby non_cic_average.rb
+
+   This reads cic_condensed.tsv and will tell you numbers like:
+   "for the 189354 books held by 10 CIC members, 
+   there are an average 3995012 copies among non-CIC members with an average 0.004 open and 1.142 closed".
+
+   Took about 90 min to run 4821 queries with a IN()-size of max 1000 volume_ids.
+
+6. Generate pretty-printed text report.
+
+   >$ ruby prettyprint_report.rb
+
+   It will write to cic_counts_report.tsv.

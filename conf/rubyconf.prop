@@ -1,0 +1,10 @@
+# Settings in local conf will supercede settings in global conf.
+# Syntax: 
+#     Commented lines match /\s*#/.
+#     Key-value lines match /^([a-z_0-9]+)\s*=\s*(.+)$/.
+#     Empty or all-whitespace lines are ignored.
+
+db_driver = com.mysql.jdbc.Driver
+db_url    = jdbc:mysql://mysql-htdev/ht_repository
+db_user   = ht_repository
+db_pw     = X5Gz/YtOs3h.E

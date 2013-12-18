@@ -1,0 +1,17 @@
+Fri Dec 13 09:31:11 EST 2013
+jruby -J-Xmx2000m /htapps/pulintz.babel/Code/phdb/bin/multipart_cluster_mapper.rb /afs/umich.edu/user/m/w/mwarin/phdb_scripts/data/cluster_htmember_multi.20131213.data
+57 multipart members.
+579643 clusters in list.
+10000...
+20000...
+NoMethodError: undefined method `length' for #<JDBCHelper::Connection::ResultSet:0x650171ad>
+      map_multipart_cluster_to_members at /htapps/pulintz.babel/Code/phdb/lib//phdb/phdb_multipart_utils.rb:238
+                                  each at org/jruby/RubyArray.java:1613
+      map_multipart_cluster_to_members at /htapps/pulintz.babel/Code/phdb/lib//phdb/phdb_multipart_utils.rb:211
+  generate_cluster_htmember_multi_file at /htapps/pulintz.babel/Code/phdb/bin/multipart_cluster_mapper.rb:29
+                                  each at org/jruby/RubyArray.java:1613
+  generate_cluster_htmember_multi_file at /htapps/pulintz.babel/Code/phdb/bin/multipart_cluster_mapper.rb:28
+                                (root) at /htapps/pulintz.babel/Code/phdb/bin/multipart_cluster_mapper.rb:55
+Fri Dec 13 09:35:59 EST 2013
+jruby /htapps/pulintz.babel/Code/phdb/bin/generate_htitem_htmember_jn_data.rb /afs/umich.edu/user/m/w/mwarin/phdb_scripts/data/cluster_htmember_multi.20131213.data /afs/umich.edu/user/m/w/mwarin/phdb_scripts/data/holdings_htitem_htmember.multi.20131213.data
+90 members.

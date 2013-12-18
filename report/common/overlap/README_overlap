@@ -1,0 +1,26 @@
+A common (?) question is what the overlap is between a given members'
+print holdings and that of the rest of Hathi.
+
+For instance (edited, in vain, for brevity):
+
+  The University of Delaware Library (UD) is beginning to investigate the possibility of withdrawing part of its out of
+  copyright print material based on the holdings in the HathiTrust repository.
+  
+  I was unable to find information about this on the HathiTrust web site. Since the Library has sent its holdings
+  to you, would it be possible to provide the number of out of copyright titles that UD owns that are in the repository?
+  Can the specific titles be provided to UD? Was data sent that would also enable identifying the number of volumes?
+
+This is all done by hathi_overlap.rb. All it needs is a member_id as input.
+This is roughly what it does, in 2 steps:
+
+Step 1, get all the oclc-copy_count pairs for UD:
+
+SELECT DISTINCT h2.oclcs, h3.copy_count FROM holdings_htitem AS h2, holdings_htitem_htmember_jn AS h3 WHERE h2.volume_id = h3.volume_id AND h3.member_id = 'udel' AND h2.rights IN ('pd', 'pdus');
+
+Step 2, go over these rows. Since h2.oclcs can be a multi-value list we need to split it up. Then query hathi_files on oclc.
+
+    SELECT DISTINCT oclc
+    FROM hathi_files
+    WHERE oclc IN (__LIST_OF_OCLC__)
+
+Return the list of OCLCs that overlap, plus perhaps some extra bells and gongs depending on what the client asks for.
