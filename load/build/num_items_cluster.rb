@@ -5,7 +5,7 @@ require 'hathilog';
 
 From the monthlies:
 
-6b) 
+6b)
 Calculate num_of_items for each cluster
 mysql> UPDATE holdings_cluster SET num_of_items = (select count(volume_id)
 from holdings_cluster_htitem_jn where
@@ -18,7 +18,7 @@ Rows matched: 5442960  Changed: 5442960  Warnings: 0
 
 db   = Hathidb::Db.new();
 conn = db.get_conn();
-log  = Hathilog::Log.new({:file_name => 'num_items_cluster.log'});
+log  = Hathilog::Log.new();
 sql  = %W<
     UPDATE holdings_cluster SET num_of_items = (
         SELECT
@@ -43,4 +43,3 @@ ensure
 end
 
 log.i('Finished');
-

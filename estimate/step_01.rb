@@ -18,22 +18,27 @@ https://docs.google.com/a/umich.edu/document/d/1R5GdnvykPz1O_2wo_d-61BVjkanAgAJy
 $HT_DIR = '/htapps/pulintz.babel/data/phdb/MemberData/';
 $log    = Hathilog::Log.new();
 
-def create_estimate(member_id, ave_ic_cost_per_vol, conn)
+def create_estimate(member_id, ave_ic_cost_per_vol, db)
 
   puts "#####\n# #{member_id}\n#####";
 
   table = "holdings_memberitem_#{member_id}";
-  create_table(table, conn);
-  load_table(table, member_id, conn);
-  volume_id_file = get_volume_ids(table, conn);
+
+  iconn = db.get_interactive();
+  create_table(table, iconn);
+  load_table(table, member_id, iconn);
+  volume_id_file = get_volume_ids(table, iconn);
   run_ic_estimate(table, volume_id_file, ave_ic_cost_per_vol);
+
+  conn = db.get_conn();
   narrative = get_narrative(table, conn);
+  conn.close();
 
   hd = Hathidata::Data.new("estimate/narrative_#{member_id}").open('w');
   hd.file.puts narrative;
   hd.close();
 
-  drop_table(table, conn);
+  drop_table(table, iconn);
 end
 
 def create_table(table, conn)
@@ -43,7 +48,7 @@ def create_table(table, conn)
 end
 
 def load_table (table, member_id, conn)
-  member_dir = $HT_DIR + member_id;
+  member_dir = $HT_DIR + member_id + '.estimate';
   Dir.new(member_dir).each do |p|
     if p =~ /HT003_#{member_id}\.(mono|multi|serial)\.tsv/ then
 
@@ -196,10 +201,9 @@ if $0 == __FILE__ then
   end
 
   db   = Hathidb::Db.new();
-  conn = db.get_interactive();
 
    ARGV.each do |member_id|
-    create_estimate(member_id, ave_ic_cost_per_vol, conn);
+    create_estimate(member_id, ave_ic_cost_per_vol, db);
   end
 
   conn.close();
