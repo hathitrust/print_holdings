@@ -10,10 +10,9 @@ db   = Hathidb::Db.new();
 conn = db.get_conn();
 log  = Hathilog::Log.new();
 
-# Added after last run, not tried.
 log.d(q0);
 conn.query(q0) do |res|
-  log.d(res[c]);
+  log.d(res[:c]);
 end
 
 log.d(q1);
@@ -22,10 +21,9 @@ conn.update(q1);
 log.d(q2);
 conn.update(q2);
 
-# Added after last run, not tried.
 log.d(q3);
 conn.query(q3) do |res|
-  log.d(res[c]);
+  log.d(res[:c]);
 end
 
 log.d("Done");
