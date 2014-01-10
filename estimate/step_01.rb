@@ -42,9 +42,13 @@ def create_estimate(member_id, ave_ic_cost_per_vol, db)
 end
 
 def create_table(table, conn)
-  q = "CREATE TABLE #{table} LIKE holdings_memberitem";
-  $log.d(q);
-  conn.execute(q);
+  [
+   "DROP TABLE IF EXISTS #{table}",
+   "CREATE TABLE #{table} LIKE holdings_memberitem",
+  ].each do |q|
+    $log.d(q);
+    conn.execute(q);
+  end
 end
 
 def load_table (table, member_id, conn)
