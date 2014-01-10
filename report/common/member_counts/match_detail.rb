@@ -1,35 +1,52 @@
+require 'hathidata';
 require 'hathidb';
+require 'hathilog';
 
-db = Hathidb::Db.new();
-conn1 = db.get_conn();
+require_relative 'reformat_member_report';
 
-system("echo '' >> unique_counts.tsv");
+=begin
 
-q1 = "SELECT DISTINCT member_id FROM holdings_memberitem";
-conn1.query(q1).each do |row1|
-  m = row1[:member_id];
-  q2 = "SELECT oclc FROM holdings_memberitem WHERE member_id = '#{m}';";
+Provides some data for the "Match Detail" tab in the "Member Counts" report.
 
-  outfn = "match_detail_#{m}.txt";
-  outf = File.open(outfn, 'w');
-  outf.sync = true;
+=end
 
-  system("echo '#{m}:' >> unique_counts.tsv");
+log  = Hathilog::Log.new();
+log.d("Started");
+db   = Hathidb::Db.new();
+conn = db.get_conn();
+ymd  = Time.new().strftime("%Y%m%d");
+hd1  = Hathidata::Data.new("match_detail_1_#{ymd}.tsv").open('w');
 
-  conn2 = db.get_conn();
-  conn2.query(q2).each do |row2|
-    outf.puts row2[:oclc];
-  end
-  conn2.close();
-  outf.close();  
+sql = %W<
+SELECT
+  member_id,
+  access,
+  item_type,
+  SUM(H_count) AS c
+FROM
+  holdings_H_counts
+GROUP BY
+  member_id,
+  access,
+  item_type
+>.join(' ');
 
-  cmd = "sort #{outfn} | uniq -c | wc -l >> unique_counts.tsv";
-  puts cmd;
-  system(cmd);
-
-  rm_cmd = "rm -v #{outfn}";
-  puts rm_cmd;
-  system(rm_cmd);
+log.d(sql);
+# This gets our intermediate format.
+cols = [:member_id, :access, :item_type, :c];
+conn.query(sql) do |row|
+  hd1.file.puts(cols.map{|c| row[c]}.join("\t"));
 end
 
-conn1.close();
+hd1.close();
+conn.close();
+
+# Call method in reformat_member_report.rb.
+# This gets our final, usable format.
+hd2  = Hathidata::Data.new("match_detail_2_#{ymd}.tsv").open('w');
+build_data_hash2(hd1.path).each_pair do |k, v|
+  hd2.file.puts(v.to_s)
+end
+hd2.close();
+
+log.d("Finished");
