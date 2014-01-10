@@ -11,12 +11,26 @@ module Hathidb
       @conf = Hathiconf::Conf.new();
     end
 
+    # Implicitly 'dev'.
     def get_conn()
       conn = JDBCHelper::Connection.new(
        :driver           => @conf.get('db_driver'),
        :url              => @conf.get('db_url'),
        :user             => @conf.get('db_user'),
        :password         => @conf.get('db_pw'),
+       :useCursorFetch   => 'true', 
+       :defaultFetchSize => 10000,
+       );
+      return conn;
+    end
+
+    # Explicitly 'prod'.
+    def get_prod_conn()
+      conn = JDBCHelper::Connection.new(
+       :driver           => @conf.get('prod_db_driver'),
+       :url              => @conf.get('prod_db_url'),
+       :user             => @conf.get('prod_db_user'),
+       :password         => @conf.get('prod_db_pw'),
        :useCursorFetch   => 'true', 
        :defaultFetchSize => 10000,
        );
