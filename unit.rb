@@ -184,6 +184,26 @@ class HathiUnit < Test::Unit::TestCase
     end
   end
 
+  def test_data_ymd_in_filename
+    assert_nothing_raised do
+      hd = Hathidata::Data.new('unittest/dated.$ymd.txt').open('w');
+      hd.file.puts("Today!");
+      hd.close();
+      hd.delete();
+    end
+  end
+
+  def test_data_ymd_in_dirname
+    assert_nothing_raised do
+      hd = Hathidata::Data.new('unittest/$ymd/dated.txt').open('w');
+      hd.file.puts("Today!");
+      hd.close();
+      parent_dir = hd.path.parent();
+      hd.delete();
+      Dir.rmdir(parent_dir);
+    end
+  end
+
   def test_data_full_circle
     # We make sure path is created all the way.
     hd = Hathidata::Data.new('unittest/fox');
