@@ -3,6 +3,7 @@ require 'java';
 require 'jdbc-helper';
 require 'mysql-connector-java-5.1.17-bin.jar';
 require 'hathiconf';
+require 'hathienv';
 
 module Hathidb
   class Db
@@ -26,6 +27,11 @@ module Hathidb
 
     # Explicitly 'prod'.
     def get_prod_conn()
+
+      if Hathienv::Env.is_dev?() then
+        raise "You cannot access the production database from here.";
+      end
+
       conn = JDBCHelper::Connection.new(
        :driver           => @conf.get('prod_db_driver'),
        :url              => @conf.get('prod_db_url'),
