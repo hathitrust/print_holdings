@@ -68,7 +68,7 @@ def export_data_files(db, log)
     log.d("#{count}: processing #{mid}...");
 
     ta = Time.new();
-    system(command)
+    system(command);
     tb = Time.new();
 
     sleeptime = (tb - ta) / 2;
