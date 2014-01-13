@@ -37,6 +37,14 @@ module Hathidata
     @@log = Hathilog::Log.new();
 
     def initialize(p_path)
+      # Make it possible to easily date filenames.
+      # Inlude $ymd and get it replaced with yyyymmdd.
+      # Works on both filenames and dirs
+      if p_path[/\$ymd/] then
+        ymd = Time.new().strftime("%Y%m%d");
+        p_path.gsub!(/\$ymd/, ymd);
+      end
+
       @path = DATA_PATH + p_path; # Pathname. Do not be fooled.
     end
 
