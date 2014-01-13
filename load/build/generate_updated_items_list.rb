@@ -1,6 +1,7 @@
 require 'hathidb';
 require 'hathidata';
 require 'hathilog';
+require 'hathienv';
 require 'set';
 
 # Copied from /htapps/pulintz.babel/Code/phdb/bin/generate_updated_items_list.rb
@@ -37,6 +38,13 @@ def changed_counts(oldlist, newlist)
 end
 
 def generate_volume_change_list(olddb, newdb, log)
+
+  hdf = Hathidata::Data.new("volume_changes.#{ymd}.txt");
+
+  if hdf.exists? then
+    return hdf.path;
+  end
+
   db    = Hathidb::Db.new();
   conn  = db.get_conn();
   count = 0
@@ -92,8 +100,7 @@ def generate_volume_change_list(olddb, newdb, log)
   conn.close;
 
   # write results
-  ymd = Time.new().strftime("%Y%m%d");
-  hdf = Hathidata::Data.new("volume_changes.#{ymd}.txt").open('w');
+  hdf.open('w');
 
   gl_set = Set.new gain_loss_changes;
   ac_set = Set.new access_count_changes;
@@ -111,13 +118,9 @@ end
 
 def load_data (path, log)
   db           = Hathidb::Db.new();
-  prod_conn    = db.get_prod_conn();
+  conn         = nil;
   next_version = 0;
   version_sql  = "SELECT MAX(version) AS max_version FROM holdings_deltas";
-
-  prod_conn.query(version_sql) do |row|
-    next_version = row[:max_version].to_i + 1;
-  end
 
   load_sql = %W<
     LOAD DATA LOCAL INFILE ? 
@@ -127,20 +130,21 @@ def load_data (path, log)
     update_date = CURRENT_DATE
   >.join(' ');
 
-  if %x(hostname).include?('grog') then
-    log.d("Loading version #{next_version} into prod.")
-    load_query_prod = prod_conn.prepare(load_sql);
-    load_query_prod.execute(path, next_version);
-    prod_conn.close();
-  end    
+  if Hathienv::Env.is_prod?() then
+    conn = db.get_prod_conn();
+  else
+    conn = db.get_conn();
+  end
 
-  log.d("Loading version #{next_version} into dev.")
+  conn.query(version_sql) do |row|
+    next_version = row[:max_version].to_i + 1;
+  end
 
-  dev_conn = db.get_conn();
-  load_query_dev = dev_conn.prepare(load_sql);
-  load_query_dev.execute(path, next_version);
-  dev_conn.close();
+  log.d("Loading version #{next_version}.")
+  load_query = conn.prepare(load_sql);
+  load_query.execute(path, next_version);
 
+  conn.close();
 end
 
 if $0 == __FILE__ then
