@@ -1,7 +1,7 @@
 #!/bin/bash
 
 d=`date '+%Y-%m-%d'`;
-tarfile="Hplot-stacked-2013-12-03.tgz";
+tarfile="Hplot-stacked-$d.tgz";
 
 /usr/bin/python h_distribution_report-all.py;
 /usr/bin/python plot_H_histogram_stacked.py hcounts.mono.csv hcounts.multi.csv hcounts.serial.csv;
