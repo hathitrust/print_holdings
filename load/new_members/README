@@ -25,7 +25,3 @@
   b) Loading member data into holdings_memberitem can be very slow.  This is a very large table (>200M rows) that has several indexes.  A file load can take over an hour to load even if its small.  It shouldn’t take that long, and sometimes its really quick.  Haven’t figured out why it’s sometimes much faster than other times.  I’ve talked about it a couple times with Ryan, he can’t see anything weird when it seems to be crawling.
 
   c) When creating a new member row in the holdings_htmember table, look to see if an appropriate id already exists for the member in the ht_repository.ht_institutions table.  The convention is to use these wayf/shib ids where possible.  If there isn’t one for the new member yet, use whatever identifier is used in the main URL for their website.  E.g., since brown’s primary URL is http://www.brown.edu, we use ‘brown’.  
-
-## My notes
-
-The script 01_new_member.rb asks you for the input into holdings_htmember (4 above), then creates a scrubber that you have to manually tune.
