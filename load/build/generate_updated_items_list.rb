@@ -19,7 +19,7 @@ def changed_counts(oldlist, newlist)
   olds = {};
   oldlist.each do |a|
     omember, ocount = a.split("-");
-    olds[omember] = (ocount.to_i > 0);
+    olds[omember]   = (ocount.to_i > 0);
   end
   newlist.each do |b|
     nmember, ncount = b.split("-");
@@ -118,7 +118,6 @@ end
 
 def load_data (path, log)
   db           = Hathidb::Db.new();
-  conn         = nil;
   next_version = 0;
   version_sql  = "SELECT MAX(version) AS max_version FROM holdings_deltas";
 
@@ -130,29 +129,36 @@ def load_data (path, log)
     update_date = CURRENT_DATE
   >.join(' ');
 
+  conns = [db.get_conn()];
+
+  # If run in dev, only do dev.
+  # If run in prod, run dev THEN prod.
   if Hathienv::Env.is_prod?() then
-    conn = db.get_prod_conn();
-  else
-    conn = db.get_conn();
+    log.d("Running twice, one for dev and one for prod!");
+    conns << db.get_prod_conn();
   end
 
-  conn.query(version_sql) do |row|
-    next_version = row[:max_version].to_i + 1;
+  conns.each do |conn|
+    conn.query(version_sql) do |row|
+      next_version = row[:max_version].to_i + 1;
+    end
+
+    log.d("Loading version #{next_version}.")
+    load_query = conn.prepare(load_sql);
+    load_query.execute(path, next_version);
+
+    conn.close();
   end
-
-  log.d("Loading version #{next_version}.")
-  load_query = conn.prepare(load_sql);
-  load_query.execute(path, next_version);
-
-  conn.close();
 end
 
 if $0 == __FILE__ then
   log = Hathilog::Log.new();
   log.d("Started");
-  old_table_name = "holdings_htitem_htmember_jn_old";
-  new_table_name = "holdings_htitem_htmember_jn";
-  path = generate_volume_change_list(old_table_name, new_table_name, log);
+
+  ntn  = "holdings_htitem_htmember_jn";
+  otn  = "#{ntn}_old";
+  path = generate_volume_change_list(otn, ntn, log);
+
   load_data(path, log);
   log.d("Finished");
 end
