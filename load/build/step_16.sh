@@ -48,7 +48,7 @@ if [ $exit_st != 0 ]; then
     exit $exit_st;             
 fi                             
 
-echo "16d, generate delta files";
+echo "16d, generate delta files and load into db";
 ruby -J-Xmx2048m $SCRIPTPATH/generate_updated_items_list.rb;
 
 exit_st=$?                     
@@ -58,4 +58,5 @@ if [ $exit_st != 0 ]; then
 fi                             
 
 echo "Made it all the way!";
+echo "Now go do step_16e manually."
 exit 0;
