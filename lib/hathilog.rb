@@ -3,10 +3,24 @@
 Uniform logging for all Hathi scripts and modules.
 
 require 'hathilog';
-lg = Hathilog::Log.new();
+
+lg = Hathilog::Log.new(); # STDERR logger
 lg.d("d does debug");
 ...
 lg.f("f for fatal");
+
+lg.set_level(2); # Will now ignore debug. 
+
+# File logger to LOG_DIR_PATH/foo.log.
+lg = Hathilog::Log.new({:file_name => 'foo.log'});
+# Add '$ymd' to :file_name to get current date as yyyymmdd.
+
+# File logger to /etc/foo.log
+lg = Hathilog::Log.new({:file_path => '/etc/foo.log'});
+
+...
+
+lg.close();
 
 =end
 
@@ -34,10 +48,10 @@ module Hathilog
 
       # Or, specify just a file name and we'll write to that file
       # in the LOG_DIR_PATH.
-      @file_name = parameters[:file_name] || nil; 
+      @file_name = parameters[:file_name] || nil;
 
       # Set at creation and/or change later. See set_level().
-      @log_level = parameters[:log_level] || nil; 
+      @log_level = parameters[:log_level] || nil;
 
       # Make a file_path if file_name given.
       if @file_path == nil && @file_name != nil then
@@ -57,7 +71,7 @@ module Hathilog
       else
         @logger = Logger.new(STDERR);
       end
-      
+
       set_level(@log_level);
 
       @logger.formatter = proc do |severity, datetime, progname, msg|
@@ -67,14 +81,14 @@ module Hathilog
     end
 
     # Called by initialize, but can also be called later by public.
-    # 0 = debug, 5 = fatal. Needs a little more logic than an 
+    # 0 = debug, 5 = fatal. Needs a little more logic than an
     # attr_accessor.
     def set_level(level)
       @level = level.to_i;
       if level != nil && level >= 0 && level <= 5 then
         @logger.level = level;
       else
-        @logger.level = Logger::DEBUG;  
+        @logger.level = Logger::DEBUG;
       end
     end
 
