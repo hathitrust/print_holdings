@@ -19,7 +19,6 @@ def get_password_from_file(fn):
 
 def get_connection(usr, pw):
     # open DB connection
-    #pw = get_password_from_file('/afs/umich.edu/user/p/u/pulintz/etc/.pw/ht_repository')
     try:
         conn = MySQLdb.connect (host = "mysql-htdev",
                             port=3306,
