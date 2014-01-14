@@ -39,11 +39,18 @@ module Hathilog
       # Set at creation and/or change later. See set_level().
       @log_level = parameters[:log_level] || nil; 
 
+      # Make a file_path if file_name given.
       if @file_path == nil && @file_name != nil then
         @file_path = LOG_DIR_PATH.to_s + @file_name;
       end
 
       if @file_path != nil then
+        # $ymd -> date expansion in path name.
+        if @file_path[/\$ymd/] then
+          ymd = Time.new().strftime("%Y%m%d");
+          @file_path.gsub!(/\$ymd/, ymd);
+        end
+
         STDERR.puts "Logging to #{@file_path}";
         f = File.open(@file_path, File::WRONLY | File::APPEND | File::CREAT)
         @logger = Logger.new(f, 2, 1048576); # Max 2 x 1MB

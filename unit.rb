@@ -109,6 +109,18 @@ class HathiUnit < Test::Unit::TestCase
     assert_equal(true, Pathname.new(logpath).exist?());
   end
 
+  def test_log_dated_filename
+    assert_nothing_raised do
+      lg = Hathilog::Log.new({:file_name => 'dated.$ymd.log'});
+      lg.d("Today!");
+      logfile_path = lg.file_path;
+      lg.close();
+
+      assert_equal(true, Pathname.new(logfile_path).exist?());
+      File.delete(logfile_path);
+    end
+  end
+
   def test_level_log
 
     lg = Hathilog::Log.new({:log_level => 3, :file_name => 'levels.log'});
