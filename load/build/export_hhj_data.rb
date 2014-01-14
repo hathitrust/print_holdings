@@ -1,6 +1,7 @@
 require 'hathidb';
 require 'hathiconf';
 require 'hathilog';
+require 'hathienv';
 
 # Copied from /htapps/pulintz.babel/Code/phdb/bin/ and slightly modded.
 
@@ -29,6 +30,7 @@ def export_data_files(db, log)
 
   memberids       = [];
   get_members_sql = "SELECT DISTINCT member_id FROM holdings_htmember ORDER BY member_id";
+  log.d(get_members_sql);
   conn.query(get_members_sql) do |mrow|
     memberids << mrow[:member_id];
   end
@@ -84,6 +86,10 @@ def export_data_files(db, log)
 end
 
 if $0 == __FILE__ then
+  if !Hathienv::Env.is_prod? then
+    raise "This script should only be run in prod.";
+  end
+
   log = Hathilog::Log.new();
   log.d("Started");
   db = Hathidb::Db.new();
