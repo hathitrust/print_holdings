@@ -7,6 +7,6 @@ plot_H_histogram_stacked.py has a hardcoded value for max_H which needs to be fi
 
 So, do:
 
-  >$ step_01.sh
+  >$ bash step_01.sh
 
 ... and give it a minute. Copy tar file to machine, extract and upload images google drive, to a new dir under plots.
