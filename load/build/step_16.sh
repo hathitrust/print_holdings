@@ -9,7 +9,7 @@ if [ $hng == 'grog' ]; then
 else
     echo "You need to run this on a host with access to the production MySQL database.";
     echo "(hint hint grog hint hint)";
-    exit 0;
+    exit 1;
 fi
 
 # Get abs path to this dir.
@@ -24,11 +24,38 @@ bt="holdings_htitem_htmember_jn";
 echo "16a: Back up table $bt";
 bash $SCRIPTPATH/backuptable.sh $bt;
 
+exit_st=$?                     
+if [ $exit_st != 0 ]; then     
+    echo "Exiting prematurely";
+    exit $exit_st;             
+fi                             
+
 echo "16b copy table in dev.";
 ruby $SCRIPTPATH/populate_holdings_htitem_htmember_jn_dev.rb;
+
+exit_st=$?                     
+if [ $exit_st != 0 ]; then     
+    echo "Exiting prematurely";
+    exit $exit_st;             
+fi                             
 
 echo "16c, copy to production";
 ruby $SCRIPTPATH/export_hhj_data.rb;
 
+exit_st=$?                     
+if [ $exit_st != 0 ]; then     
+    echo "Exiting prematurely";
+    exit $exit_st;             
+fi                             
+
 echo "16d, generate delta files";
 ruby -J-Xmx2048m $SCRIPTPATH/generate_updated_items_list.rb;
+
+exit_st=$?                     
+if [ $exit_st != 0 ]; then     
+    echo "Exiting prematurely";
+    exit $exit_st;             
+fi                             
+
+echo "Made it all the way!";
+exit 0;
