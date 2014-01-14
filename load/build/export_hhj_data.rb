@@ -18,7 +18,9 @@ end
 def truncate_table(db, log)
   check_table(db, log);
   conn = db.get_prod_conn();
-  q = "TRUNCATE TABLE holdings_htitem_htmember_jn_dev";
+  # q = "TRUNCATE TABLE holdings_htitem_htmember_jn_dev";
+  # Temporary solution, as I cannot TRUNCATE without DROP permission.
+  q = "DELETE FROM holdings_htitem_htmember_jn_dev";
   log.d(q);
   conn.execute(q);
   conn.close();
@@ -37,7 +39,7 @@ def export_data_files(db, log)
 
   conf          = Hathiconf::Conf.new();
   htrep_dev_pw  = conf.get('db_pw');
-  htrep_prod_pw = conf.get('db_prod_pw');
+  htrep_prod_pw = conf.get('prod_db_pw');
   count         = 0;
 
   memberids.each do |mid|
