@@ -39,7 +39,7 @@ end
 
 def generate_volume_change_list(olddb, newdb, log)
 
-  hdf = Hathidata::Data.new("volume_changes.#{ymd}.txt");
+  hdf = Hathidata::Data.new("volume_changes.$ymd.txt");
 
   if hdf.exists? then
     return hdf.path;
