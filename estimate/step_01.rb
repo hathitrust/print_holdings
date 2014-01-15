@@ -30,15 +30,14 @@ def create_estimate(member_id, ave_ic_cost_per_vol, db)
   volume_id_file = get_volume_ids(table, iconn);
   run_ic_estimate(table, volume_id_file, ave_ic_cost_per_vol);
 
-  conn = db.get_conn();
-  narrative = get_narrative(table, conn);
-  conn.close();
+  narrative = get_narrative(table, iconn);
 
   hd = Hathidata::Data.new("estimate/narrative_#{member_id}").open('w');
   hd.file.puts narrative;
   hd.close();
 
   drop_table(table, iconn);
+  iconn.close();
 end
 
 def create_table(table, conn)
@@ -209,11 +208,8 @@ if $0 == __FILE__ then
     abort;
   end
 
-  db   = Hathidb::Db.new();
-
+  db = Hathidb::Db.new();
    ARGV.each do |member_id|
     create_estimate(member_id, ave_ic_cost_per_vol, db);
   end
-
-  conn.close();
 end
