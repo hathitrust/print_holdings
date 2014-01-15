@@ -3,7 +3,6 @@ require 'hathilog';
 require 'hathidata';
 require 'phdb/phdb_utils';
 require 'phdb/cost_estimator';
-require 'date';
 
 =begin
 
@@ -74,9 +73,7 @@ end
 def get_volume_ids(table, conn)
   # Airlifted in from:
   # /htapps/pulintz.babel/Code/phdb/bin/estimate_pull_ic_volumes.rb
-  date    = DateTime.now;
-  datestr = date.strftime("%Y%m%d");
-  outfn   = "#{table}-volume_id.#{datestr}.out";
+  outfn   = "#{table}-volume_id.$ymd.out";
   outfile = Hathidata::Data.new(outfn);
 
   if File.exists?(outfile.path) then
