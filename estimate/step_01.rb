@@ -107,6 +107,11 @@ def run_ic_estimate(table, volume_id_file, ave_cost_per_vol)
   puts "total ic cost = $#{cost_str}";
 end
 
+# Turn 1000000000000 into 1,000,000,000,000
+def separate_thousands (n)
+  n.to_s.reverse.gsub(/\d{3}(?=\d)/,'\&,').reverse;
+end
+
 # Creates a little story about the data that was loaded.
 def get_narrative(table, conn)
 
@@ -138,27 +143,27 @@ def get_narrative(table, conn)
   message   = [];
 
   conn.query(sql1) do |row1|
-    message << "In all, we received #{row1['c']} usable holdings entries";
+    message << "In all, we received #{separate_thousands(row1['c'])} usable holdings entries";
   end
 
   line = []
   conn.query(sql2) do |row2|
-    line << "#{row2['c']} #{row2['item_type']}s";
+    line << "#{separate_thousands(row2['c'])} #{row2['item_type']}s";
   end
   message << "(#{line.join(', ')})";
 
   conn.query(sql3) do |row3|
     uniq_oclc = row3['c'].to_i;
-    message << "containing #{row3['c']} unique OCLC numbers.";
+    message << "containing #{separate_thousands(row3['c'])} unique OCLC numbers.";
   end 
 
   conn.query(sql4) do |row4|
     perc = ((row4['c'] / uniq_oclc.to_f) * 100).round(2);
-    message << "Of the unique OCLC numbers, #{row4['c']} (#{perc}%) match HathiTrust,";
+    message << "Of the unique OCLC numbers, #{separate_thousands(row4['c'])} (#{perc}%) match HathiTrust,";
   end
 
   conn.query(sql5) do |row5|
-    message << "corresponding to #{row5['c']} HathiTrust items.";
+    message << "corresponding to #{separate_thousands(row5['c'])} HathiTrust items.";
   end
 
   conn.query(sql6) do |row6|
@@ -167,7 +172,7 @@ def get_narrative(table, conn)
     whole   = (allow + deny).to_f;
     allow_p = ((allow / whole) * 100).round(2);
     deny_p  = ((deny / whole)  * 100).round(2);
-    message << "Of those, #{allow} (#{allow_p}%) are open, #{deny} (#{deny_p}%) are closed.";
+    message << "Of those, #{separate_thousands(allow)} (#{allow_p}%) are in the public domain, #{separate_thousands(deny)} (#{deny_p}%) are in copyright.";
   end
 
   return message;
