@@ -38,9 +38,7 @@ def changed_counts(oldlist, newlist)
 end
 
 def generate_volume_change_list(olddb, newdb, log)
-
   hdf = Hathidata::Data.new("volume_changes.$ymd.txt");
-
   if hdf.exists? then
     return hdf.path;
   end
@@ -55,9 +53,9 @@ def generate_volume_change_list(olddb, newdb, log)
   access_count_changes = [];
   gain_loss_changes    = [];
 
-  query1     = "select volume_id from holdings_htitem";
-  query2_new = conn.prepare("select member_id, access_count from #{newdb} where volume_id = ?");
-  query2_old = conn.prepare("select member_id, access_count from #{olddb} where volume_id = ?");
+  query1     = "SELECT volume_id FROM holdings_htitem";
+  query2_new = conn.prepare("SELECT member_id, access_count FROM #{newdb} WHERE volume_id = ?");
+  query2_old = conn.prepare("SELECT member_id, access_count FROM #{olddb} WHERE volume_id = ?");
 
   conn.enumerate(query1).each_slice(50000) do |slice|
     slice.each do |row|
@@ -69,7 +67,7 @@ def generate_volume_change_list(olddb, newdb, log)
       old_pairs   = [];
 
       # New
-      query2_new.execute(vid) do |row2|
+      query2_new.enumerate(vid) do |row2|
         mem_id       = row2[0];
         acount       = row2[1];
         new_members << mem_id;
@@ -78,7 +76,7 @@ def generate_volume_change_list(olddb, newdb, log)
       end
 
       # Old
-      query2_old.execute(vid) do |row2|
+      query2_old.enumerate(vid) do |row2|
         mem_id       = row2[0];
         acount       = row2[1];
         old_members << mem_id;
@@ -89,10 +87,7 @@ def generate_volume_change_list(olddb, newdb, log)
       gain_loss_changes    << vid unless new_members.sort == old_members.sort;
       access_count_changes << vid if     changed_counts(old_pairs, new_pairs);
     end
-    if ((count % 500000) == 0)
-      puts "#{count}...";
-    end
-    log.d(count);
+    log.d("After #{count} volume_ids, #{gain_loss_changes.length} gain/loss changes and #{access_count_changes.length} access count changes");
   end
 
   puts "There are #{gain_loss_changes.length} gain-loss changes.";
@@ -103,7 +98,10 @@ def generate_volume_change_list(olddb, newdb, log)
   hdf.open('w');
 
   gl_set = Set.new gain_loss_changes;
+  gain_loss_changes = nil; # Hopefully freeing some memory.
   ac_set = Set.new access_count_changes;
+  access_count_changes = nil; # Hopefully freeing some memory.
+
   puts "The gain_loss set a subset of the access_count subset.  #{gl_set.subset?(ac_set)}";
   puts "The access_count set a subset of the gain_loss subset.  #{ac_set.subset?(gl_set)}";
   gl_set.merge(ac_set);
