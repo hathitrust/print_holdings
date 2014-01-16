@@ -142,9 +142,15 @@ def get_narrative(table, conn)
     message << "In all, we received #{separate_thousands(row1['c'])} usable holdings entries";
   end
 
+  item_type_dict = {
+    'mono'   => 'single-part monograph',
+    'multi'  => 'multi-part monograph',
+    'serial' => 'serial'
+  };
+
   line = []
   conn.query(sql2) do |row2|
-    line << "#{separate_thousands(row2['c'])} #{row2['item_type']}s";
+    line << "#{separate_thousands(row2['c'])} #{item_type_dict[row2['item_type']]}s";
   end
   message << "(#{line.join(', ')})";
 
