@@ -2,6 +2,7 @@
 require 'java';
 require 'jdbc-helper';
 require 'mysql-connector-java-5.1.17-bin.jar';
+require 'io/console';
 require 'hathiconf';
 require 'hathienv';
 
@@ -45,7 +46,6 @@ module Hathidb
 
     def get_interactive()
       # Like get_conn but getting username & password from stdin.
-      require 'io/console';
       print "\n";
       print "User: >>";
       db_user = STDIN.noecho(&:gets).strip;
@@ -56,6 +56,31 @@ module Hathidb
       conn = JDBCHelper::Connection.new(
        :driver           => @conf.get('db_driver'),
        :url              => @conf.get('db_url'),
+       :user             => db_user,
+       :password         => db_pw,
+       :useCursorFetch   => 'true', 
+       :defaultFetchSize => 10000,
+       );
+      return conn;
+    end
+
+    def get_prod_interactive()
+      # Like get_prod_conn but getting username & password from stdin.
+
+      if Hathienv::Env.is_dev?() then
+        raise "You cannot access the production database from here.";
+      end
+
+      print "\n";
+      print "User: >>";
+      db_user = STDIN.noecho(&:gets).strip;
+      print "\n";
+      print "Password: >>";
+      db_pw   = STDIN.noecho(&:gets).strip;
+      print "\n";
+      conn = JDBCHelper::Connection.new(
+       :driver           => @conf.get('prod_db_driver'),
+       :url              => @conf.get('prod_db_url'),
        :user             => db_user,
        :password         => db_pw,
        :useCursorFetch   => 'true', 
