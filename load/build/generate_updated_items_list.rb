@@ -71,8 +71,7 @@ def generate_volume_change_list(olddb, newdb, log)
         mem_id       = row2[0];
         acount       = row2[1];
         new_members << mem_id;
-        mem_num_pair = "#{mem_id}-#{acount}";
-        new_pairs   << mem_num_pair;
+        new_pairs   << "#{mem_id}-#{acount}";
       end
 
       # Old
@@ -80,8 +79,7 @@ def generate_volume_change_list(olddb, newdb, log)
         mem_id       = row2[0];
         acount       = row2[1];
         old_members << mem_id;
-        mem_num_pair = "#{mem_id}-#{acount}";
-        old_pairs   << mem_num_pair;
+        old_pairs   << "#{mem_id}-#{acount}";
       end
 
       gain_loss_changes    << vid unless new_members.sort == old_members.sort;
