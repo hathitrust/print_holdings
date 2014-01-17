@@ -136,9 +136,9 @@ module Hathidata
       zipped_fn = @path.to_s + '.gz';
       @@log.d("deflate #{@path} to #{zipped_fn}");
       gz_writer  = Zlib::GzipWriter.open(zipped_fn);
-      unzipped_f = File.open(@path, 'r');
-      gz_writer.write(unzipped_f.read());
-      unzipped_f.close();
+      File.open(@path, 'r').each do |line|
+        gz_writer.write(line);
+      end
       gz_writer.close();
       @@log.d("Deleting #{@path}");
       File.delete(@path);
@@ -153,13 +153,15 @@ module Hathidata
     # Switches @path after inflate.
     def inflate
       if @path.to_s =~ /\.gz$/ then
-        gz_reader   = Zlib::GzipReader.open(@path);
         unzipped_fn = @path.to_s.gsub(/\.gz$/, '');
-        @@log.d("inflate #{@path} to #{unzipped_fn}");
         unzipped_f  = File.open(unzipped_fn, 'w');
-        unzipped_f.write(gz_reader.read);
+        @@log.d("inflate #{@path} to #{unzipped_fn}");
+        Zlib::GzipReader.open(@path) do |gzr|
+          gzr.each_line do |line|
+            unzipped_f.write(line);
+          end
+        end
         unzipped_f.close();
-        gz_reader.close();
         @@log.d("Deleting #{@path}");
         File.delete(@path);
         @path = Pathname.new(unzipped_fn);
