@@ -19,26 +19,28 @@ popd > /dev/null;
 
 # ... and setup finished.
 
-bt="holdings_htitem_htmember_jn";
+date;
 
-echo "16a: Back up table $bt";
-bash $SCRIPTPATH/backuptable.sh $bt;
+# Ran this manually, will be moved to step_00.
+# bt="holdings_htitem_htmember_jn";
+# echo "16a: Back up table $bt";
+# bash $SCRIPTPATH/backup_table.sh $bt;
+# exit_st=$?                     
+# if [ $exit_st != 0 ]; then     
+#     echo "Exiting prematurely";
+#     exit $exit_st;             
+# fi                             
 
-exit_st=$?                     
-if [ $exit_st != 0 ]; then     
-    echo "Exiting prematurely";
-    exit $exit_st;             
-fi                             
-
+# Ran, took 2h 15 min.
 echo "16b copy table in dev.";
 ruby $SCRIPTPATH/populate_holdings_htitem_htmember_jn_dev.rb;
-
 exit_st=$?                     
 if [ $exit_st != 0 ]; then     
     echo "Exiting prematurely";
     exit $exit_st;             
 fi                             
 
+# Ran, took 5 hours. OK. Do not run again this time.
 echo "16c, copy to production";
 ruby $SCRIPTPATH/export_hhj_data.rb;
 
@@ -58,5 +60,5 @@ if [ $exit_st != 0 ]; then
 fi                             
 
 echo "Made it all the way!";
-echo "Now go do step_16e manually."
+echo "Now run step_16e.rb manually."
 exit 0;
