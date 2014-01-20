@@ -47,13 +47,13 @@ if $0 == __FILE__ then
     raise "Failed";
   end
 
-  check_sql   = "SELECT COUNT(*) AS c FROM holdings_htitem";
-  check_query = conn.prepare(check_sql);
+  count_sql   = "SELECT COUNT(*) AS c FROM holdings_htitem";
+  count_query = conn.prepare(count_sql);
 
   # Check count before...
-  check_query.enumerate do |res|
+  count_query.enumerate do |res|
     log.d("Before... :");
-    log.d("#{check_sql} ... #{res[:c]}");
+    log.d("#{count_sql} ... #{res[:c]}");
   end
 
   # Run updates.
@@ -66,9 +66,17 @@ if $0 == __FILE__ then
   end
 
   # Check count after.
-  check_query.enumerate do |res|
+  count_query.enumerate do |res|
     log.d("After... :");
-    log.d("#{check_sql} ... #{res[:c]}");
+    log.d("#{count_sql} ... #{res[:c]}");
+  end
+
+  # Check for bad records that need human intervention.
+  check_sql = "SELECT item_type, COUNT(*) AS c FROM holdings_htitem GROUP BY item_type";
+  log.d("If there are any results with item_type=0, then they need to be fixed by hand.");
+  log.d(check_sql);
+  conn.query(check_sql) do |res|
+    log.d("#{res[:item_type]}\t#{res[:c]}");
   end
 
   conn.close();
