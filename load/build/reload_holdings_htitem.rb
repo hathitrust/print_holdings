@@ -45,8 +45,8 @@ if $0 == __FILE__ then
   end
 
   [
-   #"TRUNCATE holdings_htitem",
-   #"LOAD DATA LOCAL INFILE '#{loadfile}' INTO TABLE holdings_htitem"
+   "TRUNCATE holdings_htitem",
+   "LOAD DATA LOCAL INFILE '#{loadfile}' INTO TABLE holdings_htitem"
   ].each do |q|
     log.d(q);
     conn.update(q);
