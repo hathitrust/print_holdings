@@ -8,17 +8,38 @@
 # Further rewrite using Net::HTTP for download and Hathidata for storage,
 # 2014-01-17.
 
+=begin
+
+Call thusly:
+
+  ruby hathi_grabber.rb
+
+or
+
+  hathi_grabber.rb hathi_full_#{YYYY}#{MM}01.txt.gz
+
+Without filename as argument, it will download the 
+hathi_full_YYYYMM01.txt.gz for the current year and month. 
+
+With filename it will download the specified file from 
+http://www.hathitrust.org/sites/www.hathitrust.org/files/hathifiles/
+(view list of files at http://www.hathitrust.org/hathifiles)
+
+The file is placed in data/ by Hathidata and inflated,
+the original .gz file removed.
+
+=end
+
 require 'net/http';
 require 'open-uri';
 require 'hathidata';
 require 'hathilog';
 
 def run (fn)
-  cwd      = Dir.pwd; # Save files in current working dir
   root_url = 'http://www.hathitrust.org/hathifiles';
   puts "Grabbing #{fn} from #{root_url}";
   files = get_HT_filenames(root_url);
-  retrieve_HT_file(files, fn, cwd);
+  retrieve_HT_file(files, fn);
   puts 'Done.';
 end
 
@@ -33,7 +54,7 @@ def get_HT_filenames (url)
   return hits;
 end
 
-def retrieve_HT_file (urls, targetfile, dir)
+def retrieve_HT_file (urls, targetfile)
   # Go through list of urls and look for the target file.
   # If found, download and unzip.
   success = 0;
