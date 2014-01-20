@@ -21,3 +21,8 @@ serial_dir="$data_dir/serials";
 latest_serial_file=`ls -w1 $serial_dir | tail -1`;
 
 ruby $SCRIPTPATH/maketable_htitem_from_file.rb $latest_hathi_file serials/$latest_serial_file;
+
+exit_st=$?
+if [ $exit_st == 0 ]; then
+    echo "Finished with an OK exit code ($exit_st)";
+fi
