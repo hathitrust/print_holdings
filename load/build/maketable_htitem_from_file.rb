@@ -3,6 +3,7 @@
 
 require 'phdb/enum_chron_parser';
 require 'hathidata';
+require 'hathilog';
 
 def get_reasons()
   reasons = %w(add bib cdpp con crms ddd del exp gatt
@@ -10,27 +11,26 @@ def get_reasons()
 end
 
 def generate_htitem_table(infilen, serialsfn)
-
-  s = File.open(serialsfn, "r")
-  f = File.open(infilen, "r")
-  outf = File.open(outfilen, "w")
-  errorfn = "#{outfilen}.err"
-  e = File.open(errorfn, "w")  
+  s = Hathidata::Data.new(serialsfn).open('r');
   # parse serials file to get record nums
-  umrecords = Hash.new
-  s.each_line do |sline|
-    line = sline.force_encoding("ISO-8859-1").encode("UTF-8")
-    bits = line.split("\t")
+  umrecords = Hash.new;
+  s.file.each_line do |sline|
+    line = sline.force_encoding("ISO-8859-1").encode("UTF-8");
+    bits = line.split("\t");
     next unless bits.length > 0
-    um_id_i = bits[0].to_i
+    um_id_i = bits[0].to_i;
     if um_id_i == 0 
-      puts "Problem with serials line '#{sline}'"
-      next
+      puts "Problem with serials line '#{sline}'";
+      next;
     end
-    umrecords[um_id_i] = true
+    umrecords[um_id_i] = true;
   end
-  s.close
+  s.close();
   
+  f    = Hathidata::Data.new(infilen).open('r');
+  outf = Hathidata::Data.new("hathi_full_$ymd.data").open('w');
+  e = Hathidata::Data.new("hathi_full_$ymd.err").open('w');
+
   # parse the flatfile
   ecparser = EnumChronParser.new
   reasons = get_reasons()
@@ -39,7 +39,7 @@ def generate_htitem_table(infilen, serialsfn)
   out_count = 0
   serial_count = 0
   multi_count = 0
-  f.each_line do |line|
+  f.file.each_line do |line|
     line_count += 1
     if ((line_count % 1000000) == 0)
       puts "#{line_count}..."
@@ -51,7 +51,7 @@ def generate_htitem_table(infilen, serialsfn)
     bits = nline.split("\t")
     if bits.length < 15
       puts "Line too short: '#{nline}'"
-      e.puts(nline)
+      e.file.puts(nline)
       next
     end
     bits.map{ |item| item.strip }
@@ -86,19 +86,28 @@ def generate_htitem_table(infilen, serialsfn)
     end
     outline = "#{bits[0]}\t#{bits[1]}\t#{bits[2]}\t#{bits[3]}\t#{bits[4]}\t#{bits[5]}\t#{bits[6]}\t#{bits[7]}\t#{bits[13]}\t#{bits[14]}\t#{itype}\t0\t#{n_enum}\t#{n_chron}\t#{bits[15]}\t#{bits[16]}\t#{bits[17]}\t#{bits[18]}\t#{bits[19]}"
     out_count += 1
-    outf.puts(outline)
+    outf.file.puts(outline)
   end
   
   puts "#{line_count} lines processed."
   puts "#{out_count} lines exported."
   puts "#{serial_count} serials."
   puts "#{multi_count} multis."
-  outf.close
-  f.close
-  e.close
+
+  outf.close;
+  f.close;
+  e.close;
 end
 
-if ARGV.length != 3
-  puts "Usage: ruby maketable_htitem_from_file.rb <hathifile> <serialfile>\n"
+if $0 == __FILE__ then
+  if ARGV.length != 2
+    puts "Usage: ruby maketable_htitem_from_file.rb <hathifile> <serialfile>\n";
+    exit 1;
+  end
+  
+  log = Hathilog::Log.new();
+  log.d("Started");
+  log.d("Called with args #{ARGV[0]} and #{ARGV[1]}")
+  generate_htitem_table(ARGV[0], ARGV[1])
+  log.d("Finished");
 end
-generate_htitem_table(ARGV[0], ARGV[2])

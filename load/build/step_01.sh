@@ -5,6 +5,7 @@ pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
 
+# Gets the "latest_hathi_file".
 ruby $SCRIPTPATH/hathi_grabber.rb;
 exit_st=$?
 if [ $exit_st != 0 ]; then
@@ -15,6 +16,7 @@ fi
 data_dir="$SCRIPTPATH/../../data";
 latest_hathi_file=`ls -w1 $data_dir | egrep '^hathi_full_[0-9]+.txt$' | sort | tail -1`;
 
+# Assuming this was manually placed here.
 serial_dir="$data_dir/serials";
 latest_serial_file=`ls -w1 $serial_dir | tail -1`;
 
