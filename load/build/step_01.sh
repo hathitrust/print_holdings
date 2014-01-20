@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Get abs path to this dir.
+pushd `dirname $0` > /dev/null;
+SCRIPTPATH=`pwd`;
+popd > /dev/null;
+
+ruby $SCRIPTPATH/hathi_grabber.rb;
+exit_st=$?
+if [ $exit_st != 0 ]; then
+    echo "Exiting prematurely";
+    exit $exit_st;
+fi
+
+data_dir="$SCRIPTPATH/../../data";
+latest_hathi_file=`ls -w1 $data_dir | egrep '^hathi_full_[0-9]+.txt$' | sort | tail -1`;
+
+serial_dir="$data_dir/serials";
+latest_serial_file=`ls -w1 $serial_dir | tail -1`;
+
+ruby $SCRIPTPATH/maketable_htitem_from_file.rb $latest_hathi_file serials/$latest_serial_file;
