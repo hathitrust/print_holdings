@@ -35,13 +35,29 @@ if $0 == __FILE__ then
     raise "Failed";
   end
 
+  check_sql   = "SELECT COUNT(*) AS c FROM holdings_htitem";
+  check_query = conn.prepare(check_sql);
+
+  # Check count before...
+  check_query.enumerate do |res|
+    log.d("Before... :");
+    log.d("#{check_sql} ... #{res[:c]}");
+  end
+
   [
-   "TRUNCATE holdings_htitem",
-   "LOAD DATA LOCAL INFILE '#{loadfile}' INTO TABLE holdings_htitem"
+   #"TRUNCATE holdings_htitem",
+   #"LOAD DATA LOCAL INFILE '#{loadfile}' INTO TABLE holdings_htitem"
   ].each do |q|
     log.d(q);
     conn.update(q);
   end
+
+  # Check count after.
+  check_query.enumerate do |res|
+    log.d("After... :");
+    log.d("#{check_sql} ... #{res[:c]}");
+  end
+
   conn.close();
   log.d("Finished");
 end
