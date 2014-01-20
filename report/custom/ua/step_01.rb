@@ -2,11 +2,11 @@ require 'hathidb';
 require 'hathilog';
 require 'hathidata';
 
-$db  = Hathidb::Db.new();
 $log = Hathilog::Log.new();
 
 def generate_report(member_id, stoppers)
-  conn = $db.get_conn();
+  db = Hathidb::Db.new();
+  conn = db.get_conn();
   hdfn = "#{member_id}_all_oclc";
 
   get_oclcs(member_id, hdfn, conn);
@@ -48,7 +48,7 @@ def get_oclcs(member_id, hdfn, conn)
   sth.query(member_id) do |row|
     hdf.file.puts row['oclc'];
     count_lines += 1;
-    if count_lines % 100000 then 
+    if count_lines % 100000 == 0 then 
       $log.d("#{count_lines} oclcs output");
     end
   end
