@@ -2,7 +2,18 @@ require 'hathidata';
 require 'hathidb';
 require 'hathilog';
 
+=begin
+
+Like the name suggest, truncates holdings_htitem and then fills it
+up again with the contents of hathi_full_YYYYMMDD.data.
+
+Won't do anything if the file is not found.
+
+=end
+
 def get_loadfile (log)
+  # If a file is given as commandline arg, then use it.
+  # Otherwise, see if there is one for today.
   loadfile = nil;
   if ARGV.length > 0 then
     loadfile = ARGV.shift;
@@ -29,6 +40,7 @@ if $0 == __FILE__ then
   db   = Hathidb::Db.new();
   conn = db.get_conn();
 
+  # Get path to the LOCAL INFILE.
   loadfile = get_loadfile(log);
 
   if loadfile == nil then
@@ -44,6 +56,7 @@ if $0 == __FILE__ then
     log.d("#{check_sql} ... #{res[:c]}");
   end
 
+  # Run updates.
   [
    "TRUNCATE holdings_htitem",
    "LOAD DATA LOCAL INFILE '#{loadfile}' INTO TABLE holdings_htitem"
