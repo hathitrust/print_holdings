@@ -287,8 +287,8 @@ class HathiUnit < Test::Unit::TestCase
   def test_data_writer_reader
     t = Time.new().to_s;
     testfile = 'unittest/by_writer';
-    Hathidata.write(testfile) do
-      file.puts(t)
+    Hathidata.write(testfile) do |hd|
+      hd.file.puts t;
     end
 
     Hathidata.read(testfile) do |line|
