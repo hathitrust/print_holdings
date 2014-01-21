@@ -1,3 +1,4 @@
+require 'pathname';
 require 'hathidb';
 require 'hathilog';
 
@@ -8,7 +9,11 @@ db     = Hathidb::Db.new();
 conn   = db.get_conn();
 infile = ARGV.shift;
 
-raise "Need infile as 1st arg" if infile == nil;
+if infile == nil then
+  raise "Need infile as 1st arg" ;
+elsif !Pathname.new(infile).exist? then
+  raise "infile #{infile} is not a path to an existing file.";
+end
 
 [
  "TRUNCATE holdings_htitem_oclc",
@@ -20,3 +25,5 @@ end
 
 conn.close();
 log.d("Finished");
+
+exit 0;

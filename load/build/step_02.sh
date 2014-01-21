@@ -10,6 +10,7 @@ ymd=`date +'%Y%m%d'`;
 mhoff_outfile="htitem_oclc.$ymd.data";
 
 python $SCRIPTPATH/maketable_htitem_oclc_from_file.py $data_dir/$latest_hathi_file $data_dir/$mhoff_outfile;
-ruby $SCRIPTPATH/reload_holdings_htitem_oclc.rb $data_dir/$mhoff_outfile;
+ruby   $SCRIPTPATH/reload_holdings_htitem_oclc.rb $data_dir/$mhoff_outfile;
+ruby   -J-Xmx2042m $SCRIPTPATH/process_OCLC_resolution_index.rb;
 
-# ruby step_02e_queries.rb;
+# ruby $SCRIPTPATH/step_02e_queries.rb;
