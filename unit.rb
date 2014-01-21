@@ -31,12 +31,6 @@ class HathiUnit < Test::Unit::TestCase
       puts "Deleting #{hd.path}";
       hd.delete();
     end
-    
-    datadir  = Hathidata::Data.get_data_dir_path();
-    unit_dir = datadir.to_s + '/unittest/';
-    if File.directory?(unit_dir) then
-      Dir.rmdir(unit_dir);
-    end
   end
 
   def self.startup
@@ -288,6 +282,20 @@ class HathiUnit < Test::Unit::TestCase
     assert_equal(true, hd2.exists?);
     hd2.file.puts Time.new().to_s;
     hd2.close().deflate();
+  end
+
+  def test_data_writer_reader
+    t = Time.new().to_s;
+    testfile = 'unittest/by_writer';
+    Hathidata.write(testfile) do
+      file.puts(t)
+    end
+
+    Hathidata.read(testfile) do |line|
+      assert_equal(line.strip, t);
+    end
+
+    Hathidata::Data.new(testfile).delete;
   end
 
 end
