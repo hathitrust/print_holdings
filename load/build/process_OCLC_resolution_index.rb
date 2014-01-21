@@ -1,109 +1,127 @@
 require 'hathidb';
+require 'hathilog';
+require 'hathidata';
 
-def prune_OCLC_resolution_data(datafn, outfn)
-  # only retain lines with HT oclc numbers
-  file = File.new(datafn, "r")
-  outf = File.open(outfn, 'w')
+# Copied from /htapps/pulintz.babel/Code/phdb/bin/process_OCLC_resolution_index.rb
+# and adapted to new regime.
 
+def prune_OCLC_resolution_data(pre_pruned, pruned_output, log)
   # get a connection
-  db = Hathidb::Db.new();
-  conn = db.get_conn()
+  db   = Hathidb::Db.new();
+  conn = db.get_conn();
 
   # get oclc hash
-  oclc_h = {}
-  o_rows = conn.query("select distinct(oclc) from holdings_htitem_oclc;")
-  o_rows.each do |o|
-    oclc_h[o[0]] = 1
+  oclc_h = {};
+  sql    = "SELECT DISTINCT(oclc) FROM holdings_htitem_oclc";
+  log.d(sql);
+  c = 0;
+  conn.query(sql) do |o|
+    c += 1;
+    oclc_h[o[0]] = 1;
+    if c % 250000 == 0 then
+      log.d(c);
+    end
   end
 
-  puts "Sanity check: #{oclc_h.length} oclcs."
+  log.d("Sanity check: #{oclc_h.length} oclcs.");
 
-  count = 0
-  out = 0
+  count      = 0
+  out        = 0
   no_numbers = 0
-  while (line = file.gets)
-    count += 1
+
+  # only retain lines with HT oclc numbers
+  hdout = Hathidata::Data.new(pruned_output).open('w');
+
+  Hathidata.read(pre_pruned) do |line|
+    count += 1;
+
     #1: 6567842 | 9987701 | 53095235 | 433981287
     #2: 9772597 | 35597370 | 60494959 | 813305061 | 823937796
     #3: 7124033 | 10654585 | 14218190
     #4: 518119215
     # latest file (11/11/2013) has br tag at end (tlp):
     #94: 3696127 | 67412172 | 220820012 | 221206437 | 316195569<br>
-    line = line.gsub("<br>", "")
-    ocns = line.chomp.split(/[|: ]+/)
+    line = line.gsub("<br>", "");
+    ocns = line.chomp.split(/[|: ]+/);
     if (ocns.length == 1)
-	no_numbers += 1
-	next
+	no_numbers += 1;
+	next;
     end
 
     ocns.each do |ocn|
-      if oclc_h.has_key?(ocn.to_i)
-        outf.puts line
-	out += 1
+      if oclc_h.has_key?(ocn.to_i);
+        hdout.file.puts line;
+	out += 1;
       end
     end
 
     if ((count % 100000) == 0)
-      puts "#{count}..."
+      log.d("#{count}...");
     end
   end
-  puts "#{count} lines read from #{datafn}"
-  puts "#{no_numbers} lines skipped (no oclc number)"
-  puts "#{out} lines written to #{outfn}"
 
-  file.close
-  outf.close
-  conn.close
+  log.i("#{count} lines read from #{pre_pruned}");
+  log.i("#{no_numbers} lines skipped (no oclc number)");
+  log.i("#{out} lines written to #{pruned_output}");
+
+  hdout.close();
+  conn.close();
 end
 
 ## Creates an additional htitem_oclc file
-def generate_OCLC_data_for_htitem_oclc(datafn, outfn)
-  file = File.new(datafn, "r")
-  outf = File.open(outfn, 'w')
-  db = Hathidb::Db.new();
-  conn = db.get_conn()
-  count = 0
-  while (line = file.gets)
-    count += 1
-    ocns = line.chomp.split(/[|: ]+/)
+def generate_OCLC_data_for_htitem_oclc(pruned_output, final_output, log)
+
+  db    = Hathidb::Db.new();
+  conn  = db.get_conn();
+  sql   = "SELECT volume_id FROM holdings_htitem_oclc WHERE oclc = ?";
+  query = conn.prepare(sql);
+  count = 0;
+  hdout = Hathidata::Data.new(final_output).open('w');
+
+  Hathidata.read(pruned_output) do |line|
+    count += 1;
+    ocns = line.chomp.split(/[|: ]+/);
     # get all vol_ids associated with these ocns
-    vol_ids = Set.new
+    vol_ids = Set.new;
     ocns.each do |ocn|
-      vid_rows = conn.query("select volume_id from holdings_htitem_oclc where oclc = #{ocn};")
-      vid_rows.each do |vrow|
-        vol_ids.add(vrow[0])
+      query.enumerate(ocn) do |vrow|
+        vol_ids.add(vrow[0]);
       end
     end
     # insert vol-oclc pairs
     vol_ids.each do |vid|
       ocns.each do |oc|
-        outf.puts "#{vid}\t#{oc}\t1"
+        hdout.file.puts "#{vid}\t#{oc}\t1";
       end
     end
 
-    if ((count % 10000) == 0)
-      puts "#{count}..."
+    if (count % 10000 == 0)
+      log.d("#{count}...");
     end
   end
-  file.close
-  outf.close
-  conn.close
+
+  hdout.close();
+  conn.close();
 end
 
-root_dir = "/htapps/pulintz.babel/data/phdb/TABLE_DATA/OCLC"
-#file_roots = %w{x2.0-1 x2.1-3 x2.3-5 x2.5-7 x2.7-9}
-#file_roots = %w{x2.1-3 x2.3-5 x2.5-7 x2.7-9}
-file_roots = %w{x2.all}
+log = Hathilog::Log.new();
+log.d("Started");
+
+file_roots = %w{x2.all};
 
 file_roots.each do |fr|
-  fullfr = "#{root_dir}/#{fr}"
-  outfn  = "#{fullfr}.out"
-  datafn = "#{fullfr}.data"
+  log.d("processing #{fr}...");
 
-  puts "processing #{fullfr}..."
-  puts "Pruning."
-  prune_OCLC_resolution_data(fullfr, outfn)
-  puts "Generating."
-  generate_OCLC_data_for_htitem_oclc(outfn, datafn)
-  puts "Done."
+  # These paths will be given to Hathidata objects.
+  pre_pruned    = "x2_oclc/#{fr}";
+  pruned_output = "x2_oclc/#{fr}-$ymd.pruned";
+  final_output  = "x2_oclc/#{fr}-$ymd.data";
+
+  log.d("Pruning.");
+  prune_OCLC_resolution_data(pre_pruned, pruned_output, log);
+
+  log.d("Generating.");
+  generate_OCLC_data_for_htitem_oclc(pruned_output, final_output, log);
 end
+
+log.d("Finished");
