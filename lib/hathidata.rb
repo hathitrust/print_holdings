@@ -17,26 +17,24 @@ module Hathidata
 
   # More in tune with the ruby way, hiding the open and close.
   
-  # Hathidata.write('foo') do
-  #   file.puts 'hello';
-  #   file.puts 'adieu';
+  # Hathidata.write('foo') do |x|
+  #   x.file.puts 'hello';
+  #   x.file.puts 'adieu';
   # end
+  def self.write(path, mode = 'w', &block)
+    hd = Data.new(path).open(mode);
+    hd.instance_eval(&block);
+    hd.close();
+  end
 
   # Hathidata.read('foo') do |line|
   #   puts line; # --> prints "hello\nadieu\n"
   # end
-
   def self.read(path)
     hd = Data.new(path).open('r');
     hd.file.each_line do |line|
       yield line;
     end
-    hd.close();
-  end
-
-  def self.write(path, mode = 'w', &block)
-    hd = Data.new(path).open(mode);
-    hd.instance_eval(&block);
     hd.close();
   end
 
