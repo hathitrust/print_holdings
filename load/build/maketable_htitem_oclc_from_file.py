@@ -17,30 +17,30 @@ def generate_htitem_oclc_data(ht_filen, jn_outfilen):
     sys.stdout.flush()
     
     # open files
-    infile = file(ht_filen)
-    jn_outfile = file(jn_outfilen, 'w')
+    infile      = file(ht_filen)
+    jn_outfile  = file(jn_outfilen, 'w')
     err_outfile = file(ht_filen+'.err', 'w')
     
-    global_counter = 0
-    no_oclc = 0
-    oclc_counter = 0
+    global_counter   = 0
+    no_oclc          = 0
+    oclc_counter     = 0
     bad_line_counter = 0
     
     # containers to test uniqueness and store table data
     vol_oclc_set = set([])  # for 'htitem_oclc_jn' table 
-    oclc_set = set([])       
+    oclc_set     = set([])       
     
     # loop through all lines and write join table lines  
     for line in infile.readlines():
         # progress indicator
         global_counter += 1
-        if ((global_counter%1000000) == 0):
+        if ((global_counter % 1000000) == 0):
             print "%i rows parsed..." % (global_counter)
             sys.stdout.flush()
         # grab vol_id and oclc fields 
         tline = line.rstrip()
         bits = tline.split("\t")
-        if (len(bits)<15):
+        if (len(bits) < 15):
             err =  "bad line: '%s'" % line
             err_outfile.write(err+"\n")
             bad_line_counter += 1
@@ -115,7 +115,6 @@ def generate_htitem_oclc_data(ht_filen, jn_outfilen):
     infile.close()
     jn_outfile.close()
     err_outfile.close()
-
 
 
 if __name__ == '__main__':
