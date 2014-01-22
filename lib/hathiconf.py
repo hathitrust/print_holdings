@@ -44,6 +44,6 @@ class Hathiconf:
     def get(self, key):
         if key in self.mem:
             return self.mem[key]
-        print "Config could not find key %s\n" % (key)
+        print "Config could not find key %s" % (key)
         
         return ''
