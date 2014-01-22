@@ -20,7 +20,7 @@ end
  "LOAD DATA LOCAL INFILE '#{infile}' INTO TABLE holdings_htitem_oclc"
 ].each do |q|
   log.d(q);
-  # conn.update(q);
+  conn.update(q);
 end
 
 conn.close();

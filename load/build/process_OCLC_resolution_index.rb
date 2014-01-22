@@ -44,8 +44,8 @@ def prune_OCLC_resolution_data(pre_pruned, pruned_output, log)
     line = line.gsub("<br>", "");
     ocns = line.chomp.split(/[|: ]+/);
     if (ocns.length == 1)
-	no_numbers += 1;
-	next;
+      no_numbers += 1;
+      next;
     end
 
     ocns.each do |ocn|
@@ -104,24 +104,53 @@ def generate_OCLC_data_for_htitem_oclc(pruned_output, final_output, log)
   conn.close();
 end
 
-log = Hathilog::Log.new();
-log.d("Started");
+def load_holdings_htitem_oclc_tmp (loadfile, log)
+  hdin = Hathidata::Data.new(loadfile);
 
-file_roots = %w{x2.all};
+  if !hdin.exists? then
+    log.e("Fail");
+    raise "Cannot load #{hdin.path} as it does not exist";
+  end
 
-file_roots.each do |fr|
-  log.d("processing #{fr}...");
+  db   = Hathidb::Db.new();
+  conn = db.get_conn();
 
-  # These paths will be given to Hathidata objects.
-  pre_pruned    = "x2_oclc/#{fr}";
-  pruned_output = "x2_oclc/#{fr}-$ymd.pruned";
-  final_output  = "x2_oclc/#{fr}-$ymd.data";
+  qs = [
+        "TRUNCATE holdings_htitem_oclc_tmp",
+        "LOAD DATA LOCAL INFILE '#{hdin.path}' INTO TABLE holdings_htitem_oclc_tmp",
+        "INSERT IGNORE INTO holdings_htitem_oclc SELECT * FROM holdings_htitem_oclc_tmp",
+       ];
 
-  log.d("Pruning.");
-  prune_OCLC_resolution_data(pre_pruned, pruned_output, log);
-
-  log.d("Generating.");
-  generate_OCLC_data_for_htitem_oclc(pruned_output, final_output, log);
+  qs.each do |q|
+    log.i(q);
+    conn.execute(q);
+  end
 end
 
-log.d("Finished");
+# Runnable part.
+if $0 == __FILE__ then
+  log = Hathilog::Log.new();
+  log.d("Started");
+
+  file_roots = %w{x2.all};
+
+  file_roots.each do |fr|
+    log.d("processing #{fr}...");
+
+    # These paths will be given to Hathidata objects.
+    pre_pruned    = "x2_oclc/#{fr}";
+    pruned_output = "x2_oclc/#{fr}-$ymd.pruned";
+    final_output  = "x2_oclc/#{fr}-$ymd.data";
+
+    log.d("Pruning.");
+    prune_OCLC_resolution_data(pre_pruned, pruned_output, log);
+
+    log.d("Generating.");
+    generate_OCLC_data_for_htitem_oclc(pruned_output, final_output, log);
+
+    log.d("Loading.");
+    load_holdings_htitem_oclc_tmp(final_output, log);
+  end
+
+  log.d("Finished");
+end
