@@ -184,9 +184,16 @@ def truncate_tables():
 
     conn   = get_connection()
     cursor = conn.cursor()
-    cursor.execute("TRUNCATE holdings_cluster")
-    cursor.execute("TRUNCATE holdings_cluster_oclc")
-    cursor.execute("TRUNCATE holdings_cluster_htitem_jn")
+
+    tables = ['holdings_cluster', 'holdings_cluster_oclc', holdings_cluster_htitem_jn]
+    for t in tables:
+        count_q = "SELECT COUNT(*) AS c FROM %s" % t
+        count_r = run_single_query(cursor, count_q)
+        print "%s -- gave %s rows" % (count_q, count_r)
+        trunc_q = "TRUNCATE %s" % t
+        print trunc_q
+        cursor.execute(trunc_q)
+
     conn.commit()
 
 
@@ -197,6 +204,7 @@ def cluster_main():
     cursor = conn.cursor()
     mypath = os.path.realpath(__file__)
     mytime = time.strftime("%Y%m%d")
+    # Will write to a file the data/ dir.
     outfn  = re.sub('\/load\/.*', '/data/cluster_oclc.%s.data' % mytime, mypath)
     
     if outfn == mypath:
