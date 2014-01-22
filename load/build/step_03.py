@@ -11,11 +11,11 @@ v.3 - re-implementation of the fundamental aggregation loop
 """
 
 import sys, re, os, time
-import phdb_utils
+from hathiconf import Hathiconf
 import MySQLdb
 
 VERBOSE = 0
-NOW = time.strftime("%Y-%m-%d" + ' 00:00:00')
+NOW     = time.strftime("%Y-%m-%d" + ' 00:00:00')
 
 def get_password_from_file(fn):
     infile = file(fn)
@@ -25,13 +25,16 @@ def get_password_from_file(fn):
 
 def get_connection():
     # open DB connection
-    pw = get_password_from_file('/htapps/pulintz.babel/Code/phdb/etc/ht_repository')
+    hc = Hathiconf()
+
     try:
-        conn = MySQLdb.connect (host = "mysql-htdev",
-                            port=3306,
-                            user = "ht_repository",
-                            passwd = pw,
-                            db = "ht_repository")
+        conn = MySQLdb.connect (
+            host   = hc.get('db_host'),
+            port   = hc.get('db_port'),
+            user   = hc.get('db_user'),
+            passwd = hc.get('db_pw'),
+            db     = hc.get('db_name')
+            )
     except MySQLdb.Error, e:
         print "Couldn't get connection."
         print "Error %d: %s" % (e.args[0], e.args[1])
