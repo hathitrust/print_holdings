@@ -47,10 +47,3 @@ class Hathiconf:
         print "Config could not find key %s\n" % (key)
         
         return ''
-                            
-if __name__ == "__main__":
-    print "ok"
-    h = Hathiconf()
-
-    print "db_user is %s" % (h.get('db_user'))
-    print "nonesuch is %s" % (h.get('nonesuch'))
