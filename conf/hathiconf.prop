@@ -8,3 +8,8 @@ db_driver = com.mysql.jdbc.Driver
 db_url    = jdbc:mysql://mysql-htdev/ht_repository
 db_user   = ht_repository
 db_pw     = X5Gz/YtOs3h.E
+
+prod_db_driver = com.mysql.jdbc.Driver
+prod_db_url    = jdbc:mysql://mysql-sdr/ht_repository
+prod_db_user   = ht_repository
+prod_db_pw     = X5Gz/YtOs3h.E

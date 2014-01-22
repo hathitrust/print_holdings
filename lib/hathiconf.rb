@@ -11,8 +11,8 @@ module Hathiconf
     # Conf files are expected to be key-value pairs separated by a tab.
 
     THIS_PATH        = Pathname.new(__FILE__).expand_path;
-    GLOBAL_CONF_PATH = '/etc/conf/rubyconf.prop';
-    LOCAL_CONF_PATH  = THIS_PATH + '../../conf/rubyconf.prop';
+    GLOBAL_CONF_PATH = '/etc/conf/hathiconf.prop';
+    LOCAL_CONF_PATH  = THIS_PATH + '../../conf/hathiconf.prop';
     
     g_read = File.readable?(GLOBAL_CONF_PATH);
     l_read = File.readable?(LOCAL_CONF_PATH);
