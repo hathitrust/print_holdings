@@ -338,16 +338,8 @@ def load_cluster_htitems_flatfile(filen):
             Cluster_volid_d[clust_id].append(vol_id)
 
 if __name__ == '__main__':
-    #from sys import argv
-    
-    ## one-off: dumping the htitem_oclc table
-    #dump_table("cluster", "/htapps/pulintz.babel/phdb/cluster.csv.20110602")
-    #sys.exit()
-    
-    ### Main Clustering Routine ###
-    
+    ### Main Clustering Routine ###    
     ## load data structures ##
-
     print "Started %s" % time.strftime("%Y-%m-%d %H:%M:%S");
     sys.stdout.flush()
 
