@@ -1,7 +1,11 @@
-Make sure that the path to this dir is included in your ENV as RUBYLIB.
+Make sure that the path to this dir is included in your ENV's RUBYLIB and PYTHONPATH.
 
-All homebrew Ruby modules should reside here.
+All homebrew Ruby and Python modules should reside here.
 
 For example, in your shell profile:
+
     RUBYLIB='/path/to/this/dir/:/path/to/some/other/dir/';
     export RUBYLIB;
+
+    PYTHONPATH='/path/to/this/dir/:/path/to/some/other/dir/';
+    export PYTHONPATH;
