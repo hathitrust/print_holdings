@@ -40,7 +40,7 @@ if [ $exit_st != 0 ]; then
     exit $exit_st;             
 fi                             
 
-# Ran, took 5 hours. OK. Do not run again this time.
+# Ran, took 5 hours.
 echo "16c, copy to production";
 ruby $SCRIPTPATH/export_hhj_data.rb;
 
