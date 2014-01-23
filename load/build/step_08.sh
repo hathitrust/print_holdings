@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Get abs path to this dir.
+pushd `dirname $0` > /dev/null;
+SCRIPTPATH=`pwd`;
+popd > /dev/null;
+
 # Combines all substeps of step 8 in the monthlies.
 
 date=`date +%Y%m%d`;
