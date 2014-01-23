@@ -10,9 +10,8 @@ tables to core memory.
 v.3 - re-implementation of the fundamental aggregation loop
 """
 
-import sys, re, os, time
+import sys, re, os, time, MySQLdb
 from hathiconf import Hathiconf
-import MySQLdb
 
 VERBOSE = 0
 NOW     = time.strftime("%Y-%m-%d" + ' 00:00:00')
@@ -26,7 +25,6 @@ def get_password_from_file(fn):
 def get_connection():
     # open DB connection
     hc = Hathiconf()
-
     try:
         conn = MySQLdb.connect (
             host   = hc.get('db_host'),
@@ -181,10 +179,8 @@ def truncate_tables():
     need to be emptied before we can do anything here. Used to be a manual step, 
     scripted by mwarin 2014-01-03.
     """
-
     conn   = get_connection()
     cursor = conn.cursor()
-
     tables = ['holdings_cluster', 'holdings_cluster_oclc', holdings_cluster_htitem_jn]
     for t in tables:
         count_q = "SELECT COUNT(*) AS c FROM %s" % t
@@ -193,24 +189,37 @@ def truncate_tables():
         trunc_q = "TRUNCATE %s" % t
         print trunc_q
         cursor.execute(trunc_q)
-
     conn.commit()
+    conn.close()
 
+def load_table():
+    q = "LOAD DATA LOCAL INFILE '%s' INTO TABLE holdings_cluster_oclc"
+    infile = get_loadfile_path()
+    conn   = get_connection()
+    cursor = conn.cursor()
+    print q
+    cursor.execute(q)
+    conn.commit()
+    conn.close()
+
+def get_loadfile_path():
+    mypath = os.path.realpath(__file__)
+    mytime = time.strftime("%Y%m%d")
+    # Will write to a file the data/ dir.
+    outfn  = re.sub('\/load\/.*', '/data/cluster_oclc.%s.data' % mytime, mypath)
+    if outfn == mypath:
+        print "Error: An assumption about directories is wrong."
+        exit(1)
+    return outfn
 
 def cluster_main():
     """ main routine to create PHDB clusters. Pass it the cursor. """
     
     conn   = get_connection()
     cursor = conn.cursor()
-    mypath = os.path.realpath(__file__)
-    mytime = time.strftime("%Y%m%d")
-    # Will write to a file the data/ dir.
-    outfn  = re.sub('\/load\/.*', '/data/cluster_oclc.%s.data' % mytime, mypath)
-    
-    if outfn == mypath:
-        print "Error: An assumption about directories is wrong."
-        exit(1)
 
+    # Will write to a file the data/ dir.
+    outfn = get_loadfile_path()
     print "Will print to %s" % outfn
     sys.stdout.flush()
 
@@ -349,20 +358,19 @@ def load_cluster_htitems_flatfile(filen):
             Cluster_volid_d[clust_id].append(vol_id)
 
 if __name__ == '__main__':
-    ### Main Clustering Routine ###    
-    ## load data structures ##
-    print "Started %s" % time.strftime("%Y-%m-%d %H:%M:%S");
+    print "Started %s" % time.strftime("%Y-%m-%d %H:%M:%S")
     sys.stdout.flush()
 
     Volid_cluster_d = {}
-    Cluster_volid_d = {}
+    Cluster_volid_d = {}    
+    Cluster_oclc_d  = {}
+    Oclc_cluster_d  = {}
     
-    Cluster_oclc_d = {}
-    Oclc_cluster_d = {}
-    
+    # Start with blank slate.
     truncate_tables()
-            
-    ## end load data structures ##
+    # Calculate clusters and write to file.
     cluster_main()
+    # Load file into holdings_cluster_oclc.
+    load_table()
     
-    print "Done %s" % time.strftime("%Y-%m-%d %H:%M:%S");
+    print "Done %s" % time.strftime("%Y-%m-%d %H:%M:%S")
