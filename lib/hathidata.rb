@@ -24,6 +24,7 @@ module Hathidata
   def self.write(path, mode = 'w', &block)
     hd = Data.new(path).open(mode);
     hd.instance_eval(&block);
+  ensure
     hd.close();
   end
 
@@ -35,6 +36,7 @@ module Hathidata
     hd.file.each_line do |line|
       yield line;
     end
+  ensure
     hd.close();
   end
 
