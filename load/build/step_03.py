@@ -16,12 +16,6 @@ from hathiconf import Hathiconf
 VERBOSE = 0
 NOW     = time.strftime("%Y-%m-%d" + ' 00:00:00')
 
-def get_password_from_file(fn):
-    infile = file(fn)
-    line = infile.readline()
-    return line.rstrip()
-
-
 def get_connection():
     # open DB connection
     hc = Hathiconf()
@@ -193,7 +187,7 @@ def truncate_tables():
     conn.close()
 
 def load_table():
-    q = "LOAD DATA LOCAL INFILE '%s' INTO TABLE holdings_cluster_oclc"
+    q      = "LOAD DATA LOCAL INFILE '%s' INTO TABLE holdings_cluster_oclc"
     infile = get_loadfile_path()
     conn   = get_connection()
     cursor = conn.cursor()
@@ -205,8 +199,7 @@ def load_table():
 def get_loadfile_path():
     mypath = os.path.realpath(__file__)
     mytime = time.strftime("%Y%m%d")
-    # Will write to a file the data/ dir.
-    outfn  = re.sub('\/load\/.*', '/data/cluster_oclc.%s.data' % mytime, mypath)
+    outfn  = re.sub('\/load\/.*', ('/data/cluster_oclc.%s.data' % mytime), mypath)
     if outfn == mypath:
         print "Error: An assumption about directories is wrong."
         exit(1)
@@ -297,39 +290,40 @@ def cluster_main():
     dump_data_structure(Cluster_oclc_d, outfn)
     
 
-def remove_vids_from_list(vids):
-    print "removing previously run volume_ids from run."
-    for vid in vids:
-        if (vid in Volid_cluster_d):
-            vids.remove(vid)
-    return vids
+# Does not seem to be used. Flagged for removal. Mw 2014-01-23
+# def remove_vids_from_list(vids):
+#     print "removing previously run volume_ids from run."
+#     for vid in vids:
+#         if (vid in Volid_cluster_d):
+#             vids.remove(vid)
+#     return vids
 
 
-def dump_table(table, outfn):
-    """ dumps a flatfile of the specified query.  Useful to get around the file permissions
-    problems for the DB servers using SELECT INTO OUTFILE. """
+# Does not seem to be used. Flagged for removal. Mw 2014-01-23
+# def dump_table(table, outfn):
+#     """ dumps a flatfile of the specified query.  Useful to get around the file permissions
+#     problems for the DB servers using SELECT INTO OUTFILE. """
     
-    conn = get_connection()
-    cursor = conn.cursor()
+#     conn = get_connection()
+#     cursor = conn.cursor()
+#     outfile = file(outfn, "w")
+#     query = "select * from %s" % table
+#     try:
+#         cursor.execute(query)
+#     except MySQLdb.Error, e:
+#         print "[run_list_query] Error %d: %s" % (e.args[0], e.args[1])
+#         print "Exiting..."
+#         sys.exit(1)
+#     if (cursor.rowcount > 0):
+#         while(1):
+#             row = cursor.fetchone()
+#             if row == None:
+#                 break
+#             outline = "%s,%s,%s\n" % (row[0], row[1], row[2])
+#             #print outline
+#             outfile.write(outline)
     
-    outfile = file(outfn, "w")
-    query = "select * from %s" % table
-    try:
-        cursor.execute(query)
-    except MySQLdb.Error, e:
-        print "[run_list_query] Error %d: %s" % (e.args[0], e.args[1])
-        print "Exiting..."
-        sys.exit(1)
-    if (cursor.rowcount > 0):
-        while(1):
-            row = cursor.fetchone()
-            if row == None:
-                break
-            outline = "%s,%s,%s\n" % (row[0], row[1], row[2])
-            #print outline
-            outfile.write(outline)
-        
-    conn.close()
+#     conn.close()
     
 
 def dump_data_structure(dstruct, outfn):
@@ -341,21 +335,21 @@ def dump_data_structure(dstruct, outfn):
             outline = "%s\t%s\n" % (k, val)
             outfile.write(outline)
     
-
-def load_cluster_htitems_flatfile(filen):
-    """ loads data from a flatfile into data structures """
-    dfile = file(filen)
-    for row in dfile:
-        bits = row.split(',')
-        clust_id = int(bits[0])
-        vol_id = bits[1].strip()
-        Volid_cluster_d[vol_id] = []
-        Volid_cluster_d[vol_id].append(clust_id)
-        if (clust_id in Cluster_volid_d):
-            Cluster_volid_d[clust_id].append(vol_id)
-        else:
-            Cluster_volid_d[clust_id] = []
-            Cluster_volid_d[clust_id].append(vol_id)
+# This method seems not to be used. Flagged for removal. Mw 2014-01-23
+# def load_cluster_htitems_flatfile(filen):
+#     """ loads data from a flatfile into data structures """
+#     dfile = file(filen)
+#     for row in dfile:
+#         bits = row.split(',')
+#         clust_id = int(bits[0])
+#         vol_id = bits[1].strip()
+#         Volid_cluster_d[vol_id] = []
+#         Volid_cluster_d[vol_id].append(clust_id)
+#         if (clust_id in Cluster_volid_d):
+#             Cluster_volid_d[clust_id].append(vol_id)
+#         else:
+#             Cluster_volid_d[clust_id] = []
+#             Cluster_volid_d[clust_id].append(vol_id)
 
 if __name__ == '__main__':
     print "Started %s" % time.strftime("%Y-%m-%d %H:%M:%S")
