@@ -19,22 +19,22 @@ def get_cluster_htmember_multi_data(cluster_id, log)
 end
 
 def generate_cluster_htmember_multi_file(outfilen, log)
-  multi_members_enum = Multipart.get_multipart_members_list()
-  puts "#{multi_members_enum.length} multipart members."
-  cids = Multipart.get_multipart_cluster_list()
+  multi_members_enum = Multipart.get_multipart_members_list();
+  puts "#{multi_members_enum.length} multipart members.";
+  cids = Multipart.get_multipart_cluster_list();
   log.d("#{cids.length} clusters in list.");
-  count = 0
+  count = 0;
   Hathidata.write(outfilen) do |hdout|
     cids.each do |cid|
-      result_set = Multipart.map_multipart_cluster_to_members(cid, multi_members_enum)
+      result_set = Multipart.map_multipart_cluster_to_members(cid, multi_members_enum);
       # calc unique lines
       result_set.uniq.each do |line|
         # line: oclc, enum, member_id, cluster_id, volume_ids, count
         hdout.line.puts(line);
       end
-      count += 1
-      if ((count % 10000) == 0)
-        puts "#{count}..."
+      count += 1;
+      if ((count % 10000) == 0) then
+        log.d("#{count}...");
       end
     end
   end
@@ -43,7 +43,7 @@ end
 if $0 == __FILE__ then
   log = Hathilog::Log.new();
   log.d("Started");
-  if ARGV.length != 1
+  if ARGV.length != 1 then
     log.e("Usage: ruby multipart_cluster_mapper.rb <outfile>");
     exit 1;
   end
