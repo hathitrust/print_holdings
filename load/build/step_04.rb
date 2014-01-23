@@ -67,8 +67,8 @@ end
 
 cluster_count = 0;
 log.d(sql_select_1);
-log.d(sql_select_2);
-log.d(sql_update);
+log.d("\t" + sql_select_2);
+log.d("\t\t" + sql_update);
 conn.query(sql_select_1) do |row|
   cid = row[:cid];
   # get volume_ids associated with the cluster
