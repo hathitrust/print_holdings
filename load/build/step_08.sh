@@ -20,16 +20,16 @@ cmd3="jruby $SCRIPTPATH/generate_htitem_htmember_jn_data.rb $chmd $hhhmd";
 echo `date`;
 echo "$cmd1";
 $cmd1;
-exit_st=$?
+exit_st=$?;
 if [ $exit_st != 0 ]; then
     echo "Exiting prematurely";
     exit $exit_st;
 fi
 
 echo `date`;
-echo "$cmd2"
+echo "$cmd2";
 $cmd2;
-exit_st=$?
+exit_st=$?;
 if [ $exit_st != 0 ]; then
     echo "Exiting prematurely";
     exit $exit_st;
@@ -38,7 +38,7 @@ fi
 echo `date`;
 echo "$cmd3";
 $cmd3;
-exit_st=$?
+exit_st=$?;
 if [ $exit_st != 0 ]; then
     echo "Exiting prematurely";
     exit $exit_st;
