@@ -8,6 +8,8 @@ This version is a re-write to try and speedup the algorithm.
 v.2 - removing 'rights' queries, farm out cluster_oclc and cluster_htitem_jn
 tables to core memory.
 v.3 - re-implementation of the fundamental aggregation loop
+v.4 - Loading the table with the output file, getting db connection data 
+from conf file, truncating tables, removed some dead code. MW Jan 2014.
 """
 
 import sys, re, os, time, MySQLdb
