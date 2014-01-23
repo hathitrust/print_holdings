@@ -200,9 +200,6 @@ module Multipart
       end
     end
 
-    #puts "DEBUG, all-match members: #{all_match_mems.join(',')}."
-    #puts "DEBUG, enum-match members: #{enum_match_mems.join(',')}."
-
     ### add 'enum-match' members (should be <= all match) ###
     enum_match_mems.each do |emm|
       rows4 = conn.query("select distinct ho.oclc, h.n_enum from holdings_htitem as h,
@@ -223,12 +220,9 @@ module Multipart
         if member_data[emm].has_key?(count_key)
           copy_counts = member_data[emm][count_key]
           count_str = copy_counts.join("\t")
-        #else
-        #  puts "Problem, bad copy count key: #{count_key}"
         end
         outstr = "#{row4[0]}\t#{row4[1]}\t#{emm}\t#{cluster_id}\t#{vol_str}\t#{count_str}"
         results << outstr
-        #puts outstr
       end
       # if no matches (but with member data for oclc), add member to all-match members
       if rows4.count() == 0
@@ -259,7 +253,6 @@ module Multipart
         end
         outstr = "#{ocn}\t#{ht_item[1]}\t#{amm}\t#{cluster_id}\t#{vol_str}\t#{count_str}"
         results << outstr
-        #puts outstr
       end
     end
 
@@ -368,12 +361,9 @@ module Multipart
         if member_data.has_key?(count_key)
           copy_counts = member_data[count_key]
           count_str = copy_counts.join("\t")
-        #else
-        #  puts "Problem, bad copy count key: #{count_key}"
         end
         outstr = "#{row4[0]}\t#{row4[1]}\t#{member_id}\t#{cluster_id}\t#{vol_str}\t#{count_str}"
         results << outstr
-        #puts outstr
       end
     end
 
@@ -398,7 +388,6 @@ module Multipart
         end
         outstr = "#{ocn}\t#{ht_item[1]}\t#{member_id}\t#{cluster_id}\t#{vol_str}\t#{count_str}"
         results << outstr
-        #puts outstr
       end
     end
     conn.close()
@@ -426,7 +415,6 @@ module Multipart
       results.each do |hit|
         outstr = "#{cid}\t#{hit[0]}\t#{hit[1]}"
         outfile.puts(outstr)
-        #puts outstr
       end
       if ((count % 10000) == 0)
         puts "#{count}..."
@@ -449,7 +437,6 @@ module Multipart
     results.each do |result|
       ocn = result[0]
       n_enum = result[1]
-      #next if n_enum.length < 1
       h = result[2]
       str = "#{ocn}\t'#{n_enum}'\t#{h}"
       outstrs << str
