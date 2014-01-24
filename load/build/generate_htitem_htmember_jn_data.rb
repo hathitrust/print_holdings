@@ -23,23 +23,23 @@ def parse_cluster_htmember_multi_datafile(infile, out_hhj, log)
   members.delete('ucm');
 
   linecount = 0;
-  Hathidata.reader(infile) do |line|
-    linecount += 1;
-    if linecount % 200000 == 0 then
-      log.d(linecount);
-    end
-    bits = line.chomp.split("\t");
-    if not members.include?(bits[2]) then
-      log.w("Problem with member_id '#{bits[2]}'... skipping.");
-      next;
-    end
-    oclc = bits[0].to_i;
-    if not oclc.is_a? Integer then
-      log.w("Problem with oclc '#{bits[0]}'... skipping.");
-      next;
-    end
-    vol_bits = bits[4].split(",");
-    Hathidata.writer(out_hhj) do |hdout|
+  Hathidata.write(out_hhj) do |hdout|
+    Hathidata.read(infile) do |line|
+      linecount += 1;
+      if linecount % 200000 == 0 then
+        log.d(linecount);
+      end
+      bits = line.chomp.split("\t");
+      if not members.include?(bits[2]) then
+        log.w("Problem with member_id '#{bits[2]}'... skipping.");
+        next;
+      end
+      oclc = bits[0].to_i;
+      if not oclc.is_a? Integer then
+        log.w("Problem with oclc '#{bits[0]}'... skipping.");
+        next;
+      end
+      vol_bits = bits[4].split(",");
       vol_bits.each do |vol|
         counts = bits[5,5].join("\t");
         hdout.file.puts("#{vol}\t#{bits[2]}\t#{counts}");
