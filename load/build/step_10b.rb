@@ -29,4 +29,5 @@ qx = 1;
   qn.execute();
 end
 
+conn.close();
 log.d("Finished");
