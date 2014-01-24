@@ -1,6 +1,32 @@
--- If you get "ERROR 1148", restart with --local_infile=1.
+require 'hathilog';
+require 'hathidb';
+require 'hathidata';
 
-use ht_repository;
-RENAME TABLE holdings_htitem_htmember_jn TO mwarin_ht.holdings_htitem_htmember_jn_jan;
-CREATE TABLE holdings_htitem_htmember_jn LIKE mwarin_ht.holdings_htitem_htmember_jn_jan;
-LOAD DATA LOCAL INFILE '/htapps/mwarin.babel/phdb_scripts/data/holdings_htitem_htmember.multi.20140107.data' INTO TABLE holdings_htitem_htmember_jn;
+log = Hathilog::Log.new();
+log.d("Started");
+
+infile = Hathidata::Data.new("holdings_htitem_htmember.multi.$ymd.data");
+if !infile.exists? then
+  log.e("Failed.");
+  raise "Could not find #{infile.path}";
+end
+
+db     = Hathidb::Db.new();
+conn   = db.get_interactive();
+# 3-letter month: jan, feb, mar etc.
+curmon = Time.new().strftime("%b").downcase();
+
+# Save holdings_htitem_htmember_jn_#{curmon} as a backup table,
+# and something we can use for computing deltas later.
+q1 = conn.prepare("RENAME TABLE holdings_htitem_htmember_jn TO holdings_htitem_htmember_jn_#{curmon}");
+q2 = conn.prepare("CREATE TABLE holdings_htitem_htmember_jn LIKE holdings_htitem_htmember_jn_#{curmon}");
+q3 = conn.prepare("LOAD DATA LOCAL INFILE '#{infile.path}' INTO TABLE holdings_htitem_htmember_jn");
+
+qx = 1;
+[q1, q2, q3].each do |qn|
+  log.d("Running query #{qx}");
+  qx += 1;
+  qn.execute();
+end
+
+log.d("Finished");
