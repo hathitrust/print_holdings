@@ -74,7 +74,6 @@ if __FILE__ == $0 then
     cmd = ARGV.shift;
     if cmd == 'start' then
       db  = Hathidb::Db.new();
-
       dir = ARGV.shift;
       if dir != nil then
         log.i("Started");
