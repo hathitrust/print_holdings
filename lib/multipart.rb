@@ -2,6 +2,9 @@ require 'hathidb';
 
 module Multipart
 
+  @@db   = Hathidb::Db.new();
+  @@conn = @@db.get_conn();
+
   class MultiItem
     attr_accessor :id, :oclc, :member_id, :status, :item_condition,
     :process_date, :enum_chron, :item_type, :issn, :n_enum, :n_chron
@@ -43,38 +46,32 @@ module Multipart
 
   # returns a list of members who have contributed enum_chron data
   def Multipart.get_multipart_members_list()
-    db   = Hathidb::Db.new();
-    conn = db.get_conn();
-    rows1 = conn.query("select member_id from holdings_memberitem
+    rows1 = @@conn.query("select member_id from holdings_memberitem
                         where length(n_enum)>0 group by member_id")
     mem_ids = []
     rows1.each do |row|
       mid = row[:member_id]
       mem_ids << mid
     end
-    conn.close()
+
     return mem_ids
   end
 
 
   def Multipart.get_multipart_cluster_list()
-    db   = Hathidb::Db.new();
-    conn = db.get_conn();
-    rows1 = conn.query("select distinct(cluster_id) from holdings_cluster where cluster_type = 'mpm'")
+    rows1 = @@conn.query("select distinct(cluster_id) from holdings_cluster where cluster_type = 'mpm'")
     cids = []
     rows1.each do |row|
       cids << row[0]
     end
-    conn.close()
+
     return cids
   end
 
 
   def Multipart.choose_oclc(cluster_id, member_id)
-    db   = Hathidb::Db.new();
-    conn = db.get_conn();
 
-    res = new_conn.query("select co.oclc, count(*) from holdings_memberitem as mm,
+    res = @@conn.query("select co.oclc, count(*) from holdings_memberitem as mm,
                           holdings_cluster_oclc as co where co.oclc = mm.oclc and
                           cluster_id = #{cluster_id} and member_id = '#{member_id}' group by oclc;")
     max = 0
@@ -84,7 +81,7 @@ module Multipart
         winner = row[0]
       end
     end
-    new_conn.close()
+
     return winner
   end
 
@@ -98,16 +95,12 @@ module Multipart
   def Multipart.map_multipart_cluster_to_members(cluster_id, enum_members_l)
     # this subroutine populates the "cluster_htmember_multi" data file
 
-    # get a connection
-    db   = Hathidb::Db.new();
-    conn = db.get_conn();
-
     # collect data rows
     results = []
 
     ### get all oclcs ###
     query_str = "select distinct oclc from holdings_cluster_oclc where cluster_id = #{cluster_id};"
-    rows1 = conn.query(query_str)
+    rows1 = @@conn.query(query_str)
     ocns = []
     rows1.each do |row1|
       ocns << row1[:oclc]
@@ -118,7 +111,7 @@ module Multipart
     ##  basically its member_id[oclc-nenum] -> [copy_count, lm_count, ...]   ##
     member_data = {}    # this will be a hash of hashes of lists (refactor this)
     ocns.each do |ocn|
-      rows2 = conn.query("select member_id, oclc, n_enum, status, item_condition from holdings_memberitem
+      rows2 = @@conn.query("select member_id, oclc, n_enum, status, item_condition from holdings_memberitem
                           where oclc = #{ocn};")
       rows2.each do |row2|
         data_key = "#{row2[:oclc]}-#{row2[:n_enum]}"
@@ -151,7 +144,7 @@ module Multipart
 
     ### get all HT data ###
     ht_data = []  # this will be a list of lists
-    rows3 = conn.query("select distinct oclcs, n_enum, chtij.volume_id from holdings_htitem as h,
+    rows3 = @@conn.query("select distinct oclcs, n_enum, chtij.volume_id from holdings_htitem as h,
                         holdings_cluster_htitem_jn as chtij where h.volume_id = chtij.volume_id
                         and chtij.cluster_id = #{cluster_id};")
     rows3.each do |row3|
@@ -202,7 +195,7 @@ module Multipart
 
     ### add 'enum-match' members (should be <= all match) ###
     enum_match_mems.each do |emm|
-      rows4 = conn.query("select distinct ho.oclc, h.n_enum from holdings_htitem as h,
+      rows4 = @@conn.query("select distinct ho.oclc, h.n_enum from holdings_htitem as h,
                           holdings_htitem_oclc as ho, holdings_cluster_oclc as co, holdings_memberitem as mm
                           where h.volume_id = ho.volume_id and ho.oclc = co.oclc and
                           ho.oclc = mm.oclc and h.n_enum = mm.n_enum and co.cluster_id = #{cluster_id}
@@ -256,7 +249,6 @@ module Multipart
       end
     end
 
-    conn.close()
     return results
   end
 
@@ -265,16 +257,12 @@ module Multipart
   def Multipart.map_multipart_cluster_to_individual_member(cluster_id, member_id, member_type)
     # this subroutine populates the "cluster_htmember_multi" data file
 
-    # get a connection
-    db   = Hathidb::Db.new();
-    conn = db.get_conn();
-
     # collect data rows
     results = []
 
     ### get all oclcs ###
     query_str = "select distinct oclc from holdings_cluster_oclc where cluster_id = #{cluster_id};"
-    rows1 = conn.query(query_str)
+    rows1 = @@conn.query(query_str)
     ocns = []
     rows1.each do |row1|
       ocns << row1[:oclc]
@@ -284,7 +272,7 @@ module Multipart
     ##  The structure is a list of counts, basically its oclc-nenum -> [copy_count, lm_count, ...]
     member_data = {}
     ocns.each do |ocn|
-      rows2 = conn.query("select oclc, n_enum, status, item_condition from holdings_memberitem
+      rows2 = @@conn.query("select oclc, n_enum, status, item_condition from holdings_memberitem
                           where oclc = #{ocn} and member_id = '#{member_id}';")
       rows2.each do |row2|
         n_enum = row2[:n_enum]
@@ -311,7 +299,7 @@ module Multipart
 
     ### get all HT data ###
     ht_data = []  # this will be a list of lists
-    rows3 = conn.query("select distinct oclcs, n_enum, chtij.volume_id from holdings_htitem as h,
+    rows3 = @@conn.query("select distinct oclcs, n_enum, chtij.volume_id from holdings_htitem as h,
                         holdings_cluster_htitem_jn as chtij where h.volume_id = chtij.volume_id
                         and chtij.cluster_id = #{cluster_id};")
     rows3.each do |row3|
@@ -335,7 +323,7 @@ module Multipart
     punt_count = 0
     non_punt_count = 0
     if member_type
-      rows4 = conn.query("select distinct ho.oclc, h.n_enum from holdings_htitem as h,
+      rows4 = @@conn.query("select distinct ho.oclc, h.n_enum from holdings_htitem as h,
                           holdings_htitem_oclc as ho, holdings_cluster_oclc as co, holdings_memberitem as mm
                           where h.volume_id = ho.volume_id and ho.oclc = co.oclc and
                           ho.oclc = mm.oclc and h.n_enum = mm.n_enum and co.cluster_id = #{cluster_id}
@@ -390,7 +378,7 @@ module Multipart
         results << outstr
       end
     end
-    conn.close()
+
     return results
   end
 
@@ -400,17 +388,14 @@ module Multipart
 
     # outfile
     outfile = File.new("cluster_H_multi.data", "w")
-    # get a connection
-    db   = Hathidb::Db.new();
-    conn = db.get_conn();
 
     # get all cluster_ids
-    cidrows = conn.query("select distinct(cluster_id) from cluster_htmember_multi;")
+    cidrows = @@conn.query("select distinct(cluster_id) from cluster_htmember_multi;")
 
     count = 0
     cidrows.each do |cid|
       count += 1
-      results = conn.query("select distinct n_enum, count(distinct member_id) from cluster_htmember_multi
+      results = @@conn.query("select distinct n_enum, count(distinct member_id) from cluster_htmember_multi
                   where cluster_id = #{cid} group by n_enum;")
       results.each do |hit|
         outstr = "#{cid}\t#{hit[0]}\t#{hit[1]}"
@@ -423,7 +408,6 @@ module Multipart
     end
 
     outfile.close()
-    conn.close()
   end
 
 
