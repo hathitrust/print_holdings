@@ -27,13 +27,26 @@ def start (dir, db, log)
     full_path = dir + file;
     load_aws_file(full_path, db, log);
   end
+
+  check_counts(db, log);
 end
 
 # Called at the beginning of start() to make sure the table is empty.
 def ensure_table_empty (db, log)
+  has_rows = check_counts(db, log);
+  conn = db.get_conn();
+  if has_rows then
+    q = "TRUNCATE TABLE #{DB_SCH}.#{DB_TAB}";
+    log.d(q);
+    conn.execute(q);
+  end
+  conn.close();
+end
+
+# Called before and after the reload.
+def check_counts(db, log)
   conn = db.get_conn();
   q = "SELECT COUNT(*) AS rc FROM #{DB_SCH}.#{DB_TAB}";
-
   has_rows = true;
   log.d(q);
   conn.query(q) do |res|
@@ -42,14 +55,8 @@ def ensure_table_empty (db, log)
       false;
     end
   end
-
-  if has_rows then
-    q = "TRUNCATE TABLE #{DB_SCH}.#{DB_TAB}";
-    log.d(q);
-    conn.execute(q);
-  end
-
   conn.close();
+  return has_rows;
 end
 
 def load_aws_file (path, db, log)
