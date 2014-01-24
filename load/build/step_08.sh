@@ -38,6 +38,12 @@ if [ $exit_st != 0 ]; then
     exit $exit_st;
 fi
 
+echo "Sanity-checking lines in $hhhmd:";
+wc -l $hhhmd;
+
+echo "Sanity-checking cluster_id 590 in $hhhmd:";
+grep -r "^590\s" $hhhmd;
+
 echo `date`;
 echo "$cmd3";
 $cmd3;
