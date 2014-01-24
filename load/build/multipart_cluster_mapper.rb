@@ -1,5 +1,4 @@
 require 'hathidata';
-require 'hathidb';
 require 'hathilog';
 require 'multipart';
 
@@ -24,13 +23,14 @@ def generate_cluster_htmember_multi_file(outfilen, log)
   cids = Multipart.get_multipart_cluster_list();
   log.d("#{cids.length} clusters in list.");
   count = 0;
+  
   Hathidata.write(outfilen) do |hdout|
     cids.each do |cid|
       result_set = Multipart.map_multipart_cluster_to_members(cid, multi_members_enum);
       # calc unique lines
       result_set.uniq.each do |line|
         # line: oclc, enum, member_id, cluster_id, volume_ids, count
-        hdout.line.puts(line);
+        hdout.file.puts(line);
       end
       count += 1;
       if ((count % 10000) == 0) then
