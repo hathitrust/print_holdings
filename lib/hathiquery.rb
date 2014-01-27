@@ -42,4 +42,12 @@ module Hathiquery
     "SELECT COUNT(*) AS c FROM #{table}";
   end
 
+  def Hathiquery.get_all_members
+    "SELECT member_id FROM holdings_htmember WHERE status = 1";
+  end
+
+  def Hathiquery.get_active_members
+    "SELECT member_id FROM holdings_htmember WHERE status = 1";
+  end
+
 end
