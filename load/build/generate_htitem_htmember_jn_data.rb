@@ -15,14 +15,13 @@ def parse_cluster_htmember_multi_datafile(infile, out_hhj, log)
   db              = Hathidb::Db.new();
   conn            = db.get_conn();
   members         = [];
-  get_members_sql = Hathiquery.get_all_members;
+  get_members_sql = Hathiquery.get_active_members;
   log.d(get_members_sql)
   conn.query(get_members_sql) do |row|
     members << row[:member_id];
   end
   conn.close();
   log.d("#{members.length} members.");
-  members.delete('ucm');
 
   linecount = 0;
   Hathidata.write(out_hhj) do |hdout|
