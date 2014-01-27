@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Get abs path to this dir.
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
