@@ -21,16 +21,6 @@ popd > /dev/null;
 
 date;
 
-# Ran this manually, will be moved to step_00.
-# bt="holdings_htitem_htmember_jn";
-# echo "16a: Back up table $bt";
-# bash $SCRIPTPATH/backup_table.sh $bt;
-# exit_st=$?                     
-# if [ $exit_st != 0 ]; then     
-#     echo "Exiting prematurely";
-#     exit $exit_st;             
-# fi                             
-
 # Ran, took 2h 15 min.
 echo "16b copy table in dev.";
 ruby $SCRIPTPATH/populate_holdings_htitem_htmember_jn_dev.rb;
