@@ -37,4 +37,9 @@ module Hathiquery
   def Hathiquery.cali_members 
     %w(berkeley ucdavis uci ucla ucmerced ucr ucsb ucsc ucsd ucsf);
   end
+
+  def Hathiquery.check_count(table)
+    "SELECT COUNT(*) AS c FROM #{table}";
+  end
+
 end
