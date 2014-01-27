@@ -16,7 +16,8 @@ DATADIR=`readlink -e $SCRIPTPATH/../../data`;
 BACKUPDIR="$DATADIR/backup";
 SERIALDIR="$DATADIR/serials";
 
-LOGDIR=`readlink -e $SCRIPTPATH/../../log/builds/current`;
+LOGROOT=`readlink -e $SCRIPTPATH/../../log`;
+LOGDIR="$LOGROOT/builds/current";
 
 HTDIR=/htapps/pulintz.babel/data/phdb/HT003;
 

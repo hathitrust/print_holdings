@@ -16,6 +16,7 @@ fi
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
+source $SCRIPTPATH/build_lib.sh;
 
 # ... and setup finished.
 
@@ -25,29 +26,18 @@ date;
 echo "16b copy table in dev.";
 ruby $SCRIPTPATH/populate_holdings_htitem_htmember_jn_dev.rb;
 exit_st=$?                     
-if [ $exit_st != 0 ]; then     
-    echo "Exiting prematurely";
-    exit $exit_st;             
-fi                             
+check_exit_code $exit_st;
 
 # Ran, took 5 hours.
 echo "16c, copy to production";
 ruby $SCRIPTPATH/export_hhj_data.rb;
-
 exit_st=$?                     
-if [ $exit_st != 0 ]; then     
-    echo "Exiting prematurely";
-    exit $exit_st;             
-fi                             
+check_exit_code $exit_st;
 
 echo "16d, generate delta files and load into db";
 ruby -J-Xmx2048m $SCRIPTPATH/generate_updated_items_list.rb;
-
 exit_st=$?                     
-if [ $exit_st != 0 ]; then     
-    echo "Exiting prematurely";
-    exit $exit_st;             
-fi                             
+check_exit_code $exit_st;      
 
 echo "Made it all the way!";
 echo "Now run step_16e.rb manually."

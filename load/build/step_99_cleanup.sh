@@ -2,17 +2,15 @@
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
-
-LOGPATH="$SCRIPTPATH/../../log";
-CURRENTLOG="$LOGPATH/builds/current";
+source $SCRIPTPATH/build_lib.sh;
 
 # Move all logfiles in the build (if any) to the current build log dir.
-mv -v $SCRIPTPATH/*.log $CURRENTLOG;
+mv -v $SCRIPTPATH/*.log $LOGDIR;
 
 todaystr=`date +'%Y-%m-%d'`;
-FINISHEDLOG="$LOGPATH/builds/$todaystr";
 
 # Rename the current build log dir.
-mv -v $CURRENTLOG $FINISHEDLOG;
+mv -v $LOGDIR $LOGROOT/builds/$todaystr;
 
-mkdir -p $CURRENTLOG;
+# Recreate $LOGROOT/builds/current
+mkdir -p $LOGDIR;
