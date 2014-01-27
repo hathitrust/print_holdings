@@ -5,10 +5,10 @@
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
+source $SCRIPTPATH/build_lib.sh;
 
 date=`date +%Y%m%d`;
-datadir=`readlink -e $SCRIPTPATH/../../data`;
-awsdir=$datadir/aws/$date;
+awsdir=$DATADIR/aws/$date;
 
 date;
 echo "Started";
