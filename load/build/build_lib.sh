@@ -28,9 +28,3 @@ function check_exit_code() {
 	exit $exit_st;             
     fi                             
 }
-
-function echodo() {
-    cmd=$1;
-    echo "$cmd";
-    $cmd;
-}
