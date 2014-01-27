@@ -7,12 +7,10 @@
 pushd `dirname $0` > /dev/null
 SCRIPTPATH=`pwd`
 popd > /dev/null
-DATAPATH="$SCRIPTPATH/../../data";
-LOGPATH="$SCRIPTPATH/../../log/builds/current";
-BACKUPPATH="$DATAPATH/backup";
 
-HT_DIR=/htapps/pulintz.babel/data/phdb/HT003;
-mkdir -pv $BACKUPPATH/;
+source $SCRIPTPATH/build_lib.sh;
+
+mkdir -pv $BACKUPDIR/;
 
 # Back up holdings_htitem_htmember_jn to file.
 echo "$SCRIPTPATH/backup_table.sh";
@@ -29,4 +27,4 @@ bash $SCRIPTPATH/backup_table.sh holdings_htitem_oclc;
 bash $SCRIPTPATH/backup_table.sh holdings_H_counts
 
 # Remember the line counts for input.
-wc -l $HT_DIR/HT003_*.tsv > $LOGPATH/ht00x_file_linecounts.txt
+wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
