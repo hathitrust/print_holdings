@@ -1,5 +1,5 @@
-require 'phdb/phdb_utils'
-require 'set'
+require 'hathidb';
+require 'set';
 
 =begin
 
@@ -30,7 +30,8 @@ end
 
 def calc_cluster_rights()
   # select cluster_ids
-  conn = PHDBUtils.get_dev_conn()
+  db   = Hathidb::Db.new();
+  conn = db.get_conn()
   
   puts "Grabbing cluster ids..."
   query1 = "SELECT cluster_id FROM holdings_cluster"
