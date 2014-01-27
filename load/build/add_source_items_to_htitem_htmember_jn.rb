@@ -1,4 +1,5 @@
-require 'phdb/phdb_utils';
+require 'hathidb';
+require 'hathiquery';
 
 =begin
 
@@ -15,16 +16,15 @@ All changed code uses the var subconn.
 # to HT originally.  This routine updates the htitem_htmember_jn table with these
 # entries.
 def add_source_items_to_htitem_htmember_jn(reportfn)
-
-  conn = PHDBUtils.get_dev_conn();
-  conn.fetch_size=10000;
-  subconn = PHDBUtils.get_dev_conn();
+  db = Hathidb::Db.new();
+  conn            = db.get_conn();
+  conn.fetch_size = 10000;
+  subconn         = db.get_conn();
 
   # source institution map
-  source_h = PHDBUtils.get_source_map();
-  cali_members = %w(berkeley ucdavis uci ucla ucmerced ucr ucsb ucsc ucsd ucsf);
-  #ht_members = PHDBUtils.get_member_list()
-  outfile = File.new(reportfn, "w");
+  source_h     = Hathiquery.source_map;
+  cali_members = Hathiquery.cali_members;
+  outfile      = File.new(reportfn, "w");
 
   ### loop through HT items ###
   rowcount   = 0;
@@ -50,8 +50,7 @@ def add_source_items_to_htitem_htmember_jn(reportfn)
     skip = false;
     if row1[:source] == 'UC' then # Cali.
       cali_total += 1;
-      test_rows = sub_select.execute(row1[:volume_id]);
-      test_rows.each do |t|
+      sub_select.enumerate(row1[:volume_id]) do |t|
         if cali_members.include?(t[0].strip) then
           skip = true;
           cali_hits += 1;
@@ -60,8 +59,7 @@ def add_source_items_to_htitem_htmember_jn(reportfn)
       end
     else # Non-Cali.
       member_id = source_h[row1[:source]];
-      test_rows = sub_select.execute(row1[:volume_id]);
-      test_rows.each do |t|
+      sub_select.enumerate(row1[:volume_id]) do |t|
         if t[0].strip == member_id then
           skip = true;
           other_hits += 1;

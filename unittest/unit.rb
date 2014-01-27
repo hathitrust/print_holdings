@@ -6,6 +6,7 @@ require 'hathidb';
 require 'hathilog';
 require 'hathidata';
 require 'hathiconf';
+require 'hathiquery';
 
 class HathiUnit < Test::Unit::TestCase
   
@@ -296,6 +297,11 @@ class HathiUnit < Test::Unit::TestCase
     end
 
     Hathidata::Data.new(testfile).delete;
+  end
+
+  def test_query
+    assert_equal(true, Hathiquery.source_map.has_key?('MIU'));
+    assert_equal(true, Hathiquery.cali_members.include?('ucla'));
   end
 
 end
