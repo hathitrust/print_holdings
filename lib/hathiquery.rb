@@ -43,11 +43,11 @@ module Hathiquery
   end
 
   def Hathiquery.get_all_members
-    "SELECT member_id FROM holdings_htmember";
+    "SELECT DISTINCT member_id FROM holdings_htmember ORDER BY member_id";
   end
 
   def Hathiquery.get_active_members
-    "SELECT member_id FROM holdings_htmember WHERE status = 1";
+    "SELECT DISTINCT member_id FROM holdings_htmember WHERE status = 1 ORDER BY member_id";
   end
 
 end
