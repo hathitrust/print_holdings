@@ -28,4 +28,5 @@ conn.query(q3) do |res|
   log.d(res[:c]);
 end
 
+conn.close();
 log.d("Finished.");
