@@ -19,7 +19,6 @@ latest_serial_file=`ls -w1 $SERIALDIR | tail -1`;
 
 # Generate a hathi_full_YYYYMMDD.data file
 ruby $SCRIPTPATH/maketable_htitem_from_file.rb $latest_hathi_file serials/$latest_serial_file;
-
 exit_st=$?;
 check_exit_code $exit_st;
 
