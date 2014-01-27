@@ -32,12 +32,17 @@ else
   log.w("#{queries[0]} should be 0, was #{results[0]}");
 end
 
+if results[3] > results[2] then
+  log.i("Result 3 & 2 check out, 3 is greater than 2.");
+else
+  log.w("#{queries[3]}\nshould be greater than #{queries[2]}\n... was not (#{results[3]} cmp #{results[2]}).");
+end
+
 if results[3] > results[4] then
   log.i("Result 3 & 4 check out, 3 is greater than 4.");
 else
   log.w("#{queries[3]}\nshould be greater than #{queries[4]}\n... was not (#{results[3]} cmp #{results[4]}).");
 end
-
 
 if results[4] == results[5] then
   log.i("Result 4 & 5 check out, they are the same.");
