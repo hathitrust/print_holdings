@@ -1,4 +1,4 @@
-require 'phdb/phdb_utils';
+require 'hathidb';
 
 =begin
 
@@ -23,9 +23,9 @@ ZZZ    = 1; # Amount of sleep between loads. Do not set to 0.
 # Goes through HT_DIR and looks for files matching HT_RE. 
 # Mathcing files are loaded with load_ht_file().
 # Stops if told by stop().
-def start ()
+def start (db)
   t0 = Time.new();
-  if !check_holdings_memberitem() then
+  if !check_holdings_memberitem(db) then
     puts "#{DB_TAB} must be manually truncated first.";
     return;
   end
@@ -58,7 +58,7 @@ def start ()
     bytes += file_size;
 
     puts "(#{i}/#{tot_files}) #{file} (#{'%.2f' % (file_size / 2**20)} MB)";
-    load_ht_file(full_path);
+    load_ht_file(full_path, db);
     t1 = Time.new();
     td = (t1 - t0) - ZZZ;
     puts("This script has been running for #{'%.2f' % td} seconds and loaded #{'%i' % (bytes / 2**20)} MB at #{'%i' % (bytes / td)} bytes/s.");
@@ -67,9 +67,9 @@ end
 
 # Performs a LOAD DATA LOCAL INFILE query on a file. 
 # Takes a short nap after.
-def load_ht_file (path)
+def load_ht_file (path, db)
   begin
-    conn = PHDBUtils.get_dev_conn();
+    conn = db.get_conn();
     q = [
          "LOAD DATA LOCAL INFILE '#{path}'",
          "INTO TABLE #{DB_SCH}.#{DB_TAB} IGNORE 1 LINES",
@@ -89,8 +89,8 @@ def load_ht_file (path)
 end
 
 # Called at the beginning of start() to make sure the table is empty.
-def check_holdings_memberitem ()
-  conn = PHDBUtils.get_dev_conn();
+def check_holdings_memberitem (db)
+  conn = db.get_conn();
   q = "SELECT COUNT(*) AS rc FROM #{DB_SCH}.#{DB_TAB}";
   ret = false;
   conn.query(q) do |res|
@@ -100,7 +100,7 @@ def check_holdings_memberitem ()
       ret = true;
     end
   end
-
+  conn.close();
   return ret;
 end
 
@@ -150,10 +150,13 @@ if __FILE__ == $0 then
   }
 
   delete_stop();
+
+  db = Hathidb::Db.new();
+
   if ARGV.length > 0
     cmd = ARGV.shift;
     if cmd == 'start' then
-      start(); 
+      start(db); 
     elsif cmd == 'stop' then
       stop();
     elsif cmd == 'single' then
@@ -161,7 +164,7 @@ if __FILE__ == $0 then
       if file == nil then
         puts usage;
       else
-        load_ht_file(file);
+        load_ht_file(file, db);
       end
     else
       puts usage;
