@@ -10,6 +10,8 @@ db   = Hathidb::Db.new();
 conn = db.get_conn();
 log  = Hathilog::Log.new();
 
+log.d("Started.");
+
 log.d(q0);
 conn.query(q0) do |res|
   log.d(res[:c]);
@@ -26,4 +28,4 @@ conn.query(q3) do |res|
   log.d(res[:c]);
 end
 
-log.d("Done");
+log.d("Finished.");
