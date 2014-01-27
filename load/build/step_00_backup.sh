@@ -22,3 +22,6 @@ ruby $SCRIPTPATH/make_hhhj_old.rb;
 
 # Back up holdings_htitem_oclc to file.
 bash $SCRIPTPATH/backup_table.sh holdings_htitem_oclc;
+
+# Used to be 12b.
+bash $SCRIPTPATH/backup_table.sh holdings_H_counts
