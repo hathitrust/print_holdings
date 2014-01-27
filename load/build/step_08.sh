@@ -5,13 +5,13 @@ pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
 
+source $SCRIPTPATH/build_lib.sh;
+
 # Combines all substeps of step 8 in the monthlies.
 
 date=`date +%Y%m%d`;
-datadir=`readlink -e $SCRIPTPATH/../../data`;
-
-chmd="${datadir}/cluster_htmember_multi.${date}.data";
-hhhmd="${datadir}/holdings_htitem_htmember.multi.${date}.data";
+chmd="${DATADIR}/cluster_htmember_multi.${date}.data";
+hhhmd="${DATADIR}/holdings_htitem_htmember.multi.${date}.data";
 
 # Fairly quick.
 cmd1="jruby $SCRIPTPATH/relabel_mpm.rb";
@@ -24,19 +24,13 @@ echo `date`;
 echo "$cmd1";
 $cmd1;
 exit_st=$?;
-if [ $exit_st != 0 ]; then
-    echo "Exiting prematurely";
-    exit $exit_st;
-fi
+check_exit_code $exit_st;
 
 echo `date`;
 echo "$cmd2";
 $cmd2;
 exit_st=$?;
-if [ $exit_st != 0 ]; then
-    echo "Exiting prematurely";
-    exit $exit_st;
-fi
+check_exit_code $exit_st;
 
 echo "Sanity-checking lines in $hhhmd:";
 wc -l $hhhmd;
@@ -48,10 +42,7 @@ echo `date`;
 echo "$cmd3";
 $cmd3;
 exit_st=$?;
-if [ $exit_st != 0 ]; then
-    echo "Exiting prematurely";
-    exit $exit_st;
-fi
+check_exit_code $exit_st;
 
 echo `date`;
 echo 'Finished';
