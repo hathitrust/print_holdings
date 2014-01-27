@@ -1,14 +1,15 @@
-d=`date +'%Y%m%d'`;
+#!/bin/bash
 
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
+source $SCRIPTPATH/build_lib.sh;
 
-datadir=`readlink -e $SCRIPTPATH/../../data`;
-logdir=`readlink -e $SCRIPTPATH/../../log`;
-logfile="$logdir/step_10e.log";
+d=`date +'%Y%m%d'`;
 
-command="jruby $SCRIPTPATH/add_source_items_to_htitem_htmember_jn.rb $datadir/deposits.${d}.txt";
+logfile="$LOGDIR/step_10e.log";
+
+command="jruby $SCRIPTPATH/add_source_items_to_htitem_htmember_jn.rb $DATADIR/deposits.${d}.txt";
 echo $command;
 echo "nohup and logging to $logfile";
 nohup $command > $logfile &
