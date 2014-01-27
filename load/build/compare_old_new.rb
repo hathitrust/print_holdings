@@ -5,6 +5,7 @@ Generates a 3-col spreadsheet over the memberdata / ht003 files.
 =end
 
 require 'hathidb';
+require 'hathiquery';
 
 HT_GLOB = '/htapps/pulintz.babel/data/phdb/HT003/HT003_*.tsv';
 MD_GLOB = '/htapps/pulintz.babel/data/phdb/MemberData/*/HT003_*.tsv';
@@ -41,11 +42,14 @@ Dir.glob(MD_GLOB).select do |f|
 end
 
 allkeys = [ht_files.keys, md_files.keys].flatten.uniq.sort;
-
 members = {};
-Hathidb::Db.new().get_conn().query("SELECT member_id FROM holdings_htmember") do |row|
+
+db   = Hathidb::Db.new();
+conn = db.get_conn();
+conn.query(Hathiquery.get_all_members) do |row|
   members[row['member_id']] = 1;
 end
+conn.close();
 
 puts %W{is_member current_f newer_f}.join("\t");
 
