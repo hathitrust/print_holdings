@@ -2,6 +2,7 @@ require 'hathidb';
 require 'hathiconf';
 require 'hathilog';
 require 'hathienv';
+require 'hathiquery';
 
 # Copied from /htapps/pulintz.babel/Code/phdb/bin/ and slightly modded.
 
@@ -31,7 +32,7 @@ def export_data_files(db, log)
   conn = db.get_conn();
 
   memberids       = [];
-  get_members_sql = "SELECT DISTINCT member_id FROM holdings_htmember ORDER BY member_id";
+  get_members_sql = Hathiquery.get_all_members;
   log.d(get_members_sql);
   conn.query(get_members_sql) do |mrow|
     memberids << mrow[:member_id];

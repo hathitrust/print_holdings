@@ -1,6 +1,7 @@
 require 'hathidb';
 require 'hathidata';
 require 'hathilog';
+require 'hathiquery'
 
 # Copied from
 # /htapps/pulintz.babel/Code/phdb/bin/generate_htitem_htmember_jn_data.rb
@@ -11,10 +12,11 @@ require 'hathilog';
 # we'll let the DB deal with that based on the PK
 
 def parse_cluster_htmember_multi_datafile(infile, out_hhj, log)
-  db = Hathidb::Db.new();
-  conn = db.get_conn();
-  get_members_sql = "SELECT DISTINCT member_id FROM holdings_htmember";
-  members = [];
+  db              = Hathidb::Db.new();
+  conn            = db.get_conn();
+  members         = [];
+  get_members_sql = Hathiquery.get_all_members;
+  log.d(get_members_sql)
   conn.query(get_members_sql) do |row|
     members << row[:member_id];
   end
