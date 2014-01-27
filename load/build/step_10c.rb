@@ -1,5 +1,6 @@
 require 'hathilog';
 require 'hathidb';
+require 'hathiquery';
 
 # Reinterpretation of:
 # /htapps/pulintz.babel/Code/phdb/lib/sql/create_htitem_htmember_jn_v1.4_nonmulti_stored_procedure.sql
@@ -36,7 +37,7 @@ main_sql = %W<
 >.join(' ');
 main_query = conn.prepare(main_sql);
 
-members_sql = "SELECT DISTINCT member_id FROM holdings_htmember WHERE status = 1";
+members_sql = Hathiquery.get_active_members;
 
 log.d("/*For each member_id in */ #{members_sql}");
 log.d("/* ... do: */ #{main_sql}");
