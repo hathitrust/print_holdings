@@ -1,3 +1,4 @@
+require 'hathilog';
 require 'hathidb';
 require 'hathiquery';
 
@@ -9,17 +10,28 @@ error when running, using jdbchelper 0.8.
 
 All changed code uses the var subconn.
 
+Jan 27 by The Same, using hathidb and hathiquery, also enumerating the
+selects instead of executing them and storing in var.
+
 =end
 
 # This routine accounts for original "source" hathitrust items.  Many items in HT
 # do not match anything, even the print holdings of the member who submitted them
 # to HT originally.  This routine updates the htitem_htmember_jn table with these
 # entries.
-def add_source_items_to_htitem_htmember_jn(reportfn)
-  db = Hathidb::Db.new();
+
+def add_source_items_to_htitem_htmember_jn(reportfn, log)
+  db              = Hathidb::Db.new();
   conn            = db.get_conn();
   conn.fetch_size = 10000;
   subconn         = db.get_conn();
+
+  check_sql   = Hathiquery.check_count('holdings_htitem_htmember_jn');
+  check_query = conn.prepare(check_sql);
+  log.d(check_sql);
+  check_query.enumerate do |row|
+    log.d("BEFORE: #{row[:c]}");
+  end
 
   # source institution map
   source_h     = Hathiquery.source_map;
@@ -73,36 +85,44 @@ def add_source_items_to_htitem_htmember_jn(reportfn)
       deposits += 1;
       sub_insert.execute(row1[:volume_id], member_id)
       outstr = "#{row1[:volume_id]}\t#{member_id}";
-      #puts outstr
       outfile.puts(outstr);
     end
 
     skip = false;
     if ((rowcount % 100000) == 0) then
-      puts Time.new();
-      puts "\nRowcount:  #{rowcount}...";
-      puts "\tCaliTotal: #{cali_total}";
-      puts "\tCaliHits:  #{cali_hits}";
-      puts "\tOtherHits: #{other_hits}";
-      puts "\tDeposits:  #{deposits}";
+      log.d("Rowcount:  #{rowcount}...");
+      log.d("\tCaliTotal: #{cali_total}");
+      log.d("\tCaliHits:  #{cali_hits}");
+      log.d("\tOtherHits: #{other_hits}");
+      log.d("\tDeposits:  #{deposits}");
     end
   end
 
-  puts "\nFinal Rowcount:  #{rowcount}...";
-  puts "\tFinal CaliTotal: #{cali_total}";
-  puts "\tFinal CaliHits:  #{cali_hits}";
-  puts "\tFinal OtherHits: #{other_hits}";
-  puts "\tFinal Deposits:  #{deposits}";
-
+  log.d("Final Rowcount:  #{rowcount}...");
+  log.d("\tFinal CaliTotal: #{cali_total}");
+  log.d("\tFinal CaliHits:  #{cali_hits}");
+  log.d("\tFinal OtherHits: #{other_hits}");
+  log.d("\tFinal Deposits:  #{deposits}");
+  
   outfile.close();
+
+  log.d(check_sql);
+  check_query.enumerate do |row|
+    log.d("AFTER: #{row[:c]}");
+  end
+
   subconn.close();
   conn.close();
 end
 
-if ARGV.length != 1 then
-  abort "Usage: ruby add_source_items_to_htitem_htmember_jn <reportfile>\n";
-end
+if $0 == __FILE__ then
+  log = Hathilog::Log.new();
+  if ARGV.length != 1 then
+    log.f("Fail.");
+    abort "Usage: ruby add_source_items_to_htitem_htmember_jn <reportfile>\n";
+  end
 
-puts "Started #{Time.new()}";
-add_source_items_to_htitem_htmember_jn(ARGV[0]);
-puts "Finished #{Time.new()}";
+  log.d("Started");
+  add_source_items_to_htitem_htmember_jn(ARGV[0], log);
+  log.d("Finished");
+end
