@@ -43,7 +43,7 @@ module Hathiquery
   end
 
   def Hathiquery.get_all_members
-    "SELECT member_id FROM holdings_htmember WHERE status = 1";
+    "SELECT member_id FROM holdings_htmember";
   end
 
   def Hathiquery.get_active_members
