@@ -1,12 +1,13 @@
 require 'hathilog';
 require 'hathidb';
+require 'hathiquery';
 
 log  = Hathilog::Log.new();
 log.d("Started");
 db   = Hathidb::Db.new();
 conn = db.get_conn();
 
-get_member_sql = "SELECT member_id FROM holdings_htmember WHERE status = 1";
+get_member_sql = Hathiquery.get_active_members;
 
 insert_sql = %W<
 INSERT INTO holdings_H_counts (H_id, member_id, access, item_type, H_count)
