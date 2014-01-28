@@ -7,10 +7,12 @@ require 'fileutils';
 
 # Given a file data/builds/current/load.tsv, with tab-separated
 # member_ids and item_types, this script will load those files
-# from the HT00x directory into the holdings_memberitem table.
+# from the memberdata dir, to the HT00x directory and from there
+# into the holdings_memberitem table.
 #
 # Before running, make sure that all the right files are in the
-# right place and have been preprocessed as needed.
+# right place and have been preprocessed as needed. Make backups
+# of the currently loaded files before reloading.
 #
 # The script will pretty much scream and die if anything isn't
 # to its liking.
@@ -22,6 +24,7 @@ db    = Hathidb::Db.new();
 @ht_dir          = '/htapps/pulintz.babel/data/phdb/HT003';
 @ht_backup_dir   = '/htapps/pulintz.babel/data/phdb/HT003_backups';
 
+# Takes a file with instructions about which files to copy and load.
 def get_infiles
   hdin = Hathidata::Data.new('builds/current/load.tsv');
   if !hdin.exists? then
@@ -39,7 +42,7 @@ def get_infiles
   # separated by tab, just like so:
   # ^chi<TAB>mono$
   # ^chi<TAB>multi$
-  # etc.
+  # ... etc.
 
   @log.d("#{hdin.path} has the following to say:");
   hdin.open('r').file.each_line do |line|
@@ -96,6 +99,8 @@ def get_infiles
   return infiles;
 end
 
+# Takes a list of files in the memberdata dir, copiess them
+# to the ht00x dir. Backs up the original ht00x files, if any.
 def copy_files (infiles)
   htfiles = [];
   backup_dir = @ht_backup_dir +'/'+ Time.new().strftime("%Y%m%d");
@@ -106,17 +111,19 @@ def copy_files (infiles)
       # If so, back it up.
       FileUtils.mkdir_p(backup_dir);
       @log.d("cp #{ht_file} #{backup_dir}");
-      #FileUtils.cp(ht_file, backup_dir);
+      FileUtils.cp(ht_file, backup_dir);
     end
     # Overwrite with one from memberdata (copy)
     @log.d("cp #{infile} #{ht_file}");
-    #FileUtils.cp(infile, ht_file);
+    FileUtils.cp(infile, ht_file);
     htfiles << ht_file;
   end
 
   return htfiles;
 end
 
+# Takes a list of files in the ht00x dir. For each file, performs
+# a reload of that type of record, i.e. one delete and one load.
 def process_htfiles (htfiles)
   delete_sql = %W[
     DELETE FROM holdings_memberitem
@@ -145,10 +152,15 @@ def process_htfiles (htfiles)
       @log.d("Line count: #{line_count}");
       @log.d("Counts for #{member_id} before:");
       show_counts(member_id);
+
+      # Delete
       @log.d("Deleting #{member_id} #{item_type}");
-      # delete_query.update(member_id, item_type);
+      delete_query.update(member_id, item_type);
+
+      #Load
       @log.d("Loading #{member_id} #{item_type}.");
-      # load_query.update(infile);
+      load_query.update(infile);
+
       @log.d("Counts for #{member_id} after:");
       show_counts(member_id);
       @log.d("Done with #{member_id} #{item_type}\n");
@@ -160,6 +172,8 @@ def process_htfiles (htfiles)
   end
 end
 
+# Gives a list of all active members.
+# So we can bail if an invalid member_id is given.
 def get_memberids ()
   member_ids = {};
   active_members_sql = Hathiquery.get_active_members;
@@ -173,6 +187,7 @@ def get_memberids ()
   return member_ids;
 end
 
+# Useful for logging change, run before and after a reload.
 def show_counts (member_id)
   sql = %W<
     SELECT
