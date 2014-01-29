@@ -1,6 +1,6 @@
-Make sure that the path to this dir is included in your ENV's RUBYLIB and PYTHONPATH.
-
 All homebrew Ruby and Python modules should reside here.
+
+Make sure that the path to this dir is included in your ENV's RUBYLIB and PYTHONPATH.
 
 For example, in your shell profile:
 
