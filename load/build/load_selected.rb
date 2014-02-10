@@ -23,6 +23,7 @@ db    = Hathidb::Db.new();
 @member_data_dir = '/htapps/pulintz.babel/data/phdb/MemberData';
 @ht_dir          = '/htapps/pulintz.babel/data/phdb/HT003';
 @ht_backup_dir   = '/htapps/pulintz.babel/data/phdb/HT003_backups';
+@dry_run         = false; # if @dry_run then skip updates and stuff. Turn on with -n flag.
 
 # Takes a file with instructions about which files to copy and load.
 def get_infiles
@@ -111,11 +112,15 @@ def copy_files (infiles)
       # If so, back it up.
       FileUtils.mkdir_p(backup_dir);
       @log.d("cp #{ht_file} #{backup_dir}");
-      FileUtils.cp(ht_file, backup_dir);
+      if @dry_run == false then
+        FileUtils.cp(ht_file, backup_dir);
+      end
     end
     # Overwrite with one from memberdata (copy)
     @log.d("cp #{infile} #{ht_file}");
-    FileUtils.cp(infile, ht_file);
+    if @dry_run == false then
+      FileUtils.cp(infile, ht_file);
+    end
     htfiles << ht_file;
   end
 
@@ -130,17 +135,18 @@ def process_htfiles (htfiles)
      WHERE member_id = ?
        AND item_type = ?
   ].join(' ');
-  @log.d(delete_sql);
-  delete_query = @conn.prepare(delete_sql);
-
   load_sql = %W[
-       LOAD DATA LOCAL INFILE ?
-       INTO TABLE holdings_memberitem IGNORE 1 LINES
-       (oclc, local_id, member_id, status, item_condition,
-       process_date, enum_chron, item_type, issn, n_enum, n_chron)
-      ].join(' ');
+    LOAD DATA LOCAL INFILE ?
+    INTO TABLE holdings_memberitem IGNORE 1 LINES
+    (oclc, local_id, member_id, status, item_condition,
+    process_date, enum_chron, item_type, issn, n_enum, n_chron)
+  ].join(' ');
+
+  @log.d(delete_sql);
   @log.d(load_sql);
-  load_query = @conn.prepare(load_sql);
+
+  delete_query = @conn.prepare(delete_sql);
+  load_query   = @conn.prepare(load_sql);
 
   htfiles.each do |infile|
     m = /HT003_([a-z]+)\.(mono|multi|serial).tsv/.match(infile);
@@ -152,17 +158,17 @@ def process_htfiles (htfiles)
       @log.d("Line count: #{line_count}");
       @log.d("Counts for #{member_id} before:");
       show_counts(member_id);
-
-      # Delete
-      @log.d("Deleting #{member_id} #{item_type}");
-      delete_query.update(member_id, item_type);
-
-      #Load
-      @log.d("Loading #{member_id} #{item_type}.");
-      load_query.update(infile);
-
-      @log.d("Counts for #{member_id} after:");
-      show_counts(member_id);
+      if @dry_run == false then
+        # Delete
+        @log.d("Deleting #{member_id} #{item_type}");
+        delete_query.update(member_id, item_type);
+        # Load
+        @log.d("Loading #{member_id} #{item_type}.");
+        load_query.update(infile);
+        # Count
+        @log.d("Counts for #{member_id} after:");
+        show_counts(member_id);
+      end
       @log.d("Done with #{member_id} #{item_type}\n");
     else
       msg = "Could not figure out member_id / item_type from #{infile}";
@@ -213,6 +219,12 @@ end
 if $0 == __FILE__ then
   begin
     @log.d("Started\n\n\n");
+
+    if ARGV.include?('-n') then
+      @dry_run = true;
+      @log.d("*** DRY RUN ***");
+    end
+
     infiles = get_infiles();
     htfiles = copy_files(infiles);
     process_htfiles(htfiles);
