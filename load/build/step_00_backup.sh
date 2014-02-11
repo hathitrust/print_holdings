@@ -12,9 +12,8 @@ source $SCRIPTPATH/build_lib.sh;
 
 mkdir -pv $BACKUPDIR/;
 
-# Back up holdings_htitem_htmember_jn to file.
-echo "$SCRIPTPATH/backup_table.sh";
-bash $SCRIPTPATH/backup_table.sh holdings_htitem_htmember_jn;
+# Remember the line counts for input.
+wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
 
 # holdings_htitem_htmember_jn -> holdings_htitem_htmember_jn_old
 echo "$SCRIPTPATH/make_hhhj_old.rb";
@@ -26,7 +25,8 @@ bash $SCRIPTPATH/backup_table.sh holdings_htitem_oclc;
 # Used to be 12b.
 bash $SCRIPTPATH/backup_table.sh holdings_H_counts
 
-# Remember the line counts for input.
-wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
+# Back up holdings_htitem_htmember_jn to file.
+echo "$SCRIPTPATH/backup_table.sh";
+bash $SCRIPTPATH/backup_table.sh holdings_htitem_htmember_jn;
 
 echo "$0 done.";
