@@ -28,3 +28,5 @@ bash $SCRIPTPATH/backup_table.sh holdings_H_counts
 
 # Remember the line counts for input.
 wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
+
+echo "$0 done.";
