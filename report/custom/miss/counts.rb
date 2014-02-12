@@ -10,13 +10,11 @@ require 'hathilog';
 
 log = Hathilog::Log.new();
 log.d("Started");
-
-db   = Hathidb::Db.new();
-conn = db.get_conn();
+conn = Hathidb::Db.new().get_conn();
 q    = %W[
   SELECT
       COUNT(access) AS acount,
-      hf.access     AS a,
+      hf.rights     AS r,
       hhh.h         AS h
   FROM
       hathi_files                 AS hf,
@@ -29,20 +27,43 @@ q    = %W[
       AND
       hhhj.member_id = 'missouri'
   GROUP BY
-      hf.access,
+      hf.rights,
       hhh.h
   ORDER BY
       h,
-      a
+      r
 ].join(' ');
 
-cols = [:acount, :a, :h];
+rights = {};
+[1, 7, (9 .. 15).to_a, 17].flatten.map{|x| rights[x] = 'allow'};
+[2, 5, 8].map{|x| rights[x] = 'deny'};
+rights[3] = 'op';
 
-Hathidata.write('missouri_counts.tsv') do |hdout|
-  conn.query(q) do |row|
-    hdout.file.puts cols.map{|c| row[c]}.join("\t");
-  end
+# Dictionary for rights attributes, 'ic' => 2 etc.
+rights_name_to_access = {};
+conn.query("SELECT name, id FROM ht_rights.attributes") do |row|
+  rights_name_to_access[row[:name]] = rights[row[:id]];
+  puts "#{row[:name]} => #{row[:id]}";
 end
 
+# Group tighter on translated rights attribute.
+out_hash = {};
+conn.query(q) do |row|
+  puts "#{row[:acount]}\t#{row[:r]}\t#{row[:h]}";
+  key = "#{rights_name_to_access[row[:r]]}\t#{row[:h]}";
+  out_hash[key] ||= 0;
+  out_hash[key]  += row[:acount].to_i;
+end
+
+# Output, finally.
+tot_count    = 0;
+broken_count = {};
+Hathidata.write('missouri_counts.tsv') do |hdout|
+  out_hash.each_key do |k|
+    hdout.file.puts "#{out_hash[k]}\t#{k}";
+    tot_count += out_hash[k];
+  end
+  hdout.file.puts "Total count: #{tot_count}";
+end
 conn.close();
 log.d("Finished");

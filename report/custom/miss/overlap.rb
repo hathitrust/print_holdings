@@ -7,7 +7,6 @@ def main(member_id, log)
   conn = db.get_conn();
   q    = %W<
     SELECT
-        h1.access,
         h1.rights,
         h2.oclcs,
         h2.enum_chron,
@@ -24,9 +23,22 @@ def main(member_id, log)
         h3.member_id = '#{member_id}'
   >.join(' ');
 
+  rights = {};
+  [1, 7, (9 .. 15).to_a, 17].flatten.map{|x| rights[x] = 'allow'};
+  [2, 5, 8].map{|x| rights[x] = 'deny'};
+  rights[3] = 'op';
+
+  # Dictionary for rights attributes, 'ic' => 'deny' etc.
+  rights_name_to_access = {};
+  conn.query("SELECT name, id FROM ht_rights.attributes") do |row|
+    rights_name_to_access[row[:name]] = rights[row[:id]];
+    puts "#{row[:name]} => #{row[:id]}";
+  end
+
+
   log.d("Running #{q}");
   i = 0;
-  cols = [:oclcs, :enum_chron, :access, :rights, :copy_count];
+  cols = [:oclcs, :enum_chron, :copy_count];
   # Write results to this output file.
   Hathidata.write("#{member_id}_overlap.tsv") do |hdout|
     conn.query(q).each do |row|
@@ -34,7 +46,11 @@ def main(member_id, log)
       if i % 100000 == 0 then
         log.d(i);
       end
-      hdout.file.puts cols.map{|c| row[c]}.join("\t");
+
+      hdout.file.puts [
+                       rights_name_to_access[row[:rights]], 
+                       cols.map{|c| row[c]}
+                      ].flatten.join("\t");
     end
   end
   conn.close();
