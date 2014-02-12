@@ -69,6 +69,8 @@ def get_infiles
   end
   hdin.close();
   infiles = [];
+
+  @log.d("Checking input files and dirs...");
   members.keys.sort.each do |k|
     mem_dir = @member_data_dir + "/#{k}";
     if Dir.exists?(mem_dir) then
@@ -103,6 +105,7 @@ end
 # Takes a list of files in the memberdata dir, copiess them
 # to the ht00x dir. Backs up the original ht00x files, if any.
 def copy_files (infiles)
+  @log.d("Backing up files...");
   htfiles = [];
   backup_dir = @ht_backup_dir +'/'+ Time.new().strftime("%Y%m%d");
   infiles.each do |infile|
