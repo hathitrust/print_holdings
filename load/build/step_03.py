@@ -24,7 +24,7 @@ def get_connection():
     try:
         conn = MySQLdb.connect (
             host   = hc.get('db_host'),
-            port   = hc.get('db_port'),
+            port   = int(float(hc.get('db_port'))),
             user   = hc.get('db_user'),
             passwd = hc.get('db_pw'),
             db     = hc.get('db_name')
