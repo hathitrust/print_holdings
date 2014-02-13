@@ -27,7 +27,8 @@ def get_connection():
             port   = int(float(hc.get('db_port'))),
             user   = hc.get('db_user'),
             passwd = hc.get('db_pw'),
-            db     = hc.get('db_name')
+            db     = hc.get('db_name'),
+            local_infile = 1
             )
     except MySQLdb.Error, e:
         print "Couldn't get connection."
@@ -189,8 +190,8 @@ def truncate_tables():
     conn.close()
 
 def load_table():
-    q      = "LOAD DATA LOCAL INFILE '%s' INTO TABLE holdings_cluster_oclc"
     infile = get_loadfile_path()
+    q      = "LOAD DATA LOCAL INFILE '%s' INTO TABLE holdings_cluster_oclc" % infile
     conn   = get_connection()
     cursor = conn.cursor()
     print q
