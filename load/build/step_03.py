@@ -177,7 +177,7 @@ def truncate_tables():
     """
     conn   = get_connection()
     cursor = conn.cursor()
-    tables = ['holdings_cluster', 'holdings_cluster_oclc', holdings_cluster_htitem_jn]
+    tables = ['holdings_cluster', 'holdings_cluster_oclc', 'holdings_cluster_htitem_jn']
     for t in tables:
         count_q = "SELECT COUNT(*) AS c FROM %s" % t
         count_r = run_single_query(cursor, count_q)
