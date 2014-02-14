@@ -90,3 +90,4 @@ end
 
 conn.close();
 log.d("Finished");
+log.close();

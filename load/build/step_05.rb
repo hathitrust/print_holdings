@@ -100,4 +100,5 @@ if __FILE__ == $0 then
   fill_table(db, log, start_with_memberid);
 
   log.d("Finished.");
+  log.close();
 end
