@@ -20,20 +20,18 @@ $log    = Hathilog::Log.new();
 def create_estimate(member_id, ave_ic_cost_per_vol, db)
 
   puts "#####\n# #{member_id}\n#####";
-
   table = "holdings_memberitem_#{member_id}";
-
   iconn = db.get_interactive();
   create_table(table, iconn);
   load_table(table, member_id, iconn);
   volume_id_file = get_volume_ids(table, iconn);
-  run_ic_estimate(table, volume_id_file, ave_ic_cost_per_vol);
 
   narrative = get_narrative(table, iconn);
-
   hd = Hathidata::Data.new("estimate/narrative_#{member_id}").open('w');
   hd.file.puts narrative;
   hd.close();
+
+  run_ic_estimate(table, volume_id_file, ave_ic_cost_per_vol);
 
   drop_table(table, iconn);
   iconn.close();
