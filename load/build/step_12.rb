@@ -30,10 +30,8 @@ conn.query(get_member_sql) do |gmrow|
   member_id = gmrow[:member_id];
   log.d(member_id + ' ...');
   insert_query.execute(member_id);
-
-  # Changed from execute to enumerate, untested as of yet.
   count_query.enumerate(member_id) do |cqrow|
-    log.d('... ' + cqrow[:c]);
+    log.d(cqrow[:c]);
   end
   
   sleep(1);
