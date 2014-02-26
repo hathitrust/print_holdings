@@ -1,94 +1,78 @@
+require 'hathidb';
+require 'hathidata';
+require 'hathilog';
+require 'hathiquery';
 
-require 'phdb/phdb_utils'
-require 'date'
-
-
-def put_total_member_counts(filen)
-  conn = PHDBUtils.get_dev_conn()
-  outf = File.open(filen, "w")
-  
-  rows = conn.query("select member_id, item_type, count(*) 
-                     from holdings_memberitem group by member_id, item_type")
-  rows.each do |row|
-    outstr = row.join("\t")
-    outf.puts outstr
-  end      
-  outf.close     
-  conn.close
-end
-
-
-def put_matching_item_counts(outfn)
-  conn = PHDBUtils.get_dev_conn()
-  outf = File.open(outfn, 'w')
-                                                                                     
-  members = []
-  rows = conn.query("select member_id, member_name from holdings_htmember")
-  rows.each do |row|
-    members << row[:member_id]
-  end
-  puts "#{members.length} members."
-
-  smembers = members.sort
-  smembers.each do |mem|
-    q1 = "select item_type, count(distinct hhj.volume_id)
-          from holdings_htitem_htmember_jn as hhj, holdings_htitem as h where hhj.volume_id = h.volume_id
-          and member_id = '#{mem}' group by item_type"
-    conn.query(q1) do |row|
-      out_str = "#{mem}\t#{row[0]}\t#{row[1]}"
-      puts out_str
-      outf.puts(out_str)
+@@members = [];
+def get_members (conn)
+  if @@members.size == 0 then
+    conn.query(Hathiquery.get_all_members) do |row|
+      @@members << row[:member_id]
     end
   end
-  conn.close
-  outf.close
+  return @@members;
 end
 
-
-def put_matching_oclc_counts(outfn)
-  conn = PHDBUtils.get_dev_conn()
-  outf = File.open(outfn, 'w')
-
-  members = []
-  rows = conn.query("select member_id, member_name from holdings_htmember")
-  rows.each do |row|
-    members << row[:member_id]
-  end
-  puts "#{members.length} members."
-
-  smembers = members.sort
-  smembers.each do |mem|
-    q1 = "select item_type, count(distinct oclc)      
-          from holdings_memberitem where member_id = '#{mem}' group by item_type"
-    conn.query(q1) do |row|
-      out_str = "#{mem}\t#{row[0]}\t#{row[1]}"
-      puts out_str
-      outf.puts(out_str)
+def put_total_member_counts(conn, log)
+  q = ["SELECT   member_id, item_type, COUNT(*)",
+       "FROM     holdings_memberitem ",
+       "WHERE    item_type IN ('mono', 'multi', 'serial')",
+       "GROUP BY member_id, item_type"].join(' ');
+  log.d(q);
+  Hathidata.write("total_member_counts_$ymd.out") do |hdout|
+    conn.query(q) do |row|
+      hdout.file.puts row.join("\t");
     end
   end
-  conn.close
-  outf.close
 end
 
-
-def main()
-  date = DateTime.now
-  datestr = date.strftime("%Y%m%d")
-
-  ### count report queries ### 
-  name1 = "total_member_counts.#{datestr}.out"
-  puts "Generating #{name1}..."
-  put_total_member_counts(name1)
-
-  name2 = "matching_item_counts.#{datestr}.out"
-  puts "Generating #{name2}..."
-  put_matching_item_counts(name2)
-
-  name3 = "matching_oclc_counts.#{datestr}.out"
-  puts "Generating #{name3}..."
-  put_matching_oclc_counts(name3)
+def put_matching_item_counts(conn, log)
+  q = ["SELECT   item_type, COUNT(DISTINCT hhj.volume_id) AS c",
+        "FROM     holdings_htitem_htmember_jn AS hhj, holdings_htitem AS h",
+        "WHERE    hhj.volume_id = h.volume_id AND member_id = ?",
+        "GROUP BY item_type"].join(' ');
+  pq = conn.prepare(q);
+  log.d(q);
+  Hathidata.write("matching_item_counts_$ymd.out") do |hdout|
+    get_members(conn).each do |mem|
+      pq.enumerate(mem) do |row|
+        out_str = [mem, row[:item_type], row[:c]].join("\t");
+        puts out_str;
+        hdout.file.puts out_str;
+      end
+    end
+  end
+  pq.close();
 end
 
+def put_matching_oclc_counts(conn, log)
+  q = ["SELECT   item_type, COUNT(DISTINCT oclc) AS c",
+       "FROM     holdings_memberitem",
+       "WHERE    member_id = ?",
+       "GROUP BY item_type"].join(' ');
+  pq = conn.prepare(q);
+  log.d(q);
+  Hathidata.write("matching_oclc_counts_$ymd.out") do |hdout|
+    get_members(conn).each do |mem|
+      pq.enumerate(mem) do |row|
+        out_str = "#{mem}\t#{row[:item_type]}\t#{row[:c]}";
+        puts out_str;
+        hdout.file.puts out_str;
+      end
+    end
+  end
+  pq.close();
+end
 
+if $0 == __FILE__ then
+  log = Hathilog::Log.new();
+  log.d("Started");
+  db   = Hathidb::Db.new();
+  conn = db.get_conn();
 
-main()
+  put_total_member_counts(conn, log);
+  put_matching_item_counts(conn, log);
+  put_matching_oclc_counts(conn, log);
+
+  conn.close();
+end
