@@ -42,10 +42,10 @@ conn.close();
 
 # Call method in reformat_member_report.rb.
 # This gets our final, usable format.
-hd2  = Hathidata::Data.new("match_detail_2_$ymd.tsv").open('w');
-build_data_hash2(hd1.path).each_pair do |k, v|
-  hd2.file.puts(v.to_s)
+Hathidata.write("match_detail_2_$ymd.tsv") do |hd2|
+  build_data_hash2(hd1.path).each_pair do |k, v|
+    hd2.file.puts(v.to_s);
+  end
 end
-hd2.close();
 
 log.d("Finished");
