@@ -14,8 +14,7 @@ log  = Hathilog::Log.new();
 log.d("Started");
 db   = Hathidb::Db.new();
 conn = db.get_conn();
-ymd  = Time.new().strftime("%Y%m%d");
-hd1  = Hathidata::Data.new("match_detail_1_#{ymd}.tsv").open('w');
+hd1  = Hathidata::Data.new("match_detail_1_$ymd.tsv").open('w');
 
 sql = %W<
 SELECT
@@ -43,7 +42,7 @@ conn.close();
 
 # Call method in reformat_member_report.rb.
 # This gets our final, usable format.
-hd2  = Hathidata::Data.new("match_detail_2_#{ymd}.tsv").open('w');
+hd2  = Hathidata::Data.new("match_detail_2_$ymd.tsv").open('w');
 build_data_hash2(hd1.path).each_pair do |k, v|
   hd2.file.puts(v.to_s)
 end
