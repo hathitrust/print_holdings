@@ -3,6 +3,8 @@ require 'hathidata';
 require 'hathilog';
 require 'hathiquery';
 
+require_relative 'reformat_member_report';
+
 @@members = [];
 def get_members (conn)
   if @@members.size == 0 then
@@ -73,6 +75,17 @@ if $0 == __FILE__ then
   put_total_member_counts(conn, log);
   put_matching_item_counts(conn, log);
   put_matching_oclc_counts(conn, log);
+
+  ["total_member_counts",
+  "matching_item_counts",
+  "matching_oclc_counts"].each do |f|
+    hdin = Hathidata::Data.new("#{f}_$ymd.out");
+    Hathidata.write("#{f}_2_$ymd.tsv") do |hdout|
+      build_data_hash1(hdin.path).each_pair do |k,v|
+        hdout.file.puts v.to_s;
+      end
+    end
+  end
 
   conn.close();
 end
