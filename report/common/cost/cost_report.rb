@@ -5,8 +5,8 @@ require 'hathilog';
 
 ### cost_report.rb ###
 # This script implements the cost calculation for hathitrust members.
-# It currently calculates serials using the 'remove non-serial-members' approach,
-# although there's only one partner who hasn't submitted serial data yet (USU).
+# It currently calculates serials using the 'remove non-serial-members' approach.
+
 log = Hathilog::Log.new();
 log.d("Started");
 
@@ -21,7 +21,7 @@ total_members         = Integer(ARGV[1]);
 db   = Hathidb::Db.new();
 conn = db.get_conn();
 
-hdout = Hathidata::Data.new("cost_report_$ymd.txt").open('w');
+hdout = Hathidata::Data.new("costreport/costreport_$ymd.txt").open('w');
 
 calc_full_serial = true;
 xfactor = 1.0;
@@ -180,7 +180,7 @@ hdout.file.puts "Remaining total cost (reduced): $#{total_operating_costs - sum 
 hdout.close();
 
 ### produce member report ###
-Hathidata.write("cost_report_$ymd.tsv") do |hdout|
+Hathidata.write("costreport/costreport_$ymd.tsv") do |hdout|
   hdout.file.puts "\nmember_id\tpd_cost\tspm_cost\tmpm_cost\t% ser\tserial-full\tserial-reduced";
   # k = member id, v = array of values.
   cost_struct.each do |k, v|
