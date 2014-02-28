@@ -67,14 +67,13 @@ module CostCalc
   def CostCalc.calc_adjusted_ic_spm_ave_cost_per_vol(ave_cost_per_vol, conn)
     new_total = 0.0
     conn.query("select distinct (member_id) from holdings_memberitem") do |mr|
-      result = CostCalc.calc_ic_singlepart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol)
+      result = CostCalc.calc_ic_singlepart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol, conn)
       cost_f = "%.2f" % result.to_f
       new_total += result.to_f
     end
 
-    old_total = CostCalc.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol)
+    old_total = CostCalc.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol, conn)
     diff = old_total - new_total
-    puts "\tSPM Old Total: #{old_total} New Total: #{new_total} \n\tDiff: #{diff}"
 
     # need the number of *matching volumes* among which to distribute new cost
     ic_spms = 0
@@ -120,7 +119,7 @@ module CostCalc
     raise "DEPRECATED"
 
     # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
-    old_total_cost = CostCalc.calc_total_ic_multipart_monograph_cost(old_ave_cost_per_vol)
+    old_total_cost = CostCalc.calc_total_ic_multipart_monograph_cost(old_ave_cost_per_vol, conn)
 
     ic_multis = 0
     # need the number of *matching volumes* among which to distribute new cost
@@ -140,14 +139,13 @@ module CostCalc
   def CostCalc.calc_adjusted_ic_mpm_ave_cost_per_vol(ave_cost_per_vol, conn)
     new_total = 0.0
     conn.query("select distinct (member_id) from holdings_memberitem") do |mr|
-      result = CostCalc.calc_ic_multipart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol)
+      result = CostCalc.calc_ic_multipart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol, conn)
       cost_f = "%.2f" % result.to_f
       new_total += result.to_f
     end
 
-    old_total = CostCalc.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol)
+    old_total = CostCalc.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol, conn)
     diff = old_total - new_total
-    puts "\tMPM Old Total: #{old_total} New Total: #{new_total} \n\tDiff: #{diff}"
 
     # need the number of *matching volumes* among which to distribute new cost
     ic_mpms = 0
@@ -190,7 +188,7 @@ module CostCalc
 
   def CostCalc.calc_adjusted_ic_serial_cost_per_vol(old_ave_cost_per_vol, total_amount_reduced, conn)
     # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
-    old_total_cost = CostCalc.calc_total_ic_serial_cost(old_ave_cost_per_vol)
+    old_total_cost = CostCalc.calc_total_ic_serial_cost(old_ave_cost_per_vol, conn)
 
     # need the number of *matching* volumes among which to distribute new cost
     ic_serials = 0
@@ -239,7 +237,7 @@ module CostCalc
 
     cost_hash.each { |key, value|
       sum = value[0] + value[1]
-      percent_hash[key] = (value[0]+value[1])/total_mono_cost
+      percent_hash[key] = (value[0] + value[1]) / total_mono_cost
     }
     return percent_hash
   end
