@@ -1,33 +1,34 @@
-require 'phdb/phdb_utils'
+module CostCalc
 
-module PHDBUtils
-
-  def PHDBUtils.calc_ave_cost_per_vol(projected_operating_costs)
-    conn = PHDBUtils.get_dev_conn()
+  def CostCalc.calc_ave_cost_per_vol(projected_operating_costs, conn)
     total_HT_items = 0;
     conn.query("select count(*) as c from holdings_htitem;") do |count1|
       total_HT_items = count1['c']
       break
     end
-    conn.close()
     return projected_operating_costs.to_f/total_HT_items.to_f
   end
 
-
-  def PHDBUtils.get_monograph_list()
-    conn = get_dev_conn()
+  def CostCalc.get_monograph_list(conn)
     members = []
     conn.query("select distinct (member_id) from holdings_memberitem") do |mr|
       members << mr['member_id']
     end
-    conn.close()
     return members
   end
 
+  def CostCalc.get_serial_list(conn)
+    serial_member_sql  = "SELECT DISTINCT member_id FROM holdings_memberitem WHERE item_type='serial' ORDER BY member_id";
+    serial_members = [];
+    conn.query(serial_member_sql) do |row|
+      serial_members << row[:member_id];
+    end
 
-  def PHDBUtils.calc_pd_costs(ave_cost_per_vol)
-    conn = get_dev_conn()
+    return serial_members;
+  end
 
+
+  def CostCalc.calc_pd_costs(ave_cost_per_vol, conn)
     public_counts = []
     # get the singlepart monograph public domain cost
     conn.query("select count(*) as c from holdings_htitem where item_type = 'mono' and access = 'allow';") do |count1|
@@ -49,37 +50,29 @@ module PHDBUtils
 
     costs = public_counts.map {|x| x.to_i*ave_cost_per_vol}
 
-    conn.close()
     return costs
   end
 
-
-  def PHDBUtils.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol)
-    conn   = get_dev_conn()
+  def CostCalc.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol, conn)
     ic_spm = 0
     conn.query("select count(*) as c from holdings_htitem where item_type = 'mono' and access = 'deny'") do |count_row|
       ic_spm = count_row['c'].to_i
       break
     end
-
     total_spm_cost = ic_spm * ave_cost_per_vol
 
-    conn.close()
     return total_spm_cost
   end
 
-
-  def PHDBUtils.calc_adjusted_ic_spm_ave_cost_per_vol(ave_cost_per_vol)
-    conn = get_dev_conn()
-
+  def CostCalc.calc_adjusted_ic_spm_ave_cost_per_vol(ave_cost_per_vol, conn)
     new_total = 0.0
     conn.query("select distinct (member_id) from holdings_memberitem") do |mr|
-      result = PHDBUtils::calc_ic_singlepart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol)
+      result = CostCalc.calc_ic_singlepart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol)
       cost_f = "%.2f" % result.to_f
       new_total += result.to_f
     end
 
-    old_total = PHDBUtils.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol)
+    old_total = CostCalc.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol)
     diff = old_total - new_total
     puts "\tSPM Old Total: #{old_total} New Total: #{new_total} \n\tDiff: #{diff}"
 
@@ -94,16 +87,10 @@ module PHDBUtils
 
     new_ave_cost_per_vol = ave_cost_per_vol + diff/ic_spms
 
-    conn.close()
     return new_ave_cost_per_vol
   end
 
-
-  def PHDBUtils.calc_ic_singlepart_monograph_cost_for_member(mem_id, ave_cost_per_vol)
-    # get a connection
-    conn = get_dev_conn()
-
-    #ave_cost_per_volume = 0.163-(0.10*0.163)
+  def CostCalc.calc_ic_singlepart_monograph_cost_for_member(mem_id, ave_cost_per_vol, conn)
     total_cost = 0.0
 
     # get the in-copyright lookup table values for member
@@ -117,26 +104,23 @@ module PHDBUtils
     return total_cost
   end
 
-
-  def PHDBUtils.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol)
-    conn = get_dev_conn()
+  def CostCalc.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol, conn)
     ic_multis = 0;
     conn.query("select count(*) as c from holdings_htitem where item_type = 'multi' and access = 'deny'") do |count_row|
       ic_multis = count_row['c']
     end
     total_multi_cost = ic_multis.to_i * ave_cost_per_vol
-    conn.close()
 
     return total_multi_cost
   end
 
-
-  def PHDBUtils.calc_adjusted_ic_multipart_cost_per_vol(old_ave_cost_per_vol, total_amount_reduced)
+  def CostCalc.calc_adjusted_ic_multipart_cost_per_vol(old_ave_cost_per_vol, total_amount_reduced, conn)
     ### DEPRECATED ###
 
-    conn = get_dev_conn()
+    raise "DEPRECATED";
+
     # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
-    old_total_cost = PHDBUtils.calc_total_ic_multipart_monograph_cost(old_ave_cost_per_vol)
+    old_total_cost = CostCalc.calc_total_ic_multipart_monograph_cost(old_ave_cost_per_vol)
 
     ic_multis = 0;
     # need the number of *matching volumes* among which to distribute new cost
@@ -150,22 +134,18 @@ module PHDBUtils
 
     new_ave_cost_per_vol = (old_total_cost - total_amount_reduced) / ic_multis
 
-    conn.close()
     return new_ave_cost_per_vol
   end
 
-
-  def PHDBUtils.calc_adjusted_ic_mpm_ave_cost_per_vol(ave_cost_per_vol)
-    conn = get_dev_conn()
-
+  def CostCalc.calc_adjusted_ic_mpm_ave_cost_per_vol(ave_cost_per_vol, conn)
     new_total = 0.0
     conn.query("select distinct (member_id) from holdings_memberitem") do |mr|
-      result = PHDBUtils::calc_ic_multipart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol)
+      result = CostCalc.calc_ic_multipart_monograph_cost_for_member(mr['member_id'], ave_cost_per_vol)
       cost_f = "%.2f" % result.to_f
       new_total += result.to_f
     end
 
-    old_total = PHDBUtils.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol)
+    old_total = CostCalc.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol)
     diff = old_total - new_total
     puts "\tMPM Old Total: #{old_total} New Total: #{new_total} \n\tDiff: #{diff}"
 
@@ -180,14 +160,10 @@ module PHDBUtils
 
     new_ave_cost_per_vol = ave_cost_per_vol + diff / ic_mpms
 
-    conn.close()
     return new_ave_cost_per_vol
   end
 
-
-  def PHDBUtils.calc_ic_multipart_monograph_cost_for_member(mem_id, ave_cost_per_vol)
-    # get a connection
-    conn = get_dev_conn()
+  def CostCalc.calc_ic_multipart_monograph_cost_for_member(mem_id, ave_cost_per_vol, conn)
     total_cost = 0.0
 
     # get the in-copyright lookup table values for member
@@ -201,9 +177,7 @@ module PHDBUtils
     return total_cost
   end
 
-
-  def PHDBUtils.calc_total_ic_serial_cost(ave_cost_per_vol)
-    conn = get_dev_conn()
+  def CostCalc.calc_total_ic_serial_cost(ave_cost_per_vol, conn)
     ic_serials = 0;
     conn.query("select count(*) as c from holdings_htitem where item_type = 'serial' and access = 'deny'") do |count_row|
       ic_serials = count_row['c'].to_i
@@ -211,16 +185,12 @@ module PHDBUtils
     end
     total_serial_cost = ic_serials * ave_cost_per_vol
 
-    conn.close()
     return total_serial_cost
   end
 
-
-
-  def PHDBUtils.calc_adjusted_ic_serial_cost_per_vol(old_ave_cost_per_vol, total_amount_reduced)
-    conn = get_dev_conn()
+  def CostCalc.calc_adjusted_ic_serial_cost_per_vol(old_ave_cost_per_vol, total_amount_reduced, conn)
     # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
-    old_total_cost = PHDBUtils.calc_total_ic_serial_cost(old_ave_cost_per_vol)
+    old_total_cost = CostCalc.calc_total_ic_serial_cost(old_ave_cost_per_vol)
 
     # need the number of *matching* volumes among which to distribute new cost
     ic_serials = 0;
@@ -232,15 +202,10 @@ module PHDBUtils
     end
 
     new_ave_cost_per_vol = (old_total_cost - total_amount_reduced) / ic_serials
-    conn.close()
     return new_ave_cost_per_vol
   end
 
-
-  def PHDBUtils.calc_ic_serial_cost_for_member_by_size(mem_id)
-    # get a connection
-    conn = get_dev_conn()
-
+  def CostCalc.calc_ic_serial_cost_for_member_by_size(mem_id, conn)
     xfactor = 1.50
     total_storage_size_bytes = 480722804968888.625
     total_storage_cost_usd = 1878347
@@ -267,8 +232,7 @@ module PHDBUtils
     return total_cost
   end
 
-
-  def PHDBUtils.calc_member_monograph_percent_contribution(cost_hash, total_mono_cost)
+  def CostCalc.calc_member_monograph_percent_contribution(cost_hash, total_mono_cost)
     # expects a data structure as a hash, keyed by member_id, with a list [spm, mpm] costs as a value
     percent_hash = {}
     cost_hash.each_key {|k| percent_hash[k] = nil}
@@ -280,11 +244,7 @@ module PHDBUtils
     return percent_hash
   end
 
-
-  def PHDBUtils.calc_ic_serial_cost_for_member_by_count(mem_id, ave_cost_per_vol)
-    # get a connection
-    conn = get_dev_conn()
-
+  def CostCalc.calc_ic_serial_cost_for_member_by_count(mem_id, ave_cost_per_vol, conn)
     total_cost = 0.0
     # get the in-copyright lookup table values for member
     conn.enumerate("SELECT holdings_cluster.cluster_id, cost_rights_id, H, num_of_items
@@ -305,15 +265,10 @@ module PHDBUtils
       end
     end
 
-    conn.close()
     return total_cost
   end
 
-
-  def PHDBUtils.calc_ic_serial_cost_for_member_by_count2(mem_id, ave_cost_per_vol)
-    # get a connection
-    conn = get_dev_conn()
-
+  def CostCalc.calc_ic_serial_cost_for_member_by_count2(mem_id, ave_cost_per_vol, conn)
     total_cost = 0.0
 
     # get the in-copyright lookup table values for member
@@ -324,7 +279,6 @@ module PHDBUtils
       total_cost += h_count*(ave_cost_per_vol/h)
     end
 
-    conn.close()
     return total_cost
   end
 
