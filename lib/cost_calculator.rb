@@ -1,8 +1,8 @@
 module CostCalc
 
   def CostCalc.calc_ave_cost_per_vol(projected_operating_costs, conn)
-    total_HT_items = 0;
-    conn.query("select count(*) as c from holdings_htitem;") do |count1|
+    total_HT_items = 0
+    conn.query("select count(*) as c from holdings_htitem") do |count1|
       total_HT_items = count1['c']
       break
     end
@@ -18,32 +18,32 @@ module CostCalc
   end
 
   def CostCalc.get_serial_list(conn)
-    serial_member_sql  = "SELECT DISTINCT member_id FROM holdings_memberitem WHERE item_type='serial' ORDER BY member_id";
-    serial_members = [];
+    serial_member_sql  = "SELECT DISTINCT member_id FROM holdings_memberitem WHERE item_type='serial' ORDER BY member_id"
+    serial_members = []
     conn.query(serial_member_sql) do |row|
-      serial_members << row[:member_id];
+      serial_members << row[:member_id]
     end
 
-    return serial_members;
+    return serial_members
   end
 
 
   def CostCalc.calc_pd_costs(ave_cost_per_vol, conn)
     public_counts = []
     # get the singlepart monograph public domain cost
-    conn.query("select count(*) as c from holdings_htitem where item_type = 'mono' and access = 'allow';") do |count1|
+    conn.query("select count(*) as c from holdings_htitem where item_type = 'mono' and access = 'allow'") do |count1|
       public_counts << count1['c']
       break
     end
 
     # get the serial public domain cost
-    conn.query("select count(*) as c from holdings_htitem where item_type = 'serial' and access = 'allow';") do |count2|
+    conn.query("select count(*) as c from holdings_htitem where item_type = 'serial' and access = 'allow'") do |count2|
       public_counts << count2['c']
       break
     end
 
     # get the multipart monograph public domain cost
-    conn.query("select count(*) as c from holdings_htitem where item_type = 'multi' and access = 'allow';") do |count3|
+    conn.query("select count(*) as c from holdings_htitem where item_type = 'multi' and access = 'allow'") do |count3|
       public_counts << count3['c']
       break
     end
@@ -77,11 +77,11 @@ module CostCalc
     puts "\tSPM Old Total: #{old_total} New Total: #{new_total} \n\tDiff: #{diff}"
 
     # need the number of *matching volumes* among which to distribute new cost
-    ic_spms = 0;
+    ic_spms = 0
     conn.query("select count(*) as c from holdings_htitem_H as hhH, holdings_htitem as hh
                             where hhH.volume_id = hh.volume_id and hh.item_type = 'mono'
                             and hh.access = 'deny' ") do |count_row|
-      ic_spms = count_row['c'].to_i;
+      ic_spms = count_row['c'].to_i
       break
     end
 
@@ -105,7 +105,7 @@ module CostCalc
   end
 
   def CostCalc.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol, conn)
-    ic_multis = 0;
+    ic_multis = 0
     conn.query("select count(*) as c from holdings_htitem where item_type = 'multi' and access = 'deny'") do |count_row|
       ic_multis = count_row['c']
     end
@@ -117,12 +117,12 @@ module CostCalc
   def CostCalc.calc_adjusted_ic_multipart_cost_per_vol(old_ave_cost_per_vol, total_amount_reduced, conn)
     ### DEPRECATED ###
 
-    raise "DEPRECATED";
+    raise "DEPRECATED"
 
     # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
     old_total_cost = CostCalc.calc_total_ic_multipart_monograph_cost(old_ave_cost_per_vol)
 
-    ic_multis = 0;
+    ic_multis = 0
     # need the number of *matching volumes* among which to distribute new cost
     conn.query("select count(distinct oclc, n_enum) as c from cluster_htmember_multi as chm,
                             cluster as c where chm.cluster_id = c.cluster_id and
@@ -150,7 +150,7 @@ module CostCalc
     puts "\tMPM Old Total: #{old_total} New Total: #{new_total} \n\tDiff: #{diff}"
 
     # need the number of *matching volumes* among which to distribute new cost
-    ic_mpms = 0;
+    ic_mpms = 0
     conn.query("select count(*) as c from holdings_htitem_H as hhH, holdings_htitem as hh
                             where hhH.volume_id = hh.volume_id and hh.item_type = 'multi'
                             and hh.access = 'deny' ") do |count_row|
@@ -178,7 +178,7 @@ module CostCalc
   end
 
   def CostCalc.calc_total_ic_serial_cost(ave_cost_per_vol, conn)
-    ic_serials = 0;
+    ic_serials = 0
     conn.query("select count(*) as c from holdings_htitem where item_type = 'serial' and access = 'deny'") do |count_row|
       ic_serials = count_row['c'].to_i
       break
@@ -193,7 +193,7 @@ module CostCalc
     old_total_cost = CostCalc.calc_total_ic_serial_cost(old_ave_cost_per_vol)
 
     # need the number of *matching* volumes among which to distribute new cost
-    ic_serials = 0;
+    ic_serials = 0
     conn.query("select count(*) as c from holdings_htitem_H as hhH, holdings_htitem as hh
                             where hhH.volume_id = hh.volume_id and hh.item_type = 'serial'
                             and hh.access = 'deny' ") do |count_row|
