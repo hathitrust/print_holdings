@@ -1,15 +1,18 @@
 require 'hathidb';
 require 'hathiquery';
+require 'hathilog';
 require 'cost_calculator';
 
 ### cost_report.rb ###
 # This script implements the cost calculation for hathitrust members.
 # It currently calculates serials using the 'remove non-serial-members' approach,
 # although there's only one partner who hasn't submitted serial data yet (USU).
+log = Hathilog::Log.new();
+log.d("Started");
 
 if ARGV.length != 2
-  puts "Usage: ruby calc_cost.rb <infrastructure_cost> <num_of_members>\n"
-  exit
+  log.e("Usage: ruby calc_cost.rb <infrastructure_cost> <num_of_members>\n")
+  exit;
 end
 
 total_operating_costs = Integer(ARGV[0])
@@ -21,8 +24,9 @@ conn = db.get_conn();
 calc_full_serial = true
 xfactor = 1.0
 
-serial_members = CostCalc.get_serial_list(conn);
-no_serials_list = %w{usu}
+monograph_members = CostCalc.get_monograph_list(conn)
+serial_members    = CostCalc.get_serial_list(conn);
+no_serials_list   = monograph_members - serial_members;
 
 # Average Cost Per Volume Calculations
 ave_cost_per_vol = CostCalc.calc_ave_cost_per_vol(total_operating_costs, conn)
@@ -33,8 +37,6 @@ puts "Adjusted Ave Cost Per IC SPM Vol: #{ave_cost_per_vol_ic_spm}"
 
 ave_cost_per_vol_ic_mpm = CostCalc.calc_adjusted_ic_mpm_ave_cost_per_vol(ave_cost_per_vol, conn)
 puts "Adjusted Ave Cost Per IC MPM Vol: #{ave_cost_per_vol_ic_mpm}"
-
-monograph_member_list = CostCalc.get_monograph_list(conn)
 
 ### public domain costs ###
 public_costs = CostCalc.calc_pd_costs(ave_cost_per_vol, conn)
@@ -53,7 +55,7 @@ puts "Remaining total cost: $#{total_operating_costs - sum}"
 
 ### monograph cost structure ###
 cost_struct = {}
-monograph_member_list.each{|x| cost_struct[x] = [nil, nil, nil, nil]}
+monograph_members.each{|x| cost_struct[x] = [nil, nil, nil, nil]}
 
 ### singlepart monograph costs ###
 spm_total = 0.0
@@ -61,12 +63,12 @@ unadj_spm_total = 0.0
 puts "\nIn-copyright Singlepart Monograph costs:"
 target_single_cost = CostCalc.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol, conn)
 # calc unadjusted amount
-monograph_member_list.each do |mmember|
+monograph_members.each do |mmember|
   result = PHDBUtils::calc_ic_singlepart_monograph_cost_for_member(mmember, ave_cost_per_vol)
   unadj_spm_total += result.to_f
 end
 # calc adjusted amount
-monograph_member_list.each do |mmember|
+monograph_members.each do |mmember|
   result = PHDBUtils::calc_ic_singlepart_monograph_cost_for_member(mmember, ave_cost_per_vol_ic_spm)
   xresult = result*xfactor
   cost_f = "%.2f" % result.to_f
@@ -86,11 +88,11 @@ mpm_total = 0.0
 unadj_mpm_total = 0.0
 puts "\nIn-copyright Multipart Monograph costs:"
 target_multi_cost = CostCalc.calc_total_ic_multipart_monograph_cost(ave_cost_per_vol, conn)
-monograph_member_list.each do |mmember|
+monograph_members.each do |mmember|
   result = PHDBUtils::calc_ic_multipart_monograph_cost_for_member(mmember, ave_cost_per_vol)
   unadj_mpm_total += result.to_f
 end
-monograph_member_list.each do |mmember|
+monograph_members.each do |mmember|
   result = PHDBUtils::calc_ic_multipart_monograph_cost_for_member(mmember, ave_cost_per_vol_ic_mpm)
   cost_f = "%.2f" % result.to_f
   mpm_total += result.to_f
@@ -181,4 +183,4 @@ cost_struct.each { |key, value|
   puts "#{key}\t#{per_member}\t#{value[0]}\t#{value[1]}\t#{mem_ratio}\t#{value[2]}\t#{value[3]}"
 }
 
-puts "\ndone."
+log.d("Finished.");
