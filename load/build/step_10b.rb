@@ -13,23 +13,24 @@ end
 
 db     = Hathidb::Db.new();
 conn   = db.get_interactive();
+t      = 'holdings_htitem_htmember_jn';
 # 3-letter month: jan, feb, mar etc.
 curmon = Time.new().strftime("%b").downcase();
 
 # Save holdings_htitem_htmember_jn_#{curmon} as a backup table,
 # and something we can use for computing deltas later.
+# Prepare them first so that we fail early.
+qs = [
+      conn.prepare("RENAME TABLE #{t} TO #{t}_#{curmon}"),
+      conn.prepare("CREATE TABLE #{t} LIKE #{t}_#{curmon}"),
+      conn.prepare("LOAD DATA LOCAL INFILE '#{infile.path}' INTO TABLE #{t}")
+];
 
-t  = 'holdings_htitem_htmember_jn';
-q1 = conn.prepare("RENAME TABLE #{t} TO #{t}_#{curmon}");
-q2 = conn.prepare("CREATE TABLE #{t} LIKE #{t}_#{curmon}");
-q3 = conn.prepare("LOAD DATA LOCAL INFILE '#{infile.path}' INTO TABLE #{t}");
-
-qx = 1;
-[q1, q2, q3].each do |qn|
-  log.d("Running query #{qx}");
-  log.d(qn);
-  qn.execute();
-  qx += 1;
+qs.each_with_index do |q,i|
+  j = i+1;
+  log.d("Running query #{j} / #{qs.size}");
+  log.d(q);
+  q.execute();
 end
 
 conn.close();
