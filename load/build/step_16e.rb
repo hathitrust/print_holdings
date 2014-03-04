@@ -9,7 +9,7 @@ def check_main_table (conn, log)
   end
 end
 
-log = Hathilog::Log.new();
+log = Hathilog::Log.new({:file_name => 'builds/current/step_16e.log'});
 log.d("Started");
 
 db = Hathidb::Db.new();
