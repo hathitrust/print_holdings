@@ -6,6 +6,8 @@ SCRIPTPATH=`pwd`;
 popd > /dev/null;
 source $SCRIPTPATH/build_lib.sh;
 
+ruby $SCRIPTPATH/trunc_tmp_and_old.rb;
+
 # Move all logfiles in the build (if any) to the current build log dir.
 mv -v $SCRIPTPATH/*.log $LOGDIR;
 
