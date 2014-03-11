@@ -11,6 +11,7 @@ popd > /dev/null
 source $SCRIPTPATH/build_lib.sh;
 
 mkdir -pv $BACKUPDIR/;
+mkdir -pv $LOGDIR/;
 
 # Remember the line counts for input.
 wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
