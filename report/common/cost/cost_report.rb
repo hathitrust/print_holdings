@@ -43,7 +43,9 @@ hdout.file.puts "Adjusted Ave Cost Per IC MPM Vol: #{ave_cost_per_vol_ic_mpm}";
 ### public domain costs ###
 public_costs = CostCalc.calc_pd_costs(ave_cost_per_vol, conn);
 sum = 0;
-public_costs.each { |a| sum+=a }
+public_costs.each do |a| 
+  sum += a 
+end
 per_member = sum/total_members;
 
 hdout.file.puts "Public domain costs:";
