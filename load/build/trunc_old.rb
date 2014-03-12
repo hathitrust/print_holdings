@@ -9,7 +9,6 @@ conn = db.get_conn();
 
 # Check COUNT(*) before and after TRUNCATE, on these tables:
 ts = [
-      "holdings_htitem_oclc_tmp",
       "holdings_htitem_htmember_jn_old"
      ];
 

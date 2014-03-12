@@ -119,6 +119,7 @@ def load_holdings_htitem_oclc_tmp (loadfile, log)
         "TRUNCATE holdings_htitem_oclc_tmp",
         "LOAD DATA LOCAL INFILE '#{hdin.path}' INTO TABLE holdings_htitem_oclc_tmp",
         "INSERT IGNORE INTO holdings_htitem_oclc SELECT * FROM holdings_htitem_oclc_tmp",
+        "TRUNCATE holdings_htitem_oclc_tmp",
        ];
 
   qs.each do |q|
