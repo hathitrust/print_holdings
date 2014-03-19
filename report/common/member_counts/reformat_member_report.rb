@@ -67,8 +67,9 @@ class MemberHCounts
   end
 
   def to_s
-    @member_id + "\t" + @spm_pd + "\t" + @mpm_pd + "\t" + @serial_pd +
-      "\t" + @spm_ic + "\t" + @mpm_ic + "\t" + @serial_ic
+    [
+     @member_id, @spm_pd, @mpm_pd, @serial_pd, @spm_ic, @mpm_ic, @serial_ic
+    ].map{|x| x || '0'}.join("\t")
   end
 end
 
