@@ -10,43 +10,45 @@ require 'hathilog';
 log = Hathilog::Log.new();
 log.d("Started");
 
-if ARGV.length != 2
-  log.e("Usage: ruby calc_cost.rb <infrastructure_cost> <num_of_members>");
+if ARGV.length != 1
+  log.e("Usage: ruby calc_cost.rb <total_operating_cost>");
   exit;
 end
 
-total_operating_costs = Integer(ARGV[0]);
-total_members         = Integer(ARGV[1]);
-
-db   = Hathidb::Db.new();
-conn = db.get_conn();
-
+db    = Hathidb::Db.new();
+conn  = db.get_conn();
 hdout = Hathidata::Data.new("costreport/costreport_$ymd.txt").open('w');
 
 calc_full_serial = true;
 xfactor = 1.0;
-
+total_operating_costs = Integer(ARGV[0]);
 monograph_members = CostCalc.get_monograph_list(conn);
-serial_members    = CostCalc.get_serial_list(conn);
-no_serials_list   = monograph_members - serial_members;
+total_members     = monograph_members.size;
+if monograph_members.include?('ht') then
+  # HT are not used in PD costs.
+  total_members -= 1;
+end
+
+serial_members  = CostCalc.get_serial_list(conn);
+no_serials_list = monograph_members - serial_members;
 
 # Average Cost Per Volume Calculations
-ave_cost_per_vol = CostCalc.calc_ave_cost_per_vol(total_operating_costs, conn);
-hdout.file.puts "Ave Cost Per Vol\t#{ave_cost_per_vol}";
-
+ave_cost_per_vol        = CostCalc.calc_ave_cost_per_vol(total_operating_costs, conn);
 ave_cost_per_vol_ic_spm = CostCalc.calc_adjusted_ic_spm_ave_cost_per_vol(ave_cost_per_vol, conn);
-hdout.file.puts "Adjusted Ave Cost Per IC SPM Vol\t#{ave_cost_per_vol_ic_spm}";
-
 ave_cost_per_vol_ic_mpm = CostCalc.calc_adjusted_ic_mpm_ave_cost_per_vol(ave_cost_per_vol, conn);
+
+hdout.file.puts "Total Operating Costs\t#{total_operating_costs}";
+hdout.file.puts "Ave Cost Per Vol\t#{ave_cost_per_vol}";
+hdout.file.puts "Adjusted Ave Cost Per IC SPM Vol\t#{ave_cost_per_vol_ic_spm}";
 hdout.file.puts "Adjusted Ave Cost Per IC MPM Vol\t#{ave_cost_per_vol_ic_mpm}";
 
 ### public domain costs ###
 public_costs = CostCalc.calc_pd_costs(ave_cost_per_vol, conn);
 sum = 0;
-public_costs.each do |a| 
-  sum += a 
+public_costs.each do |a|
+  sum += a;
 end
-per_member = sum/total_members;
+per_member = sum / total_members;
 
 hdout.file.puts "Public domain costs:";
 hdout.file.puts "Calculating PD cost based on #{total_members} members.";
@@ -59,7 +61,9 @@ hdout.file.puts "Remaining total cost\t$#{total_operating_costs - sum}";
 
 ### monograph cost structure ###
 cost_struct = {};
-monograph_members.each{|x| cost_struct[x] = [nil, nil, nil, nil]};
+monograph_members.each{|x| 
+  cost_struct[x] = [nil, nil, nil, nil]
+};
 
 ### singlepart monograph costs ###
 spm_total = 0.0;
@@ -188,7 +192,11 @@ Hathidata.write("costreport/costreport_$ymd.tsv") do |hdout|
   cost_struct.each do |k, v|
     # Not using in report anymore, so dropped it from output.
     #mem_ratio = percents[k];
-    hdout.file.puts [k, per_member, v[0], v[1], v[2], v[3]].join("\t");
+    pd = per_member;
+    if k == 'ht' then
+      pd = 0;
+    end
+    hdout.file.puts [k, pd, v[0], v[1], v[2], v[3]].join("\t");
   end
 end
 

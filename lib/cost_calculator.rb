@@ -11,7 +11,7 @@ module CostCalc
 
   def CostCalc.get_monograph_list(conn)
     members = []
-    conn.query("SELECT DISTINCT member_id FROM holdings_memberitem") do |mr|
+    conn.query("SELECT member_id FROM holdings_htmember WHERE status = 1 ORDER BY member_id") do |mr|
       members << mr['member_id']
     end
     return members
