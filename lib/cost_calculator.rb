@@ -48,7 +48,7 @@ module CostCalc
       break
     end
 
-    costs = public_counts.map {|x| x.to_i*ave_cost_per_vol}
+    costs = public_counts.map {|x| x.to_i * ave_cost_per_vol}
 
     return costs
   end
