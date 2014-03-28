@@ -61,7 +61,7 @@ conn.query(q2) do |row|
   to_log << "#{row[:member_id]}\t#{row[:c]}";
 end
 
-logf = Hathilog::Log.new({:file_name => 'build_step_10g-$ymd.log'});
+logf = Hathilog::Log.new({:file_name => 'builds/current/step_10g-$ymd.log'});
 logf.i("\n" + to_log.join("\n"));
 logf.close();
 conn.close();
