@@ -56,7 +56,7 @@ module MemberScrub
   class MemberScrubber 
     attr_accessor :member_id, :mapper, :data_type, :delim, :min_cols, :header_lines, :long_lines
     
-    @@MAX_OCN =  870966974;
+    @@MAX_OCN =  874997133; # updated 2014-03-28
     @@VERBOSE = false
     @@REPORT_MULTIS = true 
     
