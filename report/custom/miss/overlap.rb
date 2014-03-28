@@ -14,13 +14,16 @@ def main(member_id, log)
     FROM
         hathi_files                 AS h1,
         holdings_htitem             AS h2,
-        holdings_htitem_htmember_jn AS h3
+        holdings_htitem_htmember_jn AS h3,
+        mwarin_ht.oclc_miss         AS om
     WHERE
         h1.htid      = h2.volume_id
         AND 
         h2.volume_id = h3.volume_id
         AND
         h3.member_id = '#{member_id}'
+        AND
+        om.oclc = h2.oclcs
   >.join(' ');
 
   rights = {};
