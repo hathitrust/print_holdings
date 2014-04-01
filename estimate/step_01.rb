@@ -14,7 +14,7 @@ https://docs.google.com/a/umich.edu/document/d/1R5GdnvykPz1O_2wo_d-61BVjkanAgAJy
 
 =end
 
-$HT_DIR = '/htapps/pulintz.babel/data/phdb/MemberData/';
+$HT_DIR = '/htapps/mwarin.babel/phdb_scripts/data/memberdata/';
 $log    = Hathilog::Log.new();
 
 def create_estimate(member_id, ave_ic_cost_per_vol, db)
@@ -70,7 +70,7 @@ end
 
 def get_volume_ids(table, conn)
   # Airlifted in from:
-  # /htapps/pulintz.babel/Code/phdb/bin/estimate_pull_ic_volumes.rb
+  # /htapps/pete.babel/Code/phdb/bin/estimate_pull_ic_volumes.rb
   outfn   = "#{table}-volume_id.$ymd.out";
   outfile = Hathidata::Data.new(outfn);
 
@@ -94,7 +94,7 @@ end
 
 def run_ic_estimate(table, volume_id_file, ave_cost_per_vol)
   # Airlifted in from:
-  # /htapps/pulintz.babel/Code/phdb/bin/estimate_ic_costs_for_member.rb
+  # /htapps/pete.babel/Code/phdb/bin/estimate_ic_costs_for_member.rb
   estimator = PHDBUtils::CostEstimator.new(table);
   cost = estimator.estimate_cost(ave_cost_per_vol, 1, volume_id_file);
   cost_str = "%.2f" % cost;
