@@ -3,7 +3,7 @@ require 'set';
 
 =begin
 
-Copied by mwarin from /htapps/pulintz.babel/Code/phdb/bin/calc_cluster_rights.rb.
+Copied by mwarin from /htapps/pete.babel/Code/phdb/bin/calc_cluster_rights.rb.
 
 Original docstring:
 This module implements a rights calculation for clusters.  It just 

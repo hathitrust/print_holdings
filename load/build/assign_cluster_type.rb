@@ -2,13 +2,13 @@ require 'hathidb';
 
 =begin
 
-MW rewrite of /htapps/pulintz.babel/Code/phdb/bin/assign_cluster_type.rb. 
+MW rewrite of /htapps/pete.babel/Code/phdb/bin/assign_cluster_type.rb. 
 2014-01-07.
 
 Main changes:
 -- use hathidb
 -- prepared queries
--- statements termineated by ;
+-- statements terminated by ;
 
 =end
 

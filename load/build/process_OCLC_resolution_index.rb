@@ -2,7 +2,7 @@ require 'hathidb';
 require 'hathilog';
 require 'hathidata';
 
-# Copied from /htapps/pulintz.babel/Code/phdb/bin/process_OCLC_resolution_index.rb
+# Copied from /htapps/pete.babel/Code/phdb/bin/process_OCLC_resolution_index.rb
 # and adapted to new regime.
 
 def prune_OCLC_resolution_data(pre_pruned, pruned_output, log)

@@ -4,7 +4,7 @@
 
 2) Parse the raw data into normalized files.  See: https://docs.google.com/a/umich.edu/document/d/1-oyHUsVO-XIFenwwxRmyYba4KwrSQrdtqq44n_6Xxcg/edit#heading=h.xx4cij1wpbco. 
 
-3) Copy the normalized files to /htapps/pulintz.babel/data/phdb/HT003/ folder.
+3) Copy the normalized files to /htapps/mwarin.babel/phdb_scripts/data/loadfiles folder.
 
 4) Create a record for member in holdings_htmember table:  
 
@@ -12,7 +12,7 @@
 
 5) Load files into holdings_memberitem table.  E.g. do this for all three files:
 
-   mysql>  LOAD DATA LOCAL INFILE '/htapps/pulintz.babel/data/phdb/HT003/HT003_brown.mono.tsv' INTO TABLE holdings_memberitem IGNORE 1 LINES (oclc, local_id, member_id, status, item_condition, process_date, enum_chron, item_type, issn, n_enum, n_chron);
+   mysql>  LOAD DATA LOCAL INFILE '/htapps/mwarin.babel/phdb_scripts/data/loadfiles/HT003_brown.mono.tsv' INTO TABLE holdings_memberitem IGNORE 1 LINES (oclc, local_id, member_id, status, item_condition, process_date, enum_chron, item_type, issn, n_enum, n_chron);
 
 6) Push files up to Amazon S3 (requires the s3cmd tool):
 

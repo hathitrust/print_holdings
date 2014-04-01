@@ -1,5 +1,5 @@
 # Ruby rewrite of 
-# /htapps/pulintz.babel/Code/phdb/bin/grab_hathi_file.py
+# /htapps/pete.babel/Code/phdb/bin/grab_hathi_file.py
 # by Martin Warin 2013-10-31.
 # Cut some corners but the overall functionality should be identical???
 # For instance, month seems to only be half supported in the .py version

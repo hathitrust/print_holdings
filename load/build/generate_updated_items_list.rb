@@ -4,7 +4,7 @@ require 'hathilog';
 require 'hathienv';
 require 'set';
 
-# Copied from /htapps/pulintz.babel/Code/phdb/bin/generate_updated_items_list.rb
+# Copied from /htapps/pete.babel/Code/phdb/bin/generate_updated_items_list.rb
 # and rewritten a bit.
 
 # Corresponds to 16d in the build process.

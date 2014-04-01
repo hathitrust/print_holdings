@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Originally /htapps/pulintz.babel/Code/phdb/bin/cluster_oclc3.py
+Originally /htapps/pete.babel/Code/phdb/bin/cluster_oclc3.py
 
 This module implements a clustering approach for OCLC numbers based on 
 HathiTrust data and data acquired via the OCLC Translation Table.  

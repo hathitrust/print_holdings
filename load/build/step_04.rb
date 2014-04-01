@@ -2,7 +2,7 @@ require 'hathilog';
 require 'hathidb';
 
 # MW Jan 2014. Copied from:
-# /htapps/pulintz.babel/Code/phdb/bin/update_htitem_multiparts.rb
+# /htapps/pete.babel/Code/phdb/bin/update_htitem_multiparts.rb
 # ... and reeducated to comply with the new regime.
 
 # This routine labels as 'multi' additional items associated with

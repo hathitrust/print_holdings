@@ -7,8 +7,8 @@
 # -v: Verbose i.e display progress while creating archive
 # -f: Archive File name
 
-ht_dir='/htapps/pulintz.babel/data/phdb/HT003';
-backup_dir='/htapps/pulintz.babel/data/phdb/HT003_backups';
+ht_dir='/htapps/mwarin.babel/phdb_scripts/data/loadfiles';
+backup_dir='/htapps/mwarin.babel/phdb_scripts/data/backup/loadfiles';
 dstring=`date +'%Y-%m-%d'`;
 fname="backup_HT003_${dstring}.tar.gz";
 command="tar -zcvf $backup_dir/$fname $ht_dir"

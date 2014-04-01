@@ -19,7 +19,7 @@ SERIALDIR="$DATADIR/serials";
 LOGROOT=`readlink -e $SCRIPTPATH/../../log`;
 LOGDIR="$LOGROOT/builds/current";
 
-HTDIR=/htapps/pulintz.babel/data/phdb/HT003;
+HTDIR=/htapps/mwarin.babel/phdb_scripts/data/loadfiles;
 
 function check_exit_code() {
     exit_st=$1;

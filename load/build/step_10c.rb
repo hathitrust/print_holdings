@@ -3,7 +3,7 @@ require 'hathidb';
 require 'hathiquery';
 
 # Reinterpretation of:
-# /htapps/pulintz.babel/Code/phdb/lib/sql/create_htitem_htmember_jn_v1.4_nonmulti_stored_procedure.sql
+# /htapps/pete.babel/Code/phdb/lib/sql/create_htitem_htmember_jn_v1.4_nonmulti_stored_procedure.sql
 
 log = Hathilog::Log.new();
 log.d("Started");

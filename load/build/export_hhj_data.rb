@@ -4,7 +4,7 @@ require 'hathilog';
 require 'hathienv';
 require 'hathiquery';
 
-# Copied from /htapps/pulintz.babel/Code/phdb/bin/ and slightly modded.
+# Copied from /htapps/pete.babel/Code/phdb/bin/ and slightly modded.
 
 def check_table (db, log)
   conn = db.get_prod_conn();

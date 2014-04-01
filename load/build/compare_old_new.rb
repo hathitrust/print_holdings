@@ -7,8 +7,8 @@ Generates a 3-col spreadsheet over the memberdata / ht003 files.
 require 'hathidb';
 require 'hathiquery';
 
-HT_GLOB = '/htapps/pulintz.babel/data/phdb/HT003/HT003_*.tsv';
-MD_GLOB = '/htapps/pulintz.babel/data/phdb/MemberData/*/HT003_*.tsv';
+HT_GLOB = '/htapps/mwarin.babel/phdb_scripts/data/loadfiles/HT003_*.tsv';
+MD_GLOB = '/htapps/mwarin.babel/phdb_scripts/data/memberdata/*/HT003_*.tsv';
 
 ht_files = {};
 

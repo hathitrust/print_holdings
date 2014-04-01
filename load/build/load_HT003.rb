@@ -13,7 +13,7 @@ does not need to be empty.
 =end
 
 # Some useful constants.
-HT_DIR = '/htapps/pulintz.babel/data/phdb/HT003/';
+HT_DIR = '/htapps/mwarin.babel/phdb_scripts/data/loadfiles/';
 HT_RE  = Regexp.new('^HT003_.+\.(mono|multi|serial)\.tsv$');
 STOP_F = HT_DIR + '.stop';
 DB_SCH = 'ht_repository';

@@ -20,9 +20,9 @@ require 'fileutils';
 @log  = Hathilog::Log.new({:file_name => 'builds/current/load_selected.log'});
 db    = Hathidb::Db.new();
 @conn = db.get_conn();
-@member_data_dir = '/htapps/pulintz.babel/data/phdb/MemberData';
-@ht_dir          = '/htapps/pulintz.babel/data/phdb/HT003';
-@ht_backup_dir   = '/htapps/pulintz.babel/data/phdb/HT003_backups';
+@member_data_dir = '/htapps/mwarin.babel/phdb_scripts/data/memberdata';
+@ht_dir          = '/htapps/mwarin.babel/phdb_scripts/data/loadfiles';
+@ht_backup_dir   = '/htapps/mwarin.babel/phdb_scripts/data/backup/loadfiles';
 @dry_run         = false; # if @dry_run then skip updates and stuff. Turn on with -n flag.
 
 # Takes a file with instructions about which files to copy and load.

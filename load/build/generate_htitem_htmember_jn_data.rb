@@ -4,7 +4,7 @@ require 'hathilog';
 require 'hathiquery'
 
 # Copied from
-# /htapps/pulintz.babel/Code/phdb/bin/generate_htitem_htmember_jn_data.rb
+# /htapps/pete.babel/Code/phdb/bin/generate_htitem_htmember_jn_data.rb
 
 # Parses the output from 'multipart_cluster_mapper.rb' (typically a file
 # called "cluster_htmember_multi.2013xxxx.data" into a file suitable for
