@@ -1,8 +1,7 @@
 require 'hathidb';
 require 'hathilog';
 require 'hathidata';
-require 'phdb/phdb_utils';
-require 'phdb/cost_estimator';
+require 'cost_estimator';
 
 =begin
 
@@ -31,7 +30,7 @@ def create_estimate(member_id, ave_ic_cost_per_vol, db)
   hd.file.puts narrative;
   hd.close();
 
-  run_ic_estimate(table, volume_id_file, ave_ic_cost_per_vol);
+  run_ic_estimate(table, iconn, volume_id_file, ave_ic_cost_per_vol);
 
   drop_table(table, iconn);
   iconn.close();
@@ -68,6 +67,21 @@ def load_table (table, member_id, conn)
   end
 end
 
+def pull_query(conn, query, filen)
+  # outfile for table
+  outf = File.open(filen, "w")
+  
+  puts "Running '#{query}'..."
+  
+  conn.enumerate(query) do |row|
+    outstr = row.join("\t")
+    outf.puts outstr
+  end
+  
+  outf.close     
+end
+
+
 def get_volume_ids(table, conn)
   # Airlifted in from:
   # /htapps/pete.babel/Code/phdb/bin/estimate_pull_ic_volumes.rb
@@ -85,17 +99,17 @@ def get_volume_ids(table, conn)
          AND h.volume_id = ho.volume_id
          AND h.access = 'deny'";
 
-  PHDBUtils.pull_query(query, outfile.path);
+  pull_query(conn, query, outfile.path);
 
   $log.d("Output written to file #{outfile.path}");
 
   return outfile.path;
 end
 
-def run_ic_estimate(table, volume_id_file, ave_cost_per_vol)
+def run_ic_estimate(table, conn, volume_id_file, ave_cost_per_vol)
   # Airlifted in from:
   # /htapps/pete.babel/Code/phdb/bin/estimate_ic_costs_for_member.rb
-  estimator = PHDBUtils::CostEstimator.new(table);
+  estimator = CostEstimator.new(table, conn);
   cost = estimator.estimate_cost(ave_cost_per_vol, 1, volume_id_file);
   cost_str = "%.2f" % cost;
   puts "total ic cost = $#{cost_str}";
