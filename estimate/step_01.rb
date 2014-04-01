@@ -69,13 +69,11 @@ end
 
 def pull_query(conn, query, filen)
   # outfile for table
-  outf = File.open(filen, "w")
-  
+  outf = File.open(filen, "w")  
   puts "Running '#{query}'..."
   
   conn.enumerate(query) do |row|
-    outstr = row.join("\t")
-    outf.puts outstr
+    outf.puts row.join("\t")
   end
   
   outf.close     
