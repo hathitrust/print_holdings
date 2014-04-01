@@ -7,6 +7,7 @@ choose different versions of H_count.
  
 import sys, re
 import MySQLdb
+from hathiconf import Hathiconf
 
 # currently storing passwords in separate files in my
 # project folder (under /etc).  Files are named
@@ -91,10 +92,8 @@ def generate_hplot(dbusr, dbpw):
 
 
 if __name__ == "__main__":
-
-    dbusr = "ht_repository"
-    pwfn = "/htapps/pulintz.babel/Code/phdb/etc/ht_repository"
-    dbpw = get_password_from_file(pwfn)
+    hc = Hathiconf();
+    dbusr = hc.get('db_user')
+    dbpw  = hc.get('db_pw')
     generate_hplot(dbusr, dbpw)
-    
     print 'done.'
