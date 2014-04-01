@@ -69,16 +69,15 @@ end
 
 def pull_query(conn, query, filen)
   # outfile for table
-  outf = File.open(filen, "w")  
-  puts "Running '#{query}'..."
-  
-  conn.enumerate(query) do |row|
-    outf.puts row.join("\t")
-  end
-  
-  outf.close     
-end
+  outf = File.open(filen, "w");
+  puts "Running '#{query}'...";
 
+  conn.enumerate(query) do |row|
+    outf.puts row.join("\t");
+  end
+
+  outf.close;
+end
 
 def get_volume_ids(table, conn)
   # Airlifted in from:
@@ -167,7 +166,7 @@ def get_narrative(table, conn)
   conn.query(sql3) do |row3|
     uniq_oclc = row3['c'].to_i;
     message << "containing #{separate_thousands(row3['c'])} unique OCLC numbers.";
-  end 
+  end
 
   conn.query(sql4) do |row4|
     perc = ((row4['c'] / uniq_oclc.to_f) * 100).round(2);
