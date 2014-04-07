@@ -88,6 +88,7 @@ module Hathidata
       end
 
       @file = File.open(@path, p_attr);
+      @file.sync = true;
 
       self;
     end
