@@ -32,17 +32,18 @@ $cmd2;
 exit_st=$?;
 check_exit_code $exit_st;
 
-echo "Sanity-checking lines in $hhhmd:";
-wc -l $hhhmd;
+echo "Sanity-checking lines in $chmd:";
+wc -l $chmd;
 
-echo "Sanity-checking cluster_id 590 in $hhhmd:";
-grep -r "^590\s" $hhhmd;
+echo "Sanity-checking cluster_id 590 in $chmd:";
+grep -r "^590\s" $chmd;
 
 echo `date`;
 echo "$cmd3";
 $cmd3;
 exit_st=$?;
 check_exit_code $exit_st;
+
 
 echo `date`;
 echo 'Finished';
