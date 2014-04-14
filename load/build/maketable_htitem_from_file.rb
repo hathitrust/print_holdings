@@ -1,7 +1,7 @@
 # Copied from /htapps/pete.babel/Code/phdb/bin/maketable_htitem_from_file.rb
 # encoding: UTF-8
 
-require 'phdb/enum_chron_parser';
+require 'enum_chron_parser';
 require 'hathidata';
 require 'hathilog';
 
