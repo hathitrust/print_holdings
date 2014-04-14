@@ -221,7 +221,7 @@ if $0 == __FILE__ then
   end
 
   db = Hathidb::Db.new();
-   ARGV.each do |member_id|
+  ARGV.each do |member_id|
     create_estimate(member_id, ave_ic_cost_per_vol, db);
   end
 end
