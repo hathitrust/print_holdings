@@ -21,6 +21,7 @@ conn.update(q2);
 
 log.d(q3);
 conn.query(q3) do |row|
+  log.d(row['c']);
   if row['c'].to_i > 0 then
     log.e("Expected 0, got #{row['c'].to_i}");
   end
