@@ -72,9 +72,13 @@ module CostCalc
       new_total += result.to_f
     end
 
-    old_total = CostCalc.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol, conn)
-    diff = old_total - new_total
+    puts "new total #{new_total}";
 
+    old_total = CostCalc.calc_total_ic_singlepart_monograph_cost(ave_cost_per_vol, conn)
+    puts "old total #{old_total}";
+
+    diff = old_total - new_total
+    puts "diff #{diff}";
     # need the number of *matching volumes* among which to distribute new cost
     ic_spms = 0
     conn.query("select count(*) as c from holdings_htitem_H as hhH, holdings_htitem as hh
