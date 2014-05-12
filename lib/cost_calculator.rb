@@ -117,29 +117,6 @@ module CostCalc
     return total_multi_cost
   end
 
-  def CostCalc.calc_adjusted_ic_multipart_cost_per_vol(old_ave_cost_per_vol, total_amount_reduced, conn)
-    ### DEPRECATED ###
-
-    raise "DEPRECATED"
-
-    # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
-    old_total_cost = CostCalc.calc_total_ic_multipart_monograph_cost(old_ave_cost_per_vol, conn)
-
-    ic_multis = 0
-    # need the number of *matching volumes* among which to distribute new cost
-    conn.query("select count(distinct oclc, n_enum) as c from cluster_htmember_multi as chm,
-                            cluster as c where chm.cluster_id = c.cluster_id and
-                            not c.cost_rights_id = 1") do |count_row|
-
-      ic_multis = count_row['c'].to_i
-      break
-    end
-
-    new_ave_cost_per_vol = (old_total_cost - total_amount_reduced) / ic_multis
-
-    return new_ave_cost_per_vol
-  end
-
   def CostCalc.calc_adjusted_ic_mpm_ave_cost_per_vol(ave_cost_per_vol, conn)
     new_total = 0.0
     conn.query("select distinct (member_id) from holdings_memberitem") do |mr|
