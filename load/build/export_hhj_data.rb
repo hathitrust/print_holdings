@@ -31,36 +31,39 @@ end
 def export_data_files(db, log)
   conn = db.get_conn();
 
-  memberids       = [];
-  get_members_sql = Hathiquery.get_all_members;
-  log.d(get_members_sql);
-  conn.query(get_members_sql) do |mrow|
-    memberids << mrow[:member_id];
+  # How many rows are there?
+  count_rows = 0;
+  count_sql  = "SELECT COUNT(*) AS c FROM holdings_htitem_htmember_jn_dev";
+  conn.query(count_sql) do |row|
+    count_rows = row[:c];
   end
+
+  # Do a slice at a time until all the rows are exported.
+  # One million records per slice.
+  slice_size = 1000000;
+  slice_seen = 0;
 
   conf          = Hathiconf::Conf.new();
   htrep_dev_pw  = conf.get('db_pw');
   htrep_prod_pw = conf.get('prod_db_pw');
   count         = 0;
 
-  memberids.each do |mid|
-    if mid.length < 2 then
-      log.d("Skipping #{mid}, too short.");
-      next;
-    end
-    count += 1;
-
+  while slice_seen < count_rows do
+    # Generate a mysqldump command in dev 
+    # that pipes into a mysql command in prod.
     command = %W[
         mysqldump
         -h mysql-htdev
         -u ht_repository
         -p#{htrep_dev_pw}
         ht_repository holdings_htitem_htmember_jn_dev
-        -w"member_id='#{mid}'"
+        -w"1 LIMIT #{slice_seen}, #{slice_size}"
         --skip-add-drop-table
         --skip-disable-keys
         --skip-add-locks
         --skip-lock-tables
+        --skip-comments
+        --skip-set-charset
         --no-create-info
         |
         mysql
@@ -70,20 +73,24 @@ def export_data_files(db, log)
         ht_repository
         ].join(' ');
 
-    log.d("#{count}: processing #{mid}...");
-
     ta = Time.new();
     system(command);
+    # Sleep a portion of time proportionate to the time it 
+    # took to export the last slice of records.
+    # However, sleep no more than 10 minutes, 
+    # and no less than 10 seconds.
     tb = Time.new();
-
     sleeptime = (tb - ta) / 2;
-
     if sleeptime > 600 then
       sleeptime = 600;
+    elsif sleeptime < 10
+      sleeptime = 10;
     end
-
     log.d("Timechange = #{sleeptime}");
     sleep(sleeptime);
+
+    # Count up.
+    slice_seen += slice_size;
   end
   check_table(db, log);
 end
