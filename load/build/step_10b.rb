@@ -15,6 +15,9 @@ end
 log = Hathilog::Log.new();
 log.d("Started");
 
+# This should pick the latest holdings_htitem_htmember.multi.*.data,
+# because normally a few days have passed between getting this file 
+# and using it, so the $ymd will not match anything.
 infile = Hathidata::Data.new("holdings_htitem_htmember.multi.$ymd.data");
 if !infile.exists? then
   log.e("Failed.");
