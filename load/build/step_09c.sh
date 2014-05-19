@@ -14,7 +14,8 @@ date;
 echo "Started";
 mkdir -pv $awsdir;
 
-echo "GETting files into $awsdir/";
+echo "GETting files from s3://umich-lib-phdb-1/output/$date/ to $awsdir/";
+
 s3cmd get s3://umich-lib-phdb-1/output/$date/* $awsdir/;
 
 if [ -f $awsdir/_SUCCESS ]; then
