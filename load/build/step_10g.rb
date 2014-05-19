@@ -20,9 +20,14 @@ end
 log.d("Unclaimed count before update:");
 count_unclaimed(conn, log);
 
-# Map of prefix->member_id
+# Map of prefix->member_id, reads like:
+# volume "uma.ark:/13960/t5hb1q086" goes to "umass".
 prefix_member = {
   'keio' => 'ht',
+  'osu'  => 'osu',
+  'udel' => 'udel',
+  'txa'  => 'tamu',
+  'uma'  => 'umass',
 };
 
 # Do update.
