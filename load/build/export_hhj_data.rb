@@ -74,7 +74,10 @@ def export_data_files(db, log)
         ].join(' ');
 
     ta = Time.new();
+
+    log.d(command);
     system(command);
+
     # Sleep a portion of time proportionate to the time it 
     # took to export the last slice of records.
     # However, sleep no more than 10 minutes, 
