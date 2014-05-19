@@ -47,6 +47,8 @@ end
 log.d("Unclaimed count after update:");
 count_unclaimed(conn, log);
 
+log.d("Volumes with zero lm count, per member:")
+
 # Now list how many by who.
 q2 = %W<
   SELECT
@@ -61,13 +63,10 @@ q2 = %W<
 >.join(' ');
 
 log.d(q2);
-to_log = [];
+
 conn.query(q2) do |row|
-  to_log << "#{row[:member_id]}\t#{row[:c]}";
+  log.d("#{row[:member_id]}\t#{row[:c]}");
 end
 
-logf = Hathilog::Log.new({:file_name => 'builds/current/step_10g-$ymd.log'});
-logf.i("\n" + to_log.join("\n"));
-logf.close();
 conn.close();
 log.i("Finished");
