@@ -55,7 +55,7 @@ module MemberScrub
   # Main parser module.  
   class MemberScrubber 
     attr_accessor :member_id, :mapper, :data_type, :delim, :min_cols, :header_lines, :long_lines
-    @@MAX_OCN =  878540331 # Updated 2014-04-29
+    @@MAX_OCN =  880332211 # Updated 2014-05-20
     @@VERBOSE = false
     @@REPORT_MULTIS = true 
     
