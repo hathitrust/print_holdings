@@ -15,7 +15,7 @@ results = [];
   log.d(q);
   conn.query(q) do |res|
     log.d(res[:c]);
-    results << res[:c];
+    results << res[:c].to_i;
   end
 end
 
@@ -23,6 +23,12 @@ if results[0] == 0 then
   log.d("First result is zero, as expected.");
 else
   log.w("First result unexpected. Expected 0, got #{results[0]}");
+end
+
+if results[1] == 0 then
+  log.w("Second result was zero. UNEXPECTED");
+else
+  log.d("Second result non-zero, as expected.");
 end
 
 conn.close();
