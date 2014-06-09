@@ -31,16 +31,38 @@ prefix_member = {
 };
 
 # Do update.
+sel_sql = %w[
+    SELECT
+        volume_id
+    FROM
+        holdings_htitem_htmember_jn
+    WHERE
+        member_id = '' 
+        AND 
+        volume_id LIKE CONCAT(?,'.%') 
+        AND 
+        volume_id NOT IN (
+            SELECT 
+                volume_id 
+            FROM 
+                holdings_htitem_htmember_jn 
+            WHERE 
+                member_id = ? 
+                AND 
+                volume_id LIKE CONCAT(?,'.%')
+        )
+].join(' ');
+sel_q = conn.prepare(sel_sql);
+
+upd_sql = "UPDATE holdings_htitem_htmember_jn SET member_id = ? WHERE volume_id = ? AND member_id = ''";
+upd_q = conn.prepare(upd_sql);
+
 prefix_member.each_pair do |prefix, member_id|
-  # Tried this as a prepared statement, but 'tworkn'ted.
-  # Set member_id.
-  q1 = ["UPDATE holdings_htitem_htmember_jn",
-         "SET member_id = '#{member_id}' ",
-         "WHERE volume_id LIKE '#{prefix}.%'",
-         "AND member_id = ''"
-        ].join("\n");
-  log.d(q1);
-  conn.update(q1);
+  sel_q.query(prefix, member_id, prefix) do |row|
+    volume_id = row[:volume_id];
+    log.d("#{volume_id} --> #{member_id}");
+    upd_q.execute(member_id, volume_id);
+  end
 end
 
 # Check final count.
