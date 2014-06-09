@@ -1,10 +1,10 @@
+# Part of step 1.
 # Ruby rewrite of 
 # /htapps/pete.babel/Code/phdb/bin/grab_hathi_file.py
 # by Martin Warin 2013-10-31.
 # Cut some corners but the overall functionality should be identical???
 # For instance, month seems to only be half supported in the .py version
 # so I took it out completely in the .rb version.
-
 # Further rewrite using Net::HTTP for download and Hathidata for storage,
 # 2014-01-17.
 
@@ -59,8 +59,8 @@ def retrieve_HT_file (urls, targetfile)
   # If found, download and unzip.
   success = 0;
   urls.each do |url|
-    bits        = url.split('/');
-    filen       = bits[-1];
+    bits  = url.split('/');
+    filen = bits[-1];
     if filen == targetfile then
       hd = Hathidata::Data.new(filen);
       if !hd.exists? then

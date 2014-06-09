@@ -1,4 +1,5 @@
 #!/bin/bash
+# Part of step_00_backup.sh
 # Makes a gzipped backup of a given table in host mysql-htdev schema ht_repository.
 # Table 'foo' will be saved as "$BK_LOCATION/foo_YMD.sql.gz".
 

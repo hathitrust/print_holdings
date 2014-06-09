@@ -4,6 +4,8 @@ require 'hathiquery';
 
 =begin
 
+Part of step 10.
+
 Edited by mwarin, Dec 17 2013.
 Was getting a "Statement nesting level is too deep (likely a bug)"
 error when running, using jdbchelper 0.8.

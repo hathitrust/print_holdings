@@ -3,6 +3,8 @@ require 'set';
 
 =begin
 
+Part of step 06.
+
 Copied by mwarin from /htapps/pete.babel/Code/phdb/bin/calc_cluster_rights.rb.
 
 Original docstring:

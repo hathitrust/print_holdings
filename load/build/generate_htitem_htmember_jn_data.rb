@@ -6,6 +6,7 @@ require 'hathiquery'
 # Copied from
 # /htapps/pete.babel/Code/phdb/bin/generate_htitem_htmember_jn_data.rb
 
+# Part of step 8.
 # Parses the output from 'multipart_cluster_mapper.rb' (typically a file
 # called "cluster_htmember_multi.2013xxxx.data" into a file suitable for
 # upload into the htitem_htmember_jn table.  The file is highly redundant;

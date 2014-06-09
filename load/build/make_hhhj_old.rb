@@ -1,3 +1,5 @@
+# Part of step_00_backup.sh
+
 require 'hathidb';
 require 'hathilog';
 

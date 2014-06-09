@@ -2,6 +2,7 @@ require 'hathilog';
 require 'hathidb';
 require 'hathidata';
 
+# Part of step 02.
 # The purpose of this script is to generate the HathiTrust equivalent
 # of one of the memberitem flatfiles, so that HT data can be treated
 # the same as member data for the purpose of the AWS hadoop calculations.

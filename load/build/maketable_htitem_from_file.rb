@@ -1,3 +1,4 @@
+# Part of step 01.
 # Copied from /htapps/pete.babel/Code/phdb/bin/maketable_htitem_from_file.rb
 # encoding: UTF-8
 
@@ -29,7 +30,7 @@ def generate_htitem_table(infilen, serialsfn)
   
   f    = Hathidata::Data.new(infilen).open('r');
   outf = Hathidata::Data.new("hathi_full_$ymd.data").open('w');
-  e = Hathidata::Data.new("hathi_full_$ymd.err").open('w');
+  e    = Hathidata::Data.new("hathi_full_$ymd.err").open('w');
 
   # parse the flatfile
   ecparser = EnumChronParser.new
@@ -84,7 +85,7 @@ def generate_htitem_table(infilen, serialsfn)
       itype = 'multi'
       multi_count += 1
     end
-    outline = "#{bits[0]}\t#{bits[1]}\t#{bits[2]}\t#{bits[3]}\t#{bits[4]}\t#{bits[5]}\t#{bits[6]}\t#{bits[7]}\t#{bits[13]}\t#{bits[14]}\t#{itype}\t0\t#{n_enum}\t#{n_chron}\t#{bits[15]}\t#{bits[16]}\t#{bits[17]}\t#{bits[18]}\t#{bits[19]}"
+    outline = [bits[0..7], bits[13..14], itype, 0,  n_enum, n_chron, bits[15..19]].flatten.join("\t");
     out_count += 1
     outf.file.puts(outline)
   end

@@ -4,6 +4,8 @@ require 'hathilog';
 
 =begin
 
+Part of step 01.
+
 Like the name suggest, truncates holdings_htitem and then fills it
 up again with the contents of hathi_full_YYYYMMDD.data.
 

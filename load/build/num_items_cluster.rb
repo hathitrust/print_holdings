@@ -3,6 +3,8 @@ require 'hathilog';
 
 =begin
 
+Part of step 6.
+
 From the monthlies:
 
 6b)

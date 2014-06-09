@@ -1,3 +1,6 @@
+# Part of step 02, reloads holdings_htitem_oclc with the contents of
+# the given file.
+
 require 'pathname';
 require 'hathidb';
 require 'hathilog';

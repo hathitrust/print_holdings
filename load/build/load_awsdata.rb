@@ -1,6 +1,7 @@
 require 'hathilog';
 require 'hathidb';
 
+# Part of step 9.
 # A quick and dirty slap-together of pieces from load_HT003.rb.
 # Takes a directory as input and loads files matching a pattern
 # into a database table.

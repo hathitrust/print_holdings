@@ -4,6 +4,7 @@ require 'hathilog';
 require 'hathienv';
 require 'hathiquery';
 
+# Part of step 16.
 # Copied from /htapps/pete.babel/Code/phdb/bin/ and slightly modded.
 
 def check_table (db, log)
@@ -29,24 +30,25 @@ def truncate_table(db, log)
 end
 
 def export_data_files(db, log)
-  conn = db.get_conn();
-
+  conn = db.get_conn(); # Dev conn.
   # How many rows are there?
   count_rows = 0;
   count_sql  = "SELECT COUNT(*) AS c FROM holdings_htitem_htmember_jn_dev";
   conn.query(count_sql) do |row|
     count_rows = row[:c];
   end
+  conn.close();
+
+  log.d("There are #{count_rows} rows in holdings_htitem_htmember_jn_dev");
+
+  conf          = Hathiconf::Conf.new();
+  htrep_dev_pw  = conf.get('db_pw');
+  htrep_prod_pw = conf.get('prod_db_pw');
 
   # Do a slice at a time until all the rows are exported.
   # One million records per slice.
   slice_size = 1000000;
   slice_seen = 0;
-
-  conf          = Hathiconf::Conf.new();
-  htrep_dev_pw  = conf.get('db_pw');
-  htrep_prod_pw = conf.get('prod_db_pw');
-  count         = 0;
 
   while slice_seen < count_rows do
     # Generate a mysqldump command in dev 
@@ -83,7 +85,7 @@ def export_data_files(db, log)
     # However, sleep no more than 10 minutes, 
     # and no less than 10 seconds.
     tb = Time.new();
-    sleeptime = (tb - ta) / 2;
+    sleeptime = (tb - ta);
     if sleeptime > 600 then
       sleeptime = 600;
     elsif sleeptime < 10

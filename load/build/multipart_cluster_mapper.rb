@@ -2,12 +2,13 @@ require 'hathidata';
 require 'hathilog';
 require 'multipart';
 
-# exports all lines for a cluster to an outfile (also puts them onscreen)
+# Part of step 8.
+# Exports all lines for a cluster to an outfile (also puts them onscreen)
 # useful for debugging
+
 def get_cluster_htmember_multi_data(cluster_id, log)
   log.d("Create cluster dump file for cluster_id #{cluster_id}");
   multi_members_enum = Multipart.get_multipart_members_list();
-  ## example cluster_id: 3220320
   data = Multipart.map_multipart_cluster_to_members(cluster_id, multi_members_enum);
   Hathidata.write("cluster_#{cluster_id}") do |hdout|
     data.each do |line|

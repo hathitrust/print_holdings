@@ -2,6 +2,7 @@ require 'hathidb';
 
 =begin
 
+Part of step 6.
 MW rewrite of /htapps/pete.babel/Code/phdb/bin/assign_cluster_type.rb. 
 2014-01-07.
 

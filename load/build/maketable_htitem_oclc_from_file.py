@@ -1,5 +1,6 @@
 #!/usr/bin/python
 """
+Part of step 2.
 This routine generates the htitem_oclc_jn table for the 
 PHDB database.  Takes as input a 'full' tab-delimited flatfile and 
 generates flatfiles suitable for direct load into the database.
@@ -19,7 +20,7 @@ def generate_htitem_oclc_data(ht_filen, jn_outfilen):
     # open files
     infile      = file(ht_filen)
     jn_outfile  = file(jn_outfilen, 'w')
-    err_outfile = file(ht_filen+'.err', 'w')
+    err_outfile = file(ht_filen + '.err', 'w')
     
     global_counter   = 0
     no_oclc          = 0

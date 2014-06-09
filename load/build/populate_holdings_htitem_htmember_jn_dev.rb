@@ -1,7 +1,7 @@
+# Part of step_16.
+
 require 'hathidb';
 require 'hathilog';
-
-# Part of step_16.
 
 db   = Hathidb::Db.new();
 conn = db.get_conn();
