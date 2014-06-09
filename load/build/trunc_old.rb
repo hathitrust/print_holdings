@@ -1,6 +1,8 @@
 require 'hathidb';
 require 'hathilog';
 
+# Part of step_99_cleanup.sh
+
 log  = Hathilog::Log.new();
 log.d("Started");
 
