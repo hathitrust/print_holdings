@@ -3,6 +3,7 @@ require 'hathidb';
 require 'hathiquery';
 
 module Cost
+  # This module has 2 classes: Report and Member.
   class Report
     # A Report tells a bunch of Members to give their counts.
     # Generates a cost per volume, and assigns costs to the Members
@@ -11,13 +12,16 @@ module Cost
     @@conn = @@db.get_conn();
 
     def initialize (cost)
-      @total_op_cost = cost;
-      @members      = [];
-      @cost_per_vol = 0;
-      @pd_costs     = 0;
+      @total_op_cost     = cost;
+      @members           = [];
+      @avg_cost_per_vol  = 0;
+      @cost_per_ic_spm   = 0
+      @cost_per_ic_mpm   = 0
+      @cost_per_ic_ser   = 0
+      @pd_costs          = 0;
       @participate_in_ic = 0;
       @participate_in_pd = 0;
-      @coverage     = 0;
+      @coverage          = 0;
 
       # Output goes here.
       @data = Hathidata::Data.new("costreport_$ymd.tsv").open('w');
@@ -61,9 +65,15 @@ module Cost
 
       @deet.file.puts "@total_op_cost\t#{@total_op_cost}";
       # Get costs.
-      @cost_per_vol = calc_cost_per_vol();
-      @pd_costs     = calc_pd_costs();
-      pd_cost_per_m = (@pd_costs.to_f / @participate_in_pd);
+      @avg_cost_per_vol = calc_avg_cost_per_vol();
+      @pd_costs         = calc_pd_costs();
+      pd_cost_per_m     = (@pd_costs.to_f / @participate_in_pd);
+      @cost_per_ic_spm  = calc_ic('mono');
+      @cost_per_ic_mpm  = calc_ic('multi');
+      @cost_per_ic_ser  = calc_ic('serial');
+
+      swtf = serial_wtf();
+      puts "serial wtf is #{swtf}";
 
       @deet.file.puts "Number of members\t#{@members.size}";
       @deet.file.puts %w[member_id participates_in_pd participates_in_ic ic_spm_count ic_mpm_count ic_ser_count].join("\t");
@@ -80,13 +90,13 @@ module Cost
       # Moar print.
       @deet.file.puts "@participate_in_ic\t#{@participate_in_ic}";
       @deet.file.puts "@participate_in_pd\t#{@participate_in_pd}";
-      @deet.file.puts "@cost_per_vol\t#{@cost_per_vol}";
+      @deet.file.puts "@avg_cost_per_vol\t#{@avg_cost_per_vol}";
       @deet.file.puts "pd_cost_per_m\t#{pd_cost_per_m}";
 
       # Assign cost to members.
       @members.each do |m|
         if m.participates_in_ic then
-          m.set_costs(@cost_per_vol);
+          m.set_costs(@cost_per_ic_spm, @cost_per_ic_mpm, @cost_per_ic_ser);
         end
         if m.participates_in_pd then
           m.costs[:pd] = pd_cost_per_m;
@@ -101,7 +111,7 @@ module Cost
     def ht_special_rule
       ht = @members.select { |m| m.member_id == 'ht' }[0];
       if !ht.nil? then
-        @members.delete_if {|m| m.member_id == 'ht'};
+        @members.delete_if { |m| m.member_id == 'ht' };
         ht_cost = ht.costs[:spm] + ht.costs[:mpm] + ht.costs[:ser] + ht.costs[:pd];
         ht_cost_per_pd_member = ht_cost.to_f / @participate_in_pd;
         @deet.file.puts "ht_cost\t#{ht_cost}";
@@ -114,21 +124,21 @@ module Cost
       end
     end
 
-    def calc_cost_per_vol
+    def calc_avg_cost_per_vol
       q = "SELECT COUNT(*) AS c FROM holdings_htitem";
       hathi_holdings = 0;
       @@conn.query(q) do |row|
         hathi_holdings = row[:c].to_i;
       end
-      cost_per_vol = @total_op_cost.to_f / hathi_holdings;
+      avg_cost_per_vol = @total_op_cost.to_f / hathi_holdings;
       @deet.file.puts [
-                       "#{hathi_holdings.to_i} volumes from holdings_htitem form basis of cost_per_vol:",
-                       "cost_per_vol ==",
+                       "#{hathi_holdings.to_i} volumes from holdings_htitem form basis of avg_cost_per_vol:",
+                       "avg_cost_per_vol ==",
                        "(@total_op_cost / hathi_holdings) ==",
                        "(#{@total_op_cost} / #{hathi_holdings}) ==",
-                       "#{cost_per_vol}"
+                       "#{avg_cost_per_vol}"
                       ].join("\n\t");
-      return cost_per_vol;
+      return avg_cost_per_vol;
     end
 
     def calc_pd_costs
@@ -137,15 +147,85 @@ module Cost
       @@conn.query(q) do |row|
         hathi_pd_holdings = row[:c].to_i;
       end
-      pd_costs = hathi_pd_holdings * @cost_per_vol;
+      pd_costs = hathi_pd_holdings * @avg_cost_per_vol;
       @deet.file.puts [
                        "#{hathi_pd_holdings} volumes form basis of pd_costs",
                        "pd_costs ==",
-                       "hathi_pd_holdings * @cost_per_vol ==",
-                       "#{hathi_pd_holdings} * #{@cost_per_vol} ==",
+                       "hathi_pd_holdings * @avg_cost_per_vol ==",
+                       "#{hathi_pd_holdings} * #{@avg_cost_per_vol} ==",
                        pd_costs
                       ].join("\n\t");
       return pd_costs;
+    end
+
+    # Amalgamation condensate of the generalisation of:
+    #   CostCalc.calc_adjusted_ic_spm_ave_cost_per_vol,
+    #   CostCalc.calc_ic_singlepart_monograph_cost_for_member,
+    #   CostCalc.calc_adjusted_ic_mpm_ave_cost_per_vol,
+    #   CostCalc.calc_ic_multipart_monograph_cost_for_member
+    def calc_ic (item_type)
+      # Get total ic cost for item_type as if they cost @avg_cost_per_vol each.
+      puts "Calculating #{item_type} per-volume cost...";
+      new_total = 0;
+      @members.each do |m|
+        ic_hash = m.get_ic_count('deny', item_type);
+        ic_hash.keys.each do |k|
+          new_total += (ic_hash[k] / k.to_f) * @avg_cost_per_vol;
+        end
+      end
+
+      # Then get a slightly different total ic_cost, this time not using H.
+      old_total_count = 0;
+      old_total_sql = "SELECT COUNT(*) AS c FROM holdings_htitem WHERE item_type = ? AND access = 'deny'";
+      old_sql = @@conn.prepare(old_total_sql)
+      old_sql.enumerate(item_type) do |row|
+        old_total_count += row[:c].to_i;
+        break; # <-- not strictly necessary, but visually appealing.
+      end
+      old_total_cost = old_total_count * @avg_cost_per_vol;
+
+      # Get a diff between those costs
+      diff = old_total_cost - new_total;
+      puts "Old total #{old_total_cost}";
+      puts "New total #{new_total}";
+      puts "Diff #{diff}";
+
+      # Use that diff in setting the ic_cost_per_vol.
+      ic_cost_per_vol = @avg_cost_per_vol + diff / old_total_count;
+      puts "@avg_cost_per_vol #{@avg_cost_per_vol}"
+      puts "ic_#{item_type}_cost_per_vol #{ic_cost_per_vol}"
+
+      return ic_cost_per_vol;
+    end
+
+    # Instead of:
+    #   CostCalc.calc_adjusted_ic_serial_cost_per_vol,
+    #   CostCalc.calc_total_ic_serial_cost
+    def serial_wtf
+      # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
+      old_ic_serials = 0;
+      old_sql = "SELECT COUNT(*) AS c FROM holdings_htitem WHERE item_type = 'serial' AND access = 'deny'";
+      @@conn.query(old_sql) do |row|
+        old_ic_serials = row['c'].to_i;
+        break;
+      end
+      old_total_cost = old_ic_serials * @avg_cost_per_vol;
+
+      # need the number of *matching* volumes among which to distribute new cost
+      new_ic_serials = 0;
+      new_sql = %w[SELECT COUNT(*) AS c
+                     FROM holdings_htitem_H AS h3, 
+                          holdings_htitem   AS h2
+                    WHERE h3.volume_id  = h2.volume_id
+                      AND h2.item_type  = 'serial'
+                      AND h2.access     = 'deny'].join(' ');
+      @@conn.query(new_sql) do |count_row|
+        new_ic_serials = count_row['c'].to_i;
+        break;
+      end
+
+      new_ave_cost_per_vol = (old_total_cost) / new_ic_serials;
+      return new_ave_cost_per_vol;
     end
 
     # Make sure that the cost is covered by the members.
@@ -252,16 +332,16 @@ module Cost
       return pd_count;
     end
 
-    # Given a cost_per_volume, sets the ic costs.
-    def set_costs (cost_per_vol)
-      set_cost(:spm, @ic_spm, cost_per_vol);
-      set_cost(:mpm, @ic_mpm, cost_per_vol);
-      set_cost(:ser, @ic_ser, cost_per_vol);
+    # Given a avg_cost_per_volume, sets the ic costs.
+    def set_costs (ic_spm_cost_per_vol, ic_mpm_cost_per_vol, ic_ser_cost_per_vol)
+      set_cost(:spm, @ic_spm, ic_spm_cost_per_vol);
+      set_cost(:mpm, @ic_mpm, ic_mpm_cost_per_vol);
+      set_cost(:ser, @ic_ser, ic_ser_cost_per_vol);
     end
 
     # Sets a cost of a type based on counts and cost-per-vol.
-    def set_cost (cost_sym, counts_hash, cost_per_vol)
-      @costs[cost_sym] = counts_hash.map{ |k,v| v.to_f / k }.inject(:+) * cost_per_vol;
+    def set_cost (cost_sym, counts_hash, avg_cost_per_vol)
+      @costs[cost_sym] = counts_hash.map{ |k,v| v.to_f / k }.inject(:+) * avg_cost_per_vol;
     end
 
     # For the report, one line with all the costs.
