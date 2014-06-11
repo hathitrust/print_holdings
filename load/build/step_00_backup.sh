@@ -14,6 +14,7 @@ mkdir -pv $BACKUPDIR/;
 mkdir -pv $LOGDIR/;
 
 # Remember the line counts for input.
+echo "Saving HT003 line counts.";
 wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
 
 # holdings_htitem_htmember_jn -> holdings_htitem_htmember_jn_old
