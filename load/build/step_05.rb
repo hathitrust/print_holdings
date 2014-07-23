@@ -81,8 +81,8 @@ def fill_table (db, log, start_with_memberid)
 end
 
 if __FILE__ == $0 then
-  db   = Hathidb::Db.new();
-  log  = Hathilog::Log.new();
+  db  = Hathidb::Db.new();
+  log = Hathilog::Log.new();
 
   log.d("Started.");
   start_with_memberid = nil;
