@@ -17,7 +17,7 @@ mkdir -pv $LOGDIR/;
 echo "Saving HT003 line counts.";
 wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
 
-# holdings_htitem_htmember_jn -> holdings_htitem_htmember_jn_old
+# holdings_htitem_htmember_jn -> holdings_htitem_htmember_jn_old, takes about 2,5 - 3 h.
 echo "$SCRIPTPATH/make_hhhj_old.rb";
 ruby $SCRIPTPATH/make_hhhj_old.rb;
 
