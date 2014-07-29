@@ -25,7 +25,8 @@ SELECT
     hm.oclc,
     hho.volume_id,
     hh.rights,
-    hh.access
+    hh.access,
+    hh.gov_doc
 FROM
     holdings_memberitem AS hm
 JOIN
@@ -45,7 +46,8 @@ cols = [
     :oclc,
     :volume_id,
     :rights,
-    :access
+    :access,
+    :gov_doc
 ];
 
 Hathidata.write("overlap_#{member_id}_$ymd.tsv") do |hdout|
