@@ -3,11 +3,8 @@ require 'hathidb';
 require 'hathidata';
 
 # Based on wustl/report.rb
-# create table oclc_miss (oclc INT not null, primary key (oclc));
-# LOAD DATA LOCAL INFILE '/htapps/mwarin.babel/phdb_scripts/report/custom/miss/miss.oclc' INTO TABLE mwarin_ht.oclc_miss;
 
 def get_it (member_id)
-
   log = Hathilog::Log.new();
   log.d("Started");
 
