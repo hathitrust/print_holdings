@@ -7,6 +7,8 @@
 # ruby reestimate.rb ualberta ualberta_volid.txt 0.149486585794649
 # ... where volid_file is a path relative to the hathidata root,
 # containing the volume ids of the new holdings.
+# Currently, the best way to get the file is to run estimate/step_01.rb,
+# which creates a volume_id file in /data/.
 
 require 'hathidata';
 require 'hathidb';
