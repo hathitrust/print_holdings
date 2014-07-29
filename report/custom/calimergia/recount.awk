@@ -8,6 +8,7 @@
 # Where we will recount the H for the group as actual_H - (group_h - 1)
 # and then calculate the cost for the new Hs.
 
+# Call thusly: awk -f recount.awk something.tsv
 {
     new_h = $2 - ($3 - 1);
     new_hcounts[new_h]++;
@@ -15,7 +16,7 @@
 }
 
 END {
-    ic_cost = 0.155367633816181;
+    ic_cost = 0.1512107841;
     multi   = 1.5;
 
     for (h in new_hcounts) {
