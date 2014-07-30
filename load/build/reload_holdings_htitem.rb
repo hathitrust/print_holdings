@@ -21,7 +21,7 @@ def get_loadfile (log)
     loadfile = ARGV.shift;
     log.d("Got filename #{loadfile} through ARGV");
   else
-    loadfile = 'hathi_full_$ymd.data';
+    loadfile = 'builds/current/hathi_full.data';
     log.d("Assuming #{loadfile}");
   end
 

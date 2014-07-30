@@ -18,7 +18,7 @@ def generate_htitem_table(infilen, serialsfn)
   s.file.each_line do |sline|
     line = sline.force_encoding("ISO-8859-1").encode("UTF-8");
     bits = line.split("\t");
-    next unless bits.length > 0
+    next unless bits.length > 0;
     um_id_i = bits[0].to_i;
     if um_id_i == 0 
       puts "Problem with serials line '#{sline}'";
@@ -28,9 +28,9 @@ def generate_htitem_table(infilen, serialsfn)
   end
   s.close();
   
-  f    = Hathidata::Data.new(infilen).open('r');
-  outf = Hathidata::Data.new("hathi_full_$ymd.data").open('w');
-  e    = Hathidata::Data.new("hathi_full_$ymd.err").open('w');
+  f    = Hathidata::Data.new('builds/current/' + infilen).open('r');
+  outf = Hathidata::Data.new("builds/current/hathi_full.data").open('w');
+  e    = Hathidata::Data.new("builds/current/hathi_full.err").open('w');
 
   # parse the flatfile
   ecparser = EnumChronParser.new
