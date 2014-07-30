@@ -13,7 +13,7 @@ log.d("Started");
 count  = 0;
 db     = Hathidb::Db.new();
 conn   = db.get_conn();
-hdout  = Hathidata::Data.new('aws_$ymd.data').open('w');
+hdout  = Hathidata::Data.new('builds/current/aws.data').open('w');
 oclc_h = {};
 
 query = %W<

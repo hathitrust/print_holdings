@@ -9,20 +9,19 @@ SCRIPTPATH=`pwd`
 popd > /dev/null
 
 data_dir=`readlink -e $SCRIPTPATH/../../data`;
-latest_hathi_file=`ls -w1 $data_dir | egrep '^hathi_full_[0-9]+.txt$' | sort | tail -1`;
-ymd=`date +'%Y%m%d'`;
-mhoff_outfile="htitem_oclc.$ymd.data";
+latest_hathi_file=`ls -w1 $data_dir/builds/current/ | egrep '^hathi_full.txt$' | sort | tail -1`;
+mhoff_outfile="htitem_oclc.data";
 
 echo "Started `date`";
 
-python $SCRIPTPATH/maketable_htitem_oclc_from_file.py $data_dir/$latest_hathi_file $data_dir/$mhoff_outfile;
+python $SCRIPTPATH/maketable_htitem_oclc_from_file.py $data_dir/builds/current/$latest_hathi_file $data_dir/builds/current/$mhoff_outfile;
 exit_st=$?
 if [ $exit_st != 0 ]; then
     echo "Exiting prematurely";
     exit $exit_st;
 fi
 
-ruby $SCRIPTPATH/reload_holdings_htitem_oclc.rb $data_dir/$mhoff_outfile;
+ruby $SCRIPTPATH/reload_holdings_htitem_oclc.rb $data_dir/builds/current/$mhoff_outfile;
 exit_st=$?
 if [ $exit_st != 0 ]; then
     echo "Exiting prematurely";
