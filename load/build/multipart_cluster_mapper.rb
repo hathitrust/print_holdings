@@ -6,6 +6,7 @@ require 'multipart';
 # Exports all lines for a cluster to an outfile (also puts them onscreen)
 # useful for debugging
 
+# never actually called:
 def get_cluster_htmember_multi_data(cluster_id, log)
   log.d("Create cluster dump file for cluster_id #{cluster_id}");
   multi_members_enum = Multipart.get_multipart_members_list();
