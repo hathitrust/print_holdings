@@ -18,7 +18,7 @@ log.d("Started");
 # This should pick the latest holdings_htitem_htmember.multi.*.data,
 # because normally a few days have passed between getting this file 
 # and using it, so the $ymd will not match anything.
-infile = Hathidata::Data.new("holdings_htitem_htmember.multi.$ymd.data");
+infile = Hathidata::Data.new("builds/current/holdings_htitem_htmember.multi.data");
 if !infile.exists? then
   log.e("Failed.");
   raise "Could not find #{infile.path}";

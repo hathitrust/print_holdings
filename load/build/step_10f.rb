@@ -26,7 +26,7 @@ else
 end
 
 if results[1] == 0 then
-  log.w("Second result was zero. UNEXPECTED");
+  log.w("Second result was zero. Whoah. UNEXPECTED!");
 else
   log.d("Second result non-zero, as expected.");
 end

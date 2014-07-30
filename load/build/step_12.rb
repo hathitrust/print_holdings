@@ -10,11 +10,16 @@ conn = db.get_conn();
 get_member_sql = Hathiquery.get_active_members;
 
 insert_sql = %W<
-INSERT INTO holdings_H_counts (H_id, member_id, access, item_type, H_count)
-SELECT hh.H, hhj.member_id, h.access, h.item_type, COUNT(DISTINCT hh.volume_id)
-FROM holdings_htitem AS h, holdings_htitem_H AS hh, holdings_htitem_htmember_jn AS hhj
-WHERE hh.volume_id = hhj.volume_id AND hh.volume_id = h.volume_id AND hhj.member_id = ?
-GROUP BY hh.H, h.access, h.item_type
+  INSERT INTO 
+    holdings_H_counts (H_id, member_id, access, item_type, H_count)
+  SELECT 
+    hh.H, hhj.member_id, h.access, h.item_type, COUNT(DISTINCT hh.volume_id)
+  FROM 
+    holdings_htitem AS h, holdings_htitem_H AS hh, holdings_htitem_htmember_jn AS hhj
+  WHERE 
+    hh.volume_id = hhj.volume_id AND hh.volume_id = h.volume_id AND hhj.member_id = ?
+  GROUP BY 
+    hh.H, h.access, h.item_type
 >.join(" ");
 
 insert_query = conn.prepare(insert_sql);
@@ -33,7 +38,6 @@ conn.query(get_member_sql) do |gmrow|
   count_query.enumerate(member_id) do |cqrow|
     log.d(cqrow[:c]);
   end
-  
   sleep(1);
 end
 
