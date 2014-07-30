@@ -13,11 +13,13 @@ mv -v $SCRIPTPATH/*.log $LOGDIR;
 
 todaystr=`date +'%Y-%m-%d'`;
 
-# Rename the current build log dir.
+# Rename the current build log & data dirs.
 mv -v $LOGDIR $LOGROOT/builds/$todaystr;
+mv -v $DATADIR/builds/current $DATADIR/builds/$todaystr;
 
 # Recreate $LOGROOT/builds/current
 mkdir -p $LOGDIR;
+mkdir -p $DATADIR/builds/current;
 
 # Targz some bulky files left over:
 ## AWS:
