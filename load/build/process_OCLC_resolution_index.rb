@@ -141,8 +141,8 @@ if $0 == __FILE__ then
 
     # These paths will be given to Hathidata objects.
     pre_pruned    = "x2_oclc/#{fr}";
-    pruned_output = "x2_oclc/#{fr}-$ymd.pruned";
-    final_output  = "x2_oclc/#{fr}-$ymd.data";
+    pruned_output = "builds/current/x2_oclc/#{fr}.pruned";
+    final_output  = "builds/current/x2_oclc/#{fr}.data";
 
     log.d("Pruning.");
     prune_OCLC_resolution_data(pre_pruned, pruned_output, log);
