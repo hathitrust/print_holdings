@@ -12,6 +12,7 @@ source $SCRIPTPATH/build_lib.sh;
 
 mkdir -pv $BACKUPDIR/;
 mkdir -pv $LOGDIR/;
+mkdir -pv $LOGDIR/builds/current/;
 
 # Remember the line counts for input.
 echo "Saving HT003 line counts.";
