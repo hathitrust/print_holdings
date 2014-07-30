@@ -10,6 +10,8 @@ source $SCRIPTPATH/build_lib.sh;
 loadfile=$DATADIR/builds/current/load.tsv;
 input_current="s3://umich-lib-phdb-1/input/Current";
 
+echo `date` Started;
+
 upload_to_aws () {
     echo member $1 type $2;
     # Turn on the -n flag for dry-run.
@@ -20,3 +22,5 @@ upload_to_aws () {
 egrep -v '#' $loadfile | egrep -o $'([^\t]+\t[^\t]+)' | while read -r line ; do
     upload_to_aws $line
 done
+
+echo `date` Finished;
