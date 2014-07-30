@@ -201,8 +201,7 @@ def load_table():
 
 def get_loadfile_path():
     mypath = os.path.realpath(__file__)
-    mytime = time.strftime("%Y%m%d")
-    outfn  = re.sub('\/load\/.*', ('/data/cluster_oclc.%s.data' % mytime), mypath)
+    outfn  = re.sub('\/load\/.*', ('/data/builds/current/cluster_oclc.data'), mypath)
     if outfn == mypath:
         print "Error: An assumption about directories is wrong."
         exit(1)
