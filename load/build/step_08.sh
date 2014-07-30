@@ -1,17 +1,14 @@
 #!/bin/bash
+# Combines all substeps of step 8 in the monthlies.
 
 # Get abs path to this dir.
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
-
 source $SCRIPTPATH/build_lib.sh;
 
-# Combines all substeps of step 8 in the monthlies.
-
-date=`date +%Y%m%d`;
-chmd="${DATADIR}/cluster_htmember_multi.${date}.data";
-hhhmd="${DATADIR}/holdings_htitem_htmember.multi.${date}.data";
+chmd="${DATADIR}/builds/current/cluster_htmember_multi.data";
+hhhmd="${DATADIR}/builds/current/holdings_htitem_htmember.multi.data";
 
 # Fairly quick.
 cmd1="jruby $SCRIPTPATH/relabel_mpm.rb";
@@ -43,7 +40,6 @@ echo "$cmd3";
 $cmd3;
 exit_st=$?;
 check_exit_code $exit_st;
-
 
 echo `date`;
 echo 'Finished';

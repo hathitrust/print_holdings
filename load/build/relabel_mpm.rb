@@ -26,7 +26,7 @@ AND holdings_cluster.cluster_type = 'mpm');
 
 db   = Hathidb::Db.new();
 conn = db.get_conn();
-log  = Hathilog::Log.new({:file_name => 'relabel_mpm.log'});
+log  = Hathilog::Log.new({:file_name => 'builds/current/relabel_mpm.log'});
 
 sql = %W<
 UPDATE
