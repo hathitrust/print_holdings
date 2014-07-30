@@ -1,4 +1,4 @@
-# Takes a path to a tab-separated file with format:
+# Expects $loadfile in a certain place, and that it contains rows like:
 # <member_id><TAB><(mono|multi|serial)>
 # ... and uploads the corresponding files to AWS.
 
@@ -7,6 +7,7 @@ SCRIPTPATH=`pwd`;
 popd > /dev/null;
 source $SCRIPTPATH/build_lib.sh;
 
+loadfile=$DATADIR/builds/current/load.tsv;
 input_current="s3://umich-lib-phdb-1/input/Current";
 
 upload_to_aws () {
@@ -16,6 +17,6 @@ upload_to_aws () {
 }
 
 # Skip commented-out lines. Only get ones with a tab.
-egrep -v '#' $1 | egrep -o $'([^\t]+\t[^\t]+)' | while read -r line ; do
+egrep -v '#' $loadfile | egrep -o $'([^\t]+\t[^\t]+)' | while read -r line ; do
     upload_to_aws $line
 done
