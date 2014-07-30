@@ -9,7 +9,6 @@ source $SCRIPTPATH/build_lib.sh;
 echo "Started `date`";
 
 #------------
-
 echo "6a started `date`";
 jruby $SCRIPTPATH/assign_cluster_type.rb;
 exit_st=$?
@@ -17,7 +16,6 @@ check_exit_code $exit_st;
 echo "6a finished `date`";
 
 #------------
-
 echo "6b started `date`";
 jruby $SCRIPTPATH/num_items_cluster.rb;
 exit_st=$?
@@ -32,5 +30,4 @@ check_exit_code $exit_st;
 echo "6c finished `date`";
 
 #------------
-
 echo 'Done.';
