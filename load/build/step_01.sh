@@ -12,7 +12,7 @@ ruby $SCRIPTPATH/hathi_grabber.rb;
 exit_st=$?;
 check_exit_code $exit_st;
 
-latest_hathi_file=`ls -w1 $DATADIR | egrep '^hathi_full_[0-9]+.txt$' | sort | tail -1`;
+latest_hathi_file=`ls -w1 $DATADIR/builds/current/ | egrep '^hathi_full_[0-9]+.txt$' | sort | tail -1`;
 
 # Assuming this was manually placed here.
 latest_serial_file=`ls -w1 $SERIALDIR | tail -1`;
