@@ -26,9 +26,8 @@ module MemberScrub
   # Class to accumulate reportable information through a parse.  Allows
   # additional counts to be easily added, and knows how to print itself.
   class CountReporter
-    attr_accessor :total_lines, :short_lines, :long_lines, :bad_oclc, :good_status,
-                  :bad_status, :bad_lines, :output_lines, :condition_items,
-		  :multi_ocn_items, :blank_lines;
+    attr_accessor :total_lines, :short_lines, :long_lines, :bad_oclc, :good_status, :bad_status, 
+                  :bad_lines, :output_lines, :condition_items, :multi_ocn_items, :blank_lines;
 
     def initialize( options = {} )
       @total_lines     = 0;
@@ -75,8 +74,7 @@ module MemberScrub
     end
 
     def get_max_ocn
-      # Look up current max oclc number.
-      # Manually delete file to get the freshest.
+      # Look up current max oclc number. Manually delete file to get the freshest.
       hd  = Hathidata::Data.new("max.ocn");
       ocn = 0;
       if hd.exists? then
@@ -120,7 +118,7 @@ module MemberScrub
       bits.each do |bit|
         bi = bit.to_i;
         next if bi == 0;
-        row    = @conn.query("select count(*) from holdings_htitem_oclc where oclc = #{bi}");
+        row    = @conn.query("SELECT COUNT(*) FROM holdings_htitem_oclc WHERE oclc = #{bi}");
         result = row.to_a.uniq[0];
         count  = result[0]; # grab the first term too
         if (count.to_i > 0)
@@ -193,7 +191,7 @@ module MemberScrub
     end
 
     def test_status(status)
-      status_list = ["CH", "LM", "WD", "", nil, "ch", "lm", "wd"];
+      status_list = %w[CH LM WD ch lm wd] << nil << '';
       return true if status == nil;
       if status_list.include?(status.strip)
         return true;
@@ -203,7 +201,7 @@ module MemberScrub
     end
 
     def test_condition(condition)
-      condition_list = ["BRT", "DAMAGED"];
+      condition_list = %w[BRT DAMAGED];
       if condition_list.include?(condition)
         return true;
       else
@@ -212,7 +210,7 @@ module MemberScrub
     end
 
     def test_type(itype)
-      itype_list = ["mono", "serial", "multi"];
+      itype_list = %w[mono serial multi];
       if itype_list.include?(itype)
         return true;
       else
@@ -369,13 +367,12 @@ module MemberScrub
                 end
               end
             end
-
-            outstr    = %W<ocn item_id @member_id status condition current_date enum_chron type.strip issn n_enum n_chron>.join("\t");
+            outstr = [ocn, item_id, @member_id, status, condition, current_date, enum_chron, type.strip, issn, n_enum, n_chron].join("\t");
             last_bib  = bib;
             last_line = outstr;
           else
             reporter.output_lines += 1;
-            outstr    = %W<ocn bib @member_id status condition current_date enum_chron type.strip issn n_enum n_chron>.join("\t");
+            outstr = [ocn, bib, @member_id, status, condition, current_date, enum_chron, type.strip, issn, n_enum, n_chron].join("\t");
             last_line = outstr;
             outf.puts(outstr);
           end
