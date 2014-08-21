@@ -2,6 +2,8 @@ require 'hathilog';
 require 'hathidb';
 require 'hathidata';
 
+# step_10b.rb needs to use db.get_interactive, so it cannot nohup and log all to file.
+
 # Log no. rows in t. For before/after comparison.
 def t_counts (conn, log, t)
   log.d("Checking counts.");
@@ -12,7 +14,7 @@ def t_counts (conn, log, t)
   end
 end
 
-log = Hathilog::Log.new();
+log = Hathilog::Log.new({:file_name => 'builds/current/step_10b.log'});
 log.d("Started");
 
 # This should pick the latest holdings_htitem_htmember.multi.*.data,
