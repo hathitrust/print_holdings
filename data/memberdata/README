@@ -1,0 +1,13 @@
+This directory contains data submitted from members.
+A prospective member gets a subdir called member_id.estimate/.
+An actual member gets a subdir called member_id/.
+
+Each subdir contains the submitted files, a logfile, an old/ subdir and a copy of scrub.rb.
+The local scrub.rb is adjusted to fit the submitted files. Each time you scrub something,
+mention it in the logfile.
+
+When a directory is not being actively worked on, close it (gz + tar) with
+  bash close_tgz.sh member_id
+
+When you need to do some work on a closed directory, open it (unzip + untar) with:
+  bash open_tgz.sh member_id

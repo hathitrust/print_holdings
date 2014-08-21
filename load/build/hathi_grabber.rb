@@ -62,7 +62,7 @@ def retrieve_HT_file (urls, targetfile)
     bits  = url.split('/');
     filen = bits[-1];
     if filen == targetfile then
-      hd = Hathidata::Data.new('builds/current/' + filen);
+      hd = Hathidata::Data.new('builds/current/hathi_full.txt.gz');
       if !hd.exists? then
         hd.open('wb');
         puts "Saving #{url} to #{hd.path}";
