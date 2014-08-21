@@ -239,7 +239,8 @@ module MemberScrub
 
     def process_data (infilen, outfilen)
       outf = File.open(outfilen, 'w');
-      outf.puts("OCN\tBIB\tMEMBER_ID\tSTATUS\tCONDITION\tDATE\tENUM_CHRON\tTYPE\tISSN\tN_ENUM\tN_CHRON\n");
+      outf.puts %w[OCN BIB MEMBER_ID STATUS CONDITION DATE ENUM_CHRON TYPE ISSN N_ENUM N_CHRON].join("\t");
+
       reporter = CountReporter.new;
       ecparser = EnumChronParser.new;
       File.open(infilen, 'r') do |file|
