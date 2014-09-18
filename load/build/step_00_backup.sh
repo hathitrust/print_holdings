@@ -23,6 +23,8 @@ wc -l $HTDIR/HT003_*.tsv > $LOGDIR/ht00x_file_linecounts.txt
 echo "$SCRIPTPATH/make_hhhj_old.rb";
 ruby $SCRIPTPATH/make_hhhj_old.rb;
 
+echo "vvv Going to need password here! vvv";
+
 # Back up holdings_htitem_oclc to file.
 bash $SCRIPTPATH/backup_table.sh holdings_htitem_oclc;
 
@@ -30,7 +32,6 @@ bash $SCRIPTPATH/backup_table.sh holdings_htitem_oclc;
 bash $SCRIPTPATH/backup_table.sh holdings_H_counts
 
 # Back up holdings_htitem_htmember_jn to file.
-echo "$SCRIPTPATH/backup_table.sh";
 bash $SCRIPTPATH/backup_table.sh holdings_htitem_htmember_jn;
 
 echo "$0 done.";
