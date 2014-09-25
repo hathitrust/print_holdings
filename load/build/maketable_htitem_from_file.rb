@@ -102,7 +102,7 @@ end
 
 if $0 == __FILE__ then
   if ARGV.length != 2
-    puts "Usage: ruby maketable_htitem_from_file.rb <hathifile> <serialfile>\n";
+    puts "Usage: ruby maketable_htitem_from_file.rb <hathifile> <serialfile>\n";    
     exit 1;
   end
   
