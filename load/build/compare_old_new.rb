@@ -1,16 +1,13 @@
-=begin
-
-Generates a 3-col spreadsheet over the memberdata / ht003 files.
-
-=end
+# Generates a 3-col spreadsheet over the memberdata / ht003 files.
 
 require 'hathidb';
 require 'hathiquery';
 
-HT_GLOB = '/htapps/mwarin.babel/phdb_scripts/data/loadfiles/HT003_*.tsv';
-MD_GLOB = '/htapps/mwarin.babel/phdb_scripts/data/memberdata/*/HT003_*.tsv';
-
+HT_GLOB  = '/htapps/mwarin.babel/phdb_scripts/data/loadfiles/HT003_*.tsv';
+MD_GLOB  = '/htapps/mwarin.babel/phdb_scripts/data/memberdata/*/HT003_*.tsv';
 ht_files = {};
+md_files = {};
+members  = {};
 
 Dir.glob(HT_GLOB).select do |f| 
   if File.file?(f) then
@@ -24,13 +21,9 @@ Dir.glob(HT_GLOB).select do |f|
   end
 end
 
-md_files = {};
-
 Dir.glob(MD_GLOB).select do |f| 
   if File.file?(f) then
-
     next if f =~ /estimate/; # Assumption: memberdata is sharp unless marked '.estimate'
-
     fname = f.sub(/^.+\//, '');
     fobj = File.new(f);
     md_files[fname] = {
@@ -42,7 +35,6 @@ Dir.glob(MD_GLOB).select do |f|
 end
 
 allkeys = [ht_files.keys, md_files.keys].flatten.uniq.sort;
-members = {};
 
 db   = Hathidb::Db.new();
 conn = db.get_conn();
@@ -59,8 +51,8 @@ allkeys.each do |k|
   current = "''";
   newer   = "''";
   member  = 'non_member';
+  md      = k.match(/HT003_(.+).(mono|multi|serial)/);
 
-  md = k.match(/HT003_(.+).(mono|multi|serial)/);
   if md != nil then
     if members.has_key?(md[1]) then
       member = 'member'
@@ -68,15 +60,12 @@ allkeys.each do |k|
   else
     puts "!!!!!!!!!!!!!!!!!!!!!!!!!! #{k} !!!!!!!!!!!!!!!!!!!!!";
   end
-
   if ht_files.has_key?(k) then
     current = ht_files[k]['path']
   end
-
   if md_files.has_key?(k) && (!ht_files.has_key?(k) || md_files[k]['mtime'] > ht_files[k]['mtime']) then
     newer = md_files[k]['path'];
   end
 
   puts [member, current, newer].join("\t")
-
 end
