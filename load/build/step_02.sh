@@ -13,6 +13,7 @@ latest_hathi_file=`ls -w1 $data_dir/builds/current/ | egrep '^hathi_full.txt$' |
 mhoff_outfile="htitem_oclc.data";
 
 echo "Started `date`";
+echo "latest_hathi_file = ${latest_hathi_file}";
 
 python $SCRIPTPATH/maketable_htitem_oclc_from_file.py $data_dir/builds/current/$latest_hathi_file $data_dir/builds/current/$mhoff_outfile;
 exit_st=$?

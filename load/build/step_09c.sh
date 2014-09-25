@@ -12,10 +12,10 @@ awsdir=$DATADIR/aws/$date;
 
 date;
 echo "Started";
+echo "awsdir = ${awsdir}";
 mkdir -pv $awsdir;
 
 echo "GETting files from s3://umich-lib-phdb-1/output/$date/ to $awsdir/";
-
 s3cmd get s3://umich-lib-phdb-1/output/$date/* $awsdir/;
 
 if [ -f $awsdir/_SUCCESS ]; then

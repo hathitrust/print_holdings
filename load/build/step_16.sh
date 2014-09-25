@@ -19,7 +19,6 @@ popd > /dev/null;
 source $SCRIPTPATH/build_lib.sh;
 
 # ... and setup finished.
-
 date;
 
 # Ran, took 2h 15 min.
