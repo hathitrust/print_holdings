@@ -103,6 +103,16 @@ module Cost
         end
       end
 
+      @deet.file.puts("Raw h sums");
+      @deet.file.puts(['member_id', :spm, :mpm, :ser].join("\t"));
+      @members.each do |m|
+        row = [m.member_id];
+        [:spm, :mpm, :ser].each do |item_type|
+          row << m.count_h_sums[item_type]
+        end
+        @deet.file.puts(row.join("\t"));
+      end
+
       # Covert trickery.
       ht_special_rule();
     end
@@ -135,8 +145,7 @@ module Cost
                        "#{hathi_holdings.to_i} volumes from holdings_htitem form basis of avg_cost_per_vol:",
                        "avg_cost_per_vol ==",
                        "(@total_op_cost / hathi_holdings) ==",
-                       "(#{@total_op_cost} / #{hathi_holdings}) ==",
-                       "#{avg_cost_per_vol}"
+                       "#{@total_op_cost}\t/\t#{hathi_holdings}\t==\t#{avg_cost_per_vol}"
                       ].join("\n\t");
       return avg_cost_per_vol;
     end
@@ -149,11 +158,10 @@ module Cost
       end
       pd_costs = hathi_pd_holdings * @avg_cost_per_vol;
       @deet.file.puts [
-                       "#{hathi_pd_holdings} volumes form basis of pd_costs",
+                       "#{hathi_pd_holdings}\tvolumes form basis of pd_costs",
                        "pd_costs ==",
                        "hathi_pd_holdings * @avg_cost_per_vol ==",
-                       "#{hathi_pd_holdings} * #{@avg_cost_per_vol} ==",
-                       pd_costs
+                       "#{hathi_pd_holdings}\t*\t#{@avg_cost_per_vol}\t==\tpd_costs"
                       ].join("\n\t");
       return pd_costs;
     end
@@ -277,7 +285,7 @@ module Cost
     # A Member has some counts and some costs. It can only figure out the counts itself.
     @@db   = Hathidb::Db.new();
     @@conn = @@db.get_conn();
-    attr_reader :member_id, :ic_spm, :ic_mpm, :ic_ser, :num_pd, :participates_in_ic, :participates_in_pd;
+    attr_reader :member_id, :ic_spm, :ic_mpm, :ic_ser, :num_pd, :participates_in_ic, :participates_in_pd, :count_h_sums;
     attr_accessor :costs;
 
     def initialize (member_id, participates = {:ic => true, :pd => true})
@@ -288,7 +296,8 @@ module Cost
       @ic_mpm = {};
       @ic_ser = {};
       @num_pd = 0;
-      @costs  = {:spm => 0, :mpm => 0, :ser => 0, :pd => 0, :extra => 0, :subtotal => 0, :total => 0};
+      @count_h_sums = {:spm => 0, :mpm => 0, :ser => 0};
+      @costs        = {:spm => 0, :mpm => 0, :ser => 0, :pd => 0, :extra => 0, :subtotal => 0, :total => 0};
 
       return self;
     end
@@ -341,7 +350,9 @@ module Cost
 
     # Sets a cost of a type based on counts and cost-per-vol.
     def set_cost (cost_sym, counts_hash, avg_cost_per_vol)
-      @costs[cost_sym] = counts_hash.map{ |k,v| v.to_f / k }.inject(:+) * avg_cost_per_vol;
+      count_h_sum             = counts_hash.map{ |k,v| v.to_f / k }.inject(:+);
+      @count_h_sums[cost_sym] = count_h_sum;
+      @costs[cost_sym]        = count_h_sum * avg_cost_per_vol;
     end
 
     # For the report, one line with all the costs.
