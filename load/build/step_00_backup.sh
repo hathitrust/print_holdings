@@ -12,7 +12,6 @@ source $SCRIPTPATH/build_lib.sh;
 
 mkdir -pv $BACKUPDIR/;
 mkdir -pv $LOGDIR/;
-mkdir -pv $LOGDIR/builds/current/;
 mkdir -pv $DATADIR/builds/current/;
 
 # Remember the line counts for input.
