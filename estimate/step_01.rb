@@ -195,11 +195,7 @@ def drop_table(table, conn)
   conn.execute(q);
 end
 
-############
-###      ###
-### MAIN ###
-###      ###
-############
+# # MAIN # #
 
 # Take a number and some member_ids as input.
 # Allows you to estimate several new members in sequence,
