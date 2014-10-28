@@ -1,8 +1,10 @@
 require 'hathidata';
 require 'hathidb';
 
-# Count the monos, multis and serials both in holdings_memberitem and in the files in /memberdata/.
-# Output and give a diff for each. Takes a list of member_ids as input.
+# Takes a list of member_ids.
+# For each, count the monos, multis and serials both in holdings_memberitem 
+# and in the files in /memberdata/. Output and give a diff for each. Takes 
+# a list of member_ids as input. 
 # Looks extra pretty if piped through | column -t
 
 class Counter
@@ -24,7 +26,7 @@ class Counter
 
   def get_counts ()
     %w[mono multi serial].each do |t|
-      counts[t]['old']   = get_old_count(t);
+      counts[t]['old'] = get_old_count(t);
       counts[t]['new'] = get_new_count(t);
     end
 
@@ -34,7 +36,7 @@ class Counter
   def get_old_count(item_type)
     dpath = "loadfiles/HT003_#{@member_id}.#{item_type}.tsv";
     hd    = Hathidata::Data.new(dpath);
-    print "old file #{@member_id} #{item_type}";
+    print "old file #{@member_id} #{item_type} ";
     count = %x{wc -l #{hd.path}}.strip.split(" ")[0];
     puts count;
 
@@ -76,7 +78,7 @@ if $0 == __FILE__ then
   header = ['member_id'];
   %w[mono multi serial].each do |t|
     %w[old new diff].each do |s|
-      header << "#{t}_#{s}"
+      header << "#{t}_#{s}";
     end
   end
   puts header.join("\t");
@@ -90,7 +92,7 @@ if $0 == __FILE__ then
         line << c.counts[t][s];
       end
       # Add diff.
-      line << c.counts[t]['new'] - c.counts[t]['old']
+      line << c.counts[t]['new'] - c.counts[t]['old'];
     end
     puts line.join("\t");
   end
