@@ -26,7 +26,7 @@ exit_st=$?;
 check_exit_code $exit_st;
 
 # Reload holdings_htitem with the output from the previous script.
-ruby reload_holdings_htitem.rb;
+ruby $SCRIPTPATH/reload_holdings_htitem.rb;
 exit_st=$?;
 check_exit_code $exit_st;
 
