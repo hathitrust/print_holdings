@@ -33,7 +33,7 @@ class Counter
     return self;
   end
 
-  def get_old_count(item_type)
+  def get_old_count (item_type)
     dpath = "loadfiles/HT003_#{@member_id}.#{item_type}.tsv";
     hd    = Hathidata::Data.new(dpath);
     print "old file #{@member_id} #{item_type} ";
@@ -43,7 +43,7 @@ class Counter
     return count.to_i;
   end
 
-  def get_actual_db_count(item_type)
+  def get_actual_db_count (item_type)
     print "db #{@member_id} #{item_type} ";
     count = 0;
     @@query.enumerate(@member_id, item_type) do |row|
@@ -54,7 +54,7 @@ class Counter
     return count.to_i;
   end
 
-  def get_new_count(item_type)
+  def get_new_count (item_type)
     print "file #{@member_id} #{item_type} ";
     dpath = "memberdata/#{@member_id}/HT003_#{@member_id}.#{item_type}.tsv";
     hd    = Hathidata::Data.new(dpath);
