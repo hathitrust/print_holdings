@@ -23,7 +23,7 @@ mkdir -p $DATADIR/builds/current;
 
 # Targz some bulky files left over:
 ## AWS:
-last_aws=`ls $DATADIR/aws/ | tail -1`
+last_aws=`ls -d1 $DATADIR/aws/*/ | tail -1`
 echo "Making a tar.gz of AWS $last_aws"
 ## cd to the dir instead of messing with --strip-components.
 cd $DATADIR/aws/$last_aws/;
