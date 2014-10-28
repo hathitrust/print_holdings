@@ -15,8 +15,12 @@ Main changes:
 
 def assign_cluster_type()
   # Set up connection and prepare queries.
-  db              = Hathidb::Db.new();
-  conn            = db.get_conn();
+
+  db   = Hathidb::Db.new();
+  conn = db.get_conn();
+  log  = Hathilog::Log.new();
+  log.i("Starting to assign cluster types.");
+
   conn.fetch_size = 50000;
   cluster_count   = 0;
   sel_cluster_id_sql = "SELECT cluster_id FROM holdings_cluster";
@@ -61,7 +65,7 @@ def assign_cluster_type()
         when 'serial'
           ckey = 'ser';
         else
-          puts "#{ctype[0]} type unknown.";
+          log.w("#{ctype[0]} type unknown.");
           ckey = 'spm';
         end
         ctypes << ckey;
@@ -72,11 +76,11 @@ def assign_cluster_type()
 
       cluster_count += 1;
       if ((cluster_count % 50000) == 0) then
-        puts "#{cluster_count}...";
+        log.i("#{cluster_count}...");
       end
     end
   end
-  puts "done assigning cluster types.";
+  log("done assigning cluster types.");
 end
 
 assign_cluster_type()

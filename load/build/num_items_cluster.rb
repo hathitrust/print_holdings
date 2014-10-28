@@ -21,6 +21,8 @@ Rows matched: 5442960  Changed: 5442960  Warnings: 0
 db   = Hathidb::Db.new();
 conn = db.get_conn();
 log  = Hathilog::Log.new();
+log.i("Updating holdings_cluster with number of items.");
+
 sql  = %W<
     UPDATE holdings_cluster SET num_of_items = (
         SELECT
