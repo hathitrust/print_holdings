@@ -8,7 +8,7 @@ From the monthlies:
 8a)
 Assign 'multi' to additional records in memberitem.
 This step changes the member-submitted type designation to 'multi'
-f0r items that are associated with multipart clusters.
+for items that are associated with multipart clusters.
 
 This essentially maps the HathiTrust multi designation onto those items.
 Since not all members submit multi files, items that they submit as
