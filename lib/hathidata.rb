@@ -28,13 +28,17 @@ module Hathidata
     hd.close();
   end
 
-  # Hathidata.read('foo') do |line|
+  # HTPH::Hathidata.read('foo') do |line|
   #   puts line; # --> prints "hello\nadieu\n"
   # end
+  # Break the loop with:
+  #   throw :break;
   def self.read(path)
     hd = Data.new(path).open('r');
-    hd.file.each_line do |line|
-      yield line;
+    catch :break do
+      hd.file.each_line do |line|
+        yield line;
+      end
     end
   ensure
     hd.close();
