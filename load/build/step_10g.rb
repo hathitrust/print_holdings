@@ -23,10 +23,13 @@ count_unclaimed(conn, log);
 # Map of prefix->member_id, reads like:
 # volume "uma.ark:/13960/t5hb1q086" goes to "umass".
 prefix_member = {
+  'gri'  => 'getty',
   'keio' => 'ht',
+  'mcg'  => 'mcgill',
   'osu'  => 'osu',
-  'udel' => 'udel',
   'txa'  => 'tamu',
+  'ucw'  => 'uconn',
+  'udel' => 'udel',
   'uma'  => 'umass',
 };
 
