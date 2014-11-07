@@ -81,7 +81,7 @@ def assign_cluster_type()
       end
     end
   end
-  log("done assigning cluster types.");
+  log.i("done assigning cluster types.");
 end
 
 assign_cluster_type()
