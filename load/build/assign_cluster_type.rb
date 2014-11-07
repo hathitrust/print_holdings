@@ -1,4 +1,5 @@
 require 'hathidb';
+require 'hathilog';
 
 =begin
 
