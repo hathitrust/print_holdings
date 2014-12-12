@@ -3,6 +3,7 @@
 
 require 'hathidb';
 require 'hathilog';
+require 'hathidata';
 
 log = Hathilog::Log.new();
 log.d("Started");
@@ -15,13 +16,14 @@ delete_sql = "TRUNCATE TABLE holdings_htitem_htmember_jn_old";
 select_sql = "SELECT volume_id, member_id, copy_count, lm_count, wd_count, brt_count access_count FROM holdings_htitem_htmember_jn";
 hdout      = Hathidata::Data.new('holdings_htitem_htmember_jn_old.dat').open('w');
 load_sql   = "LOAD DATA LOCAL INFILE ? INTO TABLE holdings_htitem_htmember_jn_old";
+cols       = [:volume_id, :member_id, :copy_count, :lm_count, :wd_count, :brt_count, :access_count];
 
 log.d(delete_sql);
 conn.execute(delete_sql);
 
 log.d(select_sql);
 conn.query(select_sql) do |row|
-  hdout.file.puts [:volume_id, :member_id, :copy_count, :lm_count, :wd_count, :brt_count, :access_count].map{|x| row[x]}.join("\t");
+  hdout.file.puts cols.map{|x| row[x]}.join("\t");
 end
 hdout.close();
 
