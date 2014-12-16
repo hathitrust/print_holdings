@@ -55,7 +55,7 @@ def export_data_files(db, log)
     # that pipes into a mysql command in prod.
     command = %W[
         mysqldump
-        -h mysql-htdev
+        -h mysql-htprep
         -u ht_repository
         -p#{htrep_dev_pw}
         ht_repository holdings_htitem_htmember_jn_dev

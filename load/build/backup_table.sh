@@ -1,6 +1,6 @@
 #!/bin/bash
 # Part of step_00_backup.sh
-# Makes a gzipped backup of a given table in host mysql-htdev schema ht_repository.
+# Makes a gzipped backup of a given table in host mysql-htprep schema ht_repository.
 # Table 'foo' will be saved as "$BK_LOCATION/foo_YMD.sql.gz".
 
 BK_LOCATION=/htapps/mwarin.babel/phdb_scripts/data/sql;
@@ -10,7 +10,7 @@ if [ $1 ]; then
     todaydate=`date +'%Y-%m-%d'`;
     backupfile="backup_${tablename}_${todaydate}.sql.gz";
     user=`whoami`;
-    host='mysql-htdev';
+    host='mysql-htprep';
     schema='ht_repository';
 
     # You will be prompted for password at this point.
