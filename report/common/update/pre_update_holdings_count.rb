@@ -61,7 +61,7 @@ class Counter
     count = %x{wc -l #{hd.path}}.strip.split(" ")[0];
     puts count;
 
-    return count.to_i - 1; # There is a header line that we skip.
+    return count.to_i;
   end
 
 end
