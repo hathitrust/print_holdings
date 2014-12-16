@@ -15,9 +15,9 @@ module Cost
       @total_op_cost     = cost;
       @members           = [];
       @avg_cost_per_vol  = 0;
-      @cost_per_ic_spm   = 0
-      @cost_per_ic_mpm   = 0
-      @cost_per_ic_ser   = 0
+      @cost_per_ic_spm   = 0;
+      @cost_per_ic_mpm   = 0;
+      @cost_per_ic_ser   = 0;
       @pd_costs          = 0;
       @participate_in_ic = 0;
       @participate_in_pd = 0;
@@ -35,7 +35,7 @@ module Cost
       # Create and run members. This gives counts.
       @@conn.query(Hathiquery.get_active_members) do |m|
         member_id = m[:member_id];
-        member = Cost::Member.new(m[:member_id], {:ic => true, :pd => (member_id != 'ht')});
+        member    = Cost::Member.new(m[:member_id], {:ic => true, :pd => (member_id != 'ht')});
         @members << member.run();
       end
 
@@ -49,16 +49,14 @@ module Cost
           @participate_in_pd += 1;
         else
           if m.num_pd != 0 then
-            puts "\n\n\n#{m.member_id} does not participate in pd, but still has pd holdings.\n\n\n";
-            raise "Oops.";
+            raise "#{m.member_id} does not participate in pd, but still has pd holdings.";
           end
         end
         if m.participates_in_ic then
           @participate_in_ic += 1;
         else
           if [m.ic_spm.keys, m.ic_mpm.keys, m.ic_ser.keys].flatten.size > 0 then
-            puts "\n\n\n#{m.member_id} does not participate in ic, but still has ic holdings.\n\n\n";
-            raise "Oops.";
+            raise "#{m.member_id} does not participate in ic, but still has ic holdings.";
           end
         end
       end
@@ -103,18 +101,17 @@ module Cost
         end
       end
 
-      @deet.file.puts("Raw h sums");
-      @deet.file.puts(['member_id', :spm, :mpm, :ser].join("\t"));
+      @deet.file.puts "Raw h sums";
+      @deet.file.puts ['member_id', :spm, :mpm, :ser].join("\t");
       @members.each do |m|
         row = [m.member_id];
         [:spm, :mpm, :ser].each do |item_type|
-          row << m.count_h_sums[item_type]
+          row << m.count_h_sums[item_type];
         end
-        @deet.file.puts(row.join("\t"));
+        @deet.file.puts row.join("\t");
       end
 
-      # Covert trickery.
-      ht_special_rule();
+      ht_special_rule(); # Covert trickery.
     end
 
     # member_id:ht is special. Distribute its costs among the others as an additional pd cost.
@@ -166,11 +163,6 @@ module Cost
       return pd_costs;
     end
 
-    # Amalgamation condensate of the generalisation of:
-    #   CostCalc.calc_adjusted_ic_spm_ave_cost_per_vol,
-    #   CostCalc.calc_ic_singlepart_monograph_cost_for_member,
-    #   CostCalc.calc_adjusted_ic_mpm_ave_cost_per_vol,
-    #   CostCalc.calc_ic_multipart_monograph_cost_for_member
     def calc_ic (item_type)
       # Get total ic cost for item_type as if they cost @avg_cost_per_vol each.
       puts "Calculating #{item_type} per-volume cost...";
@@ -185,7 +177,7 @@ module Cost
       # Then get a slightly different total ic_cost, this time not using H.
       old_total_count = 0;
       old_total_sql = "SELECT COUNT(*) AS c FROM holdings_htitem WHERE item_type = ? AND access = 'deny'";
-      old_sql = @@conn.prepare(old_total_sql)
+      old_sql = @@conn.prepare(old_total_sql);
       old_sql.enumerate(item_type) do |row|
         old_total_count += row[:c].to_i;
         break; # <-- not strictly necessary, but visually appealing.
@@ -200,15 +192,12 @@ module Cost
 
       # Use that diff in setting the ic_cost_per_vol.
       ic_cost_per_vol = @avg_cost_per_vol + diff / old_total_count;
-      puts "@avg_cost_per_vol #{@avg_cost_per_vol}"
-      puts "ic_#{item_type}_cost_per_vol #{ic_cost_per_vol}"
+      @deet.file.puts "ic_#{item_type}_cost_per_vol\t#{ic_cost_per_vol}";
 
       return ic_cost_per_vol;
     end
 
-    # Instead of:
-    #   CostCalc.calc_adjusted_ic_serial_cost_per_vol,
-    #   CostCalc.calc_total_ic_serial_cost
+    # Instead of: CostCalc.calc_adjusted_ic_serial_cost_per_vol and CostCalc.calc_total_ic_serial_cost
     def serial_wtf
       # given a value to be deducted from the total, calculate a new ave_cost_per_vol for serials
       old_ic_serials = 0;
@@ -222,7 +211,7 @@ module Cost
       # need the number of *matching* volumes among which to distribute new cost
       new_ic_serials = 0;
       new_sql = %w[SELECT COUNT(*) AS c
-                     FROM holdings_htitem_H AS h3, 
+                     FROM holdings_htitem_H AS h3,
                           holdings_htitem   AS h2
                     WHERE h3.volume_id  = h2.volume_id
                       AND h2.item_type  = 'serial'
@@ -244,8 +233,8 @@ module Cost
       puts %w(member_id spm mpm ser pd extra subtotal total).join("\t");
       @members.each do |m|
         m.costs[:subtotal] = m.costs[:spm] + m.costs[:mpm] + m.costs[:ser] + m.costs[:pd] + m.costs[:extra];
-        m.costs[:total] = m.costs[:subtotal] * 1.5;
-        print_cost = [:spm, :mpm, :ser, :pd, :extra, :subtotal, :total].map{|x| m.costs[x]}.join("\t");
+        m.costs[:total]    = m.costs[:subtotal] * 1.5;
+        print_cost         = [:spm, :mpm, :ser, :pd, :extra, :subtotal, :total].map{|x| m.costs[x]}.join("\t");
         puts [m.member_id, print_cost].join("\t");
         @coverage += m.costs[:subtotal];
       end
@@ -265,7 +254,6 @@ module Cost
         @members.each do |m|
           m.costs[:extra] += diff_per_member;
         end
-        sleep 1;
         puts "Running the numbers again...";
         return coverage();
       else
@@ -277,6 +265,7 @@ module Cost
         @data.file.puts m.to_s;
       end
       @data.close();
+      @deet.close();
     end
 
   end # class Report
@@ -306,11 +295,13 @@ module Cost
     # The Report object will use them to set costs.
     def run
       if @participates_in_ic then
+        puts "running #{@member_id} ic counts";
         @ic_spm = get_ic_count('deny', 'mono');
         @ic_mpm = get_ic_count('deny', 'multi');
         @ic_ser = get_ic_count('deny', 'serial');
       end
       if @participates_in_pd then
+        puts "running #{@member_id} pd counts";
         @num_pd = get_pd_count();
       end
 
