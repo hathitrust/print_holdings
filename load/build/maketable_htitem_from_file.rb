@@ -49,7 +49,8 @@ def generate_htitem_table(infilen, serialsfn)
     n_enum = ''
     n_chron = ''
     nline = line.force_encoding("ISO-8859-1").encode("UTF-8")
-    bits = nline.split("\t")
+    # added .map{...sub()} to deal with end-of-column backslashes confusing the MySQL LOAD DATA statement.
+    bits = nline.split("\t").map{|x| x.sub(/\\+$/, '')}
     if bits.length < 15
       puts "Line too short: '#{nline}'"
       e.file.puts(nline)
