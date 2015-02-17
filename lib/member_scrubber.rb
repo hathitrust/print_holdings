@@ -268,6 +268,7 @@ module MemberScrub
           end
           bits = line.rstrip.split(@delim);
           bits.map{ |item| item.gsub!(/\"/, '') };
+          bits.map{ |item| item.sub!(/\\+$/, '') }; # Dealing with especially enum_chrons ending with a backslash.
 	  if bits.length < 1
 	    reporter.blank_lines += 1;
 	    next;
@@ -378,8 +379,6 @@ module MemberScrub
             outf.puts(outstr);
           end
         end
-        # last line
-        outf.puts(last_line);
       end
       outf.close();
       reporter.to_s;
