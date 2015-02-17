@@ -10,25 +10,29 @@ my $file_cols  = {};
 my $delim = "\t";
 my $na    = 'N/A';
 
-# Take any number of tsv files greater than or equal to 2.
-# For each row in file x, add all cols to a corresponding row
-# in a combined sheet.
-# Assuming that all rows in a file has the same number of cols.
-# Number of cols may be different between files.
-# Also assuming an identifier in the first col, in all files,
-# which is not constantly reappended to the combined sheet.
+=pod
 
-# So 2 files like:
-#
-# a 1 3 5
-# and
-# a 8 9
-# b 5 5
-#
-# ... will result in:
-#
-# a 1   3   5   8 9
-# b N/A N/A N/A 5 5
+Take any number of tsv files greater than or equal to 2.
+For each row in file x, add all cols to a corresponding row
+in a combined sheet.
+Assuming that all rows in a file has the same number of cols.
+Number of cols may be different between files.
+Also assuming an identifier in the first col, in all files,
+which is not constantly reappended to the combined sheet.
+
+So 2 files like:
+
+a 1 3 5
+and
+a 8 9
+b 5 5
+
+... will result in:
+
+a 1   3   5   8 9
+b N/A N/A N/A 5 5
+
+=cut
 
 # For each file, read in its contents line per line.
 foreach my $k (sort keys %$files) {
