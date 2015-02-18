@@ -35,7 +35,7 @@ module Cost
       # Create and run members. This gives counts.
       @@conn.query(Hathiquery.get_active_members) do |m|
         member_id = m[:member_id];
-        member    = Cost::Member.new(m[:member_id], {:ic => true, :pd => (member_id != 'ht')});
+        member    = Cost::Member.new(m[:member_id], {:ic => true, :pd => (member_id != 'hathitrus')});
         @members << member.run();
       end
 
@@ -116,9 +116,9 @@ module Cost
 
     # member_id:ht is special. Distribute its costs among the others as an additional pd cost.
     def ht_special_rule
-      ht = @members.select { |m| m.member_id == 'ht' }[0];
+      ht = @members.select { |m| m.member_id == 'hathitrust' }[0];
       if !ht.nil? then
-        @members.delete_if { |m| m.member_id == 'ht' };
+        @members.delete_if { |m| m.member_id == 'hathitrust' };
         ht_cost = ht.costs[:spm] + ht.costs[:mpm] + ht.costs[:ser] + ht.costs[:pd];
         ht_cost_per_pd_member = ht_cost.to_f / @participate_in_pd;
         @deet.file.puts "ht_cost\t#{ht_cost}";
