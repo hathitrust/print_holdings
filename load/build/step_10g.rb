@@ -24,7 +24,7 @@ count_unclaimed(conn, log);
 # volume "uma.ark:/13960/t5hb1q086" goes to "umass".
 prefix_member = {
   'gri'  => 'getty',
-  'keio' => 'ht',
+  'keio' => 'hathitrust',
   'mcg'  => 'mcgill',
   'osu'  => 'osu',
   'txa'  => 'tamu',
