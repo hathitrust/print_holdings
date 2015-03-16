@@ -8,7 +8,7 @@ module Hathiquery
       'CHI'  => 'uchicago',
       'COO'  => 'cornell',
       'DUL'  => 'duke',
-      'FU'   => 'ufl',
+      'FU'   => 'flbog',
       'HVD'  => 'harvard',
       'IEN'  => 'northwestern',
       'INU'  => 'iu',
