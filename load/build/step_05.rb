@@ -3,7 +3,7 @@ require 'hathilog';
 
 # Martin Warin 2014-01-07.
 # Replaces the stored procedure in step 5.
-# Mostly for logging and ease of automatization purposes.
+# Mostly for logging and ease-of-automation purposes.
 
 def empty_table (db, log, start_with_memberid)
   empty_table_sql = "TRUNCATE holdings_cluster_htmember_jn";
