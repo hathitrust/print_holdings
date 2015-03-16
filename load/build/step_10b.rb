@@ -37,6 +37,7 @@ t_counts(conn, log, t);
 # Save holdings_htitem_htmember_jn_#{curmon} as a backup table,
 # and something we can use for computing deltas later.
 # Prepare them first so that we fail early.
+# This is where we actually truncate holdings_htitem_htmember_jn, in a roundabout way.
 qs = [
       conn.prepare("RENAME TABLE #{t} TO #{t}_#{curmon}"),
       conn.prepare("CREATE TABLE #{t} LIKE #{t}_#{curmon}"),
