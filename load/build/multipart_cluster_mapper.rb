@@ -25,7 +25,7 @@ def generate_cluster_htmember_multi_file(outfilen, log)
   cids = Multipart.get_multipart_cluster_list();
   log.d("#{cids.length} clusters in list.");
   count = 0;
-  
+
   Hathidata.write(outfilen) do |hdout|
     cids.each do |cid|
       result_set = Multipart.map_multipart_cluster_to_members(cid, multi_members_enum);
