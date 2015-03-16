@@ -6,8 +6,8 @@ Each subdir contains the submitted files, a logfile, an old/ subdir and a copy o
 The local scrub.rb is adjusted to fit the submitted files. Each time you scrub something,
 mention it in the logfile.
 
-When a directory is not being actively worked on, close it (gz + tar) with
+When a directory is not being actively worked on, close it (tar + gzip) with
   bash close_tgz.sh member_id
 
-When you need to do some work on a closed directory, open it (unzip + untar) with:
+When you need to do some work on a closed directory, open it (gunzip + untar) with:
   bash open_tgz.sh member_id
