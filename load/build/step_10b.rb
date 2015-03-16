@@ -26,11 +26,12 @@ if !infile.exists? then
   raise "Could not find #{infile.path}";
 end
 
-db     = Hathidb::Db.new();
-conn   = db.get_interactive();
-t      = 'holdings_htitem_htmember_jn';
+db   = Hathidb::Db.new();
+conn = db.get_interactive();
+t    = 'holdings_htitem_htmember_jn';
 # 3-letter month: jan, feb, mar etc.
 curmon = Time.new().strftime("%b").downcase();
+log.d("Going to put backup of current #{t} as #{t}_#{curmon}, then wipe #{t} and fill it with #{infile.path}");
 
 t_counts(conn, log, t);
 
