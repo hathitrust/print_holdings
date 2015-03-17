@@ -42,6 +42,7 @@ count_before_after(conn, log);
 # Map of prefix->member_id, reads like:
 # volume "uma.ark:/13960/t5hb1q086" goes to "umass".
 prefix_member = {
+  'aeu'  => 'ualberta',
   'gri'  => 'getty',
   'keio' => 'hathitrust',
   'mcg'  => 'mcgill',
