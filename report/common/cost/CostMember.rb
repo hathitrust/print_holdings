@@ -22,6 +22,9 @@ module Cost
       @participate_in_ic = 0;
       @participate_in_pd = 0;
       @coverage          = 0;
+      # Multiply subtotal with @multiply_subtotal to get the total. 
+      # Has traditionally been 1.5, until Mar 2015.
+      @multiply_subtotal = 1.4;
 
       # Output goes here.
       @data = Hathidata::Data.new("costreport_$ymd.tsv").open('w');
@@ -233,7 +236,7 @@ module Cost
       puts %w(member_id spm mpm ser pd extra subtotal total).join("\t");
       @members.each do |m|
         m.costs[:subtotal] = m.costs[:spm] + m.costs[:mpm] + m.costs[:ser] + m.costs[:pd] + m.costs[:extra];
-        m.costs[:total]    = m.costs[:subtotal] * 1.5;
+        m.costs[:total]    = m.costs[:subtotal] * @multiply_subtotal;
         print_cost         = [:spm, :mpm, :ser, :pd, :extra, :subtotal, :total].map{|x| m.costs[x]}.join("\t");
         puts [m.member_id, print_cost].join("\t");
         @coverage += m.costs[:subtotal];
