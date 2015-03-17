@@ -35,7 +35,7 @@ module Cost
       # Create and run members. This gives counts.
       @@conn.query(Hathiquery.get_active_members) do |m|
         member_id = m[:member_id];
-        member    = Cost::Member.new(m[:member_id], {:ic => true, :pd => (member_id != 'hathitrus')});
+        member    = Cost::Member.new(m[:member_id], {:ic => true, :pd => (member_id != 'hathitrust')});
         @members << member.run();
       end
 
