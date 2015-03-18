@@ -21,7 +21,7 @@ def get_password_from_file(fn):
 def get_connection(usr, pw):
     # open DB connection
     try:
-        conn = MySQLdb.connect (host = "mysql-htdev",
+        conn = MySQLdb.connect (host = "mysql-htprep",
                             port=3306,
                             user = usr,
                             passwd = pw,
