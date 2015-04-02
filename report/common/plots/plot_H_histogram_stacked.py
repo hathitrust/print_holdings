@@ -9,7 +9,7 @@ matplotlib.use('Agg') # need this if doing ssh
 import matplotlib.pyplot as plt
 import numpy as np
 
-MAX_H = 90 # it is terrible that this is hardcoded.
+MAX_H = 100 # it is terrible that this is hardcoded.
 
 def plot_H_stack(id, title, hcounts_spm, hcounts_mpm, hcounts_ser):
     """ Takes a list of H-counts and plots them as a bar chart """
