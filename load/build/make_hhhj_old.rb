@@ -39,7 +39,6 @@ get_members_q.enumerate() do |member_row|
     hdout.file.puts(cols.map{|x| row[x]}.join("\t"));
   end
   hdout.close();
-  log.d(load_q);
   load_q.execute(hdout.path);
 end
 hdout.delete() if !hdout.nil?;
