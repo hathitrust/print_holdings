@@ -20,7 +20,7 @@ count_q = conn.prepare(count_sql);
 
 trunc_sql  = "TRUNCATE TABLE holdings_htitem_htmember_jn_dev";
 
-get_members_sql = 'SELECT distinct member_id FROM holdings_htitem_htmember_jn';
+get_members_sql = "SELECT distinct member_id FROM holdings_htitem_htmember_jn WHERE member_id != ''";
 get_members_q   = conn.prepare(get_members_sql);
 
 select_sql = "SELECT #{cols.join(', ')} FROM holdings_htitem_htmember_jn WHERE member_id = ?";
