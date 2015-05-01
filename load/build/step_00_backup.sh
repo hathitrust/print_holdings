@@ -12,6 +12,8 @@ source $SCRIPTPATH/build_lib.sh;
 
 mkdir -pv $BACKUPDIR/;
 mkdir -pv $LOGDIR/;
+date >> $LOGDIR/captain.log;
+echo "Running step_00_backup.sh" >> $LOGDIR/captain.log;
 mkdir -pv $DATADIR/builds/current/;
 
 # Remember the line counts for input.
