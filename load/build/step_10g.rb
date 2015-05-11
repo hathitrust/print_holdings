@@ -44,6 +44,7 @@ count_before_after(conn, log);
 prefix_member = {
   'aeu'  => 'ualberta',
   'gri'  => 'getty',
+  'iau'  => 'iowa',
   'keio' => 'hathitrust',
   'mcg'  => 'mcgill',
   'osu'  => 'osu',
