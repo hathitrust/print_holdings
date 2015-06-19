@@ -64,7 +64,7 @@ def generate_htitem_oclc_data(ht_filen, jn_outfilen):
             for onum in oclc_nums:
                 onum_i = int(onum)
                 # test uniqueness
-                test_key = "%s-%i" % (vol_id, onum_i)
+                test_key = "%s\t%i" % (vol_id, onum_i)
                 if (test_key in vol_oclc_set):
                     err = "volume_id collision: '%s' '%s'" % (test_key, line)
                     print err
@@ -81,7 +81,7 @@ def generate_htitem_oclc_data(ht_filen, jn_outfilen):
             try:
                 oclc_i = int(oclc)
                 # test uniqueness
-                test_key = "%s-%i" % (vol_id, oclc_i)
+                test_key = "%s\t%i" % (vol_id, oclc_i)
                 if (test_key in vol_oclc_set):
                     err = "volume_id collision: '%s' '%s'" % (test_key, line)
                     print err
@@ -104,7 +104,7 @@ def generate_htitem_oclc_data(ht_filen, jn_outfilen):
     print "Writing %s" % jn_outfilen
     sys.stdout.flush()
     for val in vol_oclc_set:
-        vol_id, oc = val.split('-')
+        vol_id, oc = val.split("\t")
         outline = "%s\t%s\t0\n" % (vol_id, oc)
         jn_outfile.write(outline)
         
