@@ -218,6 +218,16 @@ def show_counts (member_id)
   end
 end
 
+def optimize_table ()
+  @log.d("Optimizing table.");
+  sql = "OPTIMIZE TABLE holdings_memberitem";
+  @log.d(sql);
+  res = @conn.execute(sql)
+  res.each do |row|
+    @log.d(row.to_a.join(" "));
+  end
+end
+
 # MAIN:
 if $0 == __FILE__ then
   begin
@@ -231,6 +241,7 @@ if $0 == __FILE__ then
     infiles = get_infiles();
     htfiles = copy_files(infiles);
     process_htfiles(htfiles);
+    optimize_table() unless @dry_run;
   ensure
     @log.d("Finished\n\n\n");
     @log.close();
