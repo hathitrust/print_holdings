@@ -22,8 +22,8 @@ Without filename as argument, it will download the
 hathi_full_YYYYMM01.txt.gz for the current year and month. 
 
 With filename it will download the specified file from 
-http://www.hathitrust.org/sites/www.hathitrust.org/files/hathifiles/
-(view list of files at http://www.hathitrust.org/hathifiles)
+https://www.hathitrust.org/sites/www.hathitrust.org/files/hathifiles/
+(view list of files at https://www.hathitrust.org/hathifiles)
 
 The file is placed in data/ by Hathidata and inflated,
 the original .gz file removed.
@@ -36,7 +36,7 @@ require 'hathidata';
 require 'hathilog';
 
 def run (fn)
-  root_url = 'http://www.hathitrust.org/hathifiles';
+  root_url = 'https://www.hathitrust.org/hathifiles';
   puts "Grabbing #{fn.nil? ? 'latest file' : fn} from #{root_url}";
   files = get_HT_filenames(root_url);
   retrieve_HT_file(files, fn);
@@ -48,7 +48,7 @@ def get_HT_filenames (url)
   body = open(url).read;
   hits = [];
   if !body.empty? then
-    hits = body.scan(/\"(http:.+hathi_full_\d+\.txt\.gz)\"/).flatten.sort;
+    hits = body.scan(/\"(https:.+hathi_full_\d+\.txt\.gz)\"/).flatten.sort;
   end
 
   return hits;
