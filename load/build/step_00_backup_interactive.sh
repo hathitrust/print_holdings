@@ -9,6 +9,7 @@ popd > /dev/null
 
 source $SCRIPTPATH/build_lib.sh;
 
+date >> $LOGDIR/captain.log;
 echo "Running step_00_backup_interactive.sh" >> $LOGDIR/captain.log;
 
 echo "vvv Going to need password here! vvv";
