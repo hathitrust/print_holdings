@@ -4,11 +4,10 @@
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
-
 source $SCRIPTPATH/build_lib.sh;
-# Potential replacement for /htapps/mwarin.babel/phdb_scripts/load/build/hathi_grabber.rb
-# A bit more concise.
 
+# Replacement for build/hathi_grabber.rb, which is now placed in /experimental/.
+# A bit more concise than the previous version.
 # Get the most recent hathi_full_YYYYMMDD.txt.gz listed in http://www.hathitrust.org/hathifiles
 # and gunzip to local file.
 
