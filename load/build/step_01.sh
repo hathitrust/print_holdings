@@ -8,7 +8,7 @@ popd > /dev/null;
 source $SCRIPTPATH/build_lib.sh;
 
 # Gets the "latest_hathi_file".
-ruby $SCRIPTPATH/hathi_grabber.rb;
+bash $SCRIPTPATH/hathi_grabber.sh;
 exit_st=$?;
 check_exit_code $exit_st;
 
