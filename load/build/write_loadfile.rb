@@ -16,7 +16,7 @@ end
 
 # Put results in data/builds/current/load.tsv
 Hathidata.write('builds/current/load.tsv') do |hdout|
-  found.sort.each do |x|
+  found.sort.uniq.each do |x|
     hdout.file.puts x;
   end
 end
