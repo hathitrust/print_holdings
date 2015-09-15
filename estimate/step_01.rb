@@ -165,12 +165,12 @@ def get_narrative(table, conn)
 
   conn.query(sql3) do |row3|
     uniq_oclc = row3['c'].to_i;
-    message << "containing #{separate_thousands(row3['c'])} unique OCLC numbers.";
+    message << "containing #{separate_thousands(row3['c'])} distinct OCLC numbers.";
   end
 
   conn.query(sql4) do |row4|
     perc = ((row4['c'] / uniq_oclc.to_f) * 100).round(2);
-    message << "Of the unique OCLC numbers, #{separate_thousands(row4['c'])} (#{perc}%) match HathiTrust,";
+    message << "Of those distinct OCLC numbers, #{separate_thousands(row4['c'])} (#{perc}%) match HathiTrust,";
   end
 
   conn.query(sql5) do |row5|
