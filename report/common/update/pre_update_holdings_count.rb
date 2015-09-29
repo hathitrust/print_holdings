@@ -10,7 +10,7 @@ require 'hathidb';
 class Counter
   db              = Hathidb::Db.new();
   @@conn          = db.get_conn();
-  @@get_count_sql = "SELECT COUNT(id) AS c FROM holdings_memberitem WHERE member_id = ? AND item_type = ?"
+  @@get_count_sql = "SELECT COUNT(id) AS c FROM holdings_memberitem WHERE member_id = ? AND item_type = ?";
   @@query         = @@conn.prepare(@@get_count_sql);
 
   attr_reader :member_id, :counts;
@@ -64,6 +64,15 @@ class Counter
     return count.to_i;
   end
 
+  def get_percent (item_type)
+    if (counts[item_type]['old'] == 0) or (counts[item_type]['new'] == 0)
+      return 'N/A';
+    end
+    
+    ratio = (counts[item_type]['new'] - counts[item_type]['old']) / counts[item_type]['old'].to_f;
+    return (ratio * 100).round(2);
+  end
+
 end
 
 if $0 == __FILE__ then
@@ -81,6 +90,10 @@ if $0 == __FILE__ then
       header << "#{t}_#{s}";
     end
   end
+  header << "tot_diff";
+  %w[mono multi serial].each do |t|
+    header << "%#{t}_diff";
+  end
   puts header.join("\t");
 
   # Output lines of data.
@@ -91,9 +104,16 @@ if $0 == __FILE__ then
       %w[old new].each do |s|
         line << c.counts[t][s];
       end
-      # Add diff.
+      # Add diff for each type.
       line << c.counts[t]['new'] - c.counts[t]['old'];
+    end    
+    line << (line[3] + line[6] + line[9]); # Total diff
+
+    %w[mono multi serial].each do |t|
+      # Add diff% for each type.
+      line << c.get_percent(t)
     end
+
     puts line.join("\t");
   end
 
