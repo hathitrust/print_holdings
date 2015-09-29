@@ -5,7 +5,7 @@ require 'hathidb';
 # For each, count the monos, multis and serials both in holdings_memberitem 
 # and in the files in /memberdata/. Output and give a diff for each. Takes 
 # a list of member_ids as input. 
-# Looks extra pretty if piped through | column -t
+# Looks extra pretty if piped through " | column -t "
 
 class Counter
   db              = Hathidb::Db.new();
@@ -43,6 +43,8 @@ class Counter
     return count.to_i;
   end
 
+=begin
+
   def get_actual_db_count (item_type)
     print "db #{@member_id} #{item_type} ";
     count = 0;
@@ -53,6 +55,8 @@ class Counter
 
     return count.to_i;
   end
+
+=end
 
   def get_new_count (item_type)
     print "file #{@member_id} #{item_type} ";
