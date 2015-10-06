@@ -38,8 +38,8 @@ def calc_cluster_rights()
   conn = db.get_conn();
 
   log.d("Grabbing cluster ids...");
-  query1 = "SELECT cluster_id FROM holdings_cluster";
-  all_clusters = run_list_query(conn, query1);
+  sql1 = "SELECT cluster_id FROM holdings_cluster";
+  all_clusters = run_list_query(conn, sql1);
 
   sql2 = %w[
     SELECT hh.access 
