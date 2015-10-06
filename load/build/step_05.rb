@@ -36,7 +36,7 @@ end
 def fill_table (db, log, start_with_memberid)
   conn = db.get_conn();
 
-  get_members_sql = %W<
+  get_members_sql = %w<
     SELECT DISTINCT
       member_id
     FROM
@@ -45,7 +45,7 @@ def fill_table (db, log, start_with_memberid)
       member_id
   >.join(' ');
 
-  insert_member_sql = %W<
+  insert_member_sql = %w<
   INSERT INTO
     holdings_cluster_htmember_jn (cluster_id, member_id)
     SELECT DISTINCT
