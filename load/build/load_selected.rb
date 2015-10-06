@@ -20,9 +20,9 @@ require 'fileutils';
 @log  = Hathilog::Log.new({:file_name => 'builds/current/load_selected.log'});
 db    = Hathidb::Db.new();
 @conn = db.get_conn();
-@member_data_dir = '/htapps/mwarin.babel/phdb_scripts/data/memberdata';
-@ht_dir          = '/htapps/mwarin.babel/phdb_scripts/data/loadfiles';
-@ht_backup_dir   = '/htapps/mwarin.babel/phdb_scripts/data/backup/loadfiles';
+@member_data_dir = Hathidata::Data.new('memberdata/').path;
+@ht_dir          = Hathidata::Data.new('loadfiles/').path;
+@ht_backup_dir   = Hathidata::Data.new('backup/loadfiles/').path;
 @dry_run         = false; # if @dry_run then skip updates and stuff. Turn on with -n flag.
 
 # Takes a file with instructions about which files to copy and load.
@@ -72,7 +72,7 @@ def get_infiles
 
   @log.d("Checking input files and dirs...");
   members.keys.sort.each do |k|
-    mem_dir = @member_data_dir + "/#{k}";
+    mem_dir = @member_data_dir + k;
     if Dir.exists?(mem_dir) then
       @log.d("#{mem_dir} OK dir");
       members[k].sort.each do |type|
