@@ -19,7 +19,7 @@ hundred_qmarks = (['?'] * 100).join(',');
 
 sql = %W<
 SELECT DISTINCT
-  hh.rights,
+  hh.access,
   hho.oclc
 FROM
   holdings_htitem_oclc AS hho
@@ -35,7 +35,7 @@ q = conn.prepare(sql);
 # If we're out of oclc numbers, pad with nils.
 while oclcs.size > 0 do
   slice = [];
-  puts "Slice!";
+  STDERR.puts "Slice!";
   1.upto(100).each do |i|
     if oclcs.size > 0 then
       slice << oclcs.shift;
@@ -43,12 +43,12 @@ while oclcs.size > 0 do
       slice << nil;
     end
   end
-  puts slice.join(',');
+  STDERR.puts slice.join(',');
 
   q.enumerate(*slice) do |row|
     o = row[:oclc].to_s;
-    r = row[:rights];
-    overlap[o] = r;
+    a = row[:access];
+    overlap[o] = a;
   end
 end
 
