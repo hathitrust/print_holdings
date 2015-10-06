@@ -66,7 +66,7 @@ module Hathilog
         end
 
         STDERR.puts "Logging to #{@file_path}";
-        f = File.open(@file_path, File::WRONLY | File::APPEND | File::CREAT)
+        f = File.open(@file_path, File::WRONLY | File::APPEND | File::CREAT);
         @logger = Logger.new(f, 2, 1048576); # Max 2 x 1MB
       else
         @logger = Logger.new(STDERR);
@@ -76,7 +76,7 @@ module Hathilog
 
       @logger.formatter = proc do |severity, datetime, progname, msg|
         fileLine = caller(2)[4].split(':')[0,2].join(':');
-        "#{datetime} | #{fileLine} | #{severity} | #{msg}\n"
+        "#{datetime} | #{fileLine} | #{severity} | #{msg}\n";
       end
     end
 
@@ -95,7 +95,7 @@ module Hathilog
     def close
       # We don't want to close STDERR.
       if @file_path != nil then
-        @logger.close()
+        @logger.close();
       end
     end
 
