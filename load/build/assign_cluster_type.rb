@@ -84,4 +84,6 @@ def assign_cluster_type()
   log.i("done assigning cluster types.");
 end
 
-assign_cluster_type()
+if $0 == __FILE__ then
+  assign_cluster_type();
+end
