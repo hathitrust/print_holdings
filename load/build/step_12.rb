@@ -9,7 +9,7 @@ conn = db.get_conn();
 
 get_member_sql = Hathiquery.get_active_members;
 
-insert_sql = %W<
+insert_sql = %w<
   INSERT INTO 
     holdings_H_counts (H_id, member_id, access, item_type, H_count)
   SELECT 
