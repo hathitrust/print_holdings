@@ -26,9 +26,9 @@ def prune_OCLC_resolution_data(pre_pruned, pruned_output, log)
 
   log.d("Sanity check: #{oclc_h.length} oclcs.");
 
-  count      = 0
-  out        = 0
-  no_numbers = 0
+  count      = 0;
+  out        = 0;
+  no_numbers = 0;
 
   # only retain lines with HT oclc numbers
   hdout = Hathidata::Data.new(pruned_output).open('w');
