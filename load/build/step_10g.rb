@@ -16,7 +16,7 @@ def count_before_after (conn, log)
   end
 
   # List how many by who.
-  count_by_member_before_after = %W<
+  count_by_member_before_after = %w<
     SELECT
       member_id,
       COUNT(*) AS c
