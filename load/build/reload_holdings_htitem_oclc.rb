@@ -13,7 +13,7 @@ conn   = db.get_conn();
 infile = ARGV.shift;
 
 if infile == nil then
-  raise "Need infile as 1st arg" ;
+  raise "Need infile as 1st arg";
 elsif !Pathname.new(infile).exist? then
   raise "infile #{infile} is not a path to an existing file.";
 end
