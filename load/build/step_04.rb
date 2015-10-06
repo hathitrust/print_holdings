@@ -15,7 +15,7 @@ conn = db.get_conn();
 
 # Preparing the queries.
 
-sql_check = %W<
+sql_check = %w<
 SELECT
     item_type,
     COUNT(*) AS c
@@ -27,7 +27,7 @@ GROUP BY
 query_check = conn.prepare(sql_check);
 
 # select multipart clusters
-sql_select_1 = %W<
+sql_select_1 = %w<
 SELECT
     DISTINCT(cluster_id) AS cid
 FROM
@@ -39,7 +39,7 @@ WHERE
     h.item_type = 'multi'
 >.join(' ');
 
-sql_select_2 = %W<
+sql_select_2 = %w<
 SELECT
     DISTINCT(volume_id)
 FROM
@@ -49,7 +49,7 @@ WHERE
 >.join(' ');
 query_select_2 = conn.prepare(sql_select_2);
 
-sql_update = %W<
+sql_update = %w<
 UPDATE
     holdings_htitem
 SET
@@ -62,7 +62,7 @@ query_update = conn.prepare(sql_update);
 log.d("Checking counts before...");
 log.d(sql_check);
 query_check.enumerate() do |row|
-  log.d("#{row[:item_type]}\t#{row[:c]}")
+  log.d("#{row[:item_type]}\t#{row[:c]}");
 end
 
 cluster_count = 0;
@@ -85,7 +85,7 @@ end
 log.d("Checking counts after...");
 log.d(sql_check);
 query_check.enumerate() do |row|
-  log.d("#{row[:item_type]}\t#{row[:c]}")
+  log.d("#{row[:item_type]}\t#{row[:c]}");
 end
 
 conn.close();
