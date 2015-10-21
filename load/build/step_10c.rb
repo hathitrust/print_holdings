@@ -15,10 +15,10 @@ count_sql   = "SELECT COUNT(*) AS c FROM holdings_htitem_htmember_jn";
 count_query = conn.prepare(count_sql);
 
 count_query.enumerate() do |row|
-  puts "#{count_sql} -- before: #{row[:c]}";
+  log.d("#{count_sql} -- before: #{row[:c]}");
 end
 
-main_sql = %W<
+main_sql = %w<
     INSERT IGNORE INTO holdings_htitem_htmember_jn 
     (volume_id, member_id, copy_count, lm_count, wd_count, brt_count, access_count)
     SELECT 
@@ -54,7 +54,7 @@ conn.query(members_sql) do |row|
   log.d("Running #{member_id}");
   main_query.execute(member_id);
   count_query.enumerate() do |row|
-    puts "#{count_sql} -- after member_id: #{row[:c]}";
+    log.d("After #{member_id}: #{row[:c]}");
   end
 end
 
