@@ -49,7 +49,7 @@ def add_source_items_to_htitem_htmember_jn(reportfn, log)
 
   sub_select = subconn.prepare("SELECT member_id FROM holdings_htitem_htmember_jn WHERE volume_id = ?");
   sub_insert = subconn.prepare(
-                               %W<
+                               %w<
                                 INSERT IGNORE INTO 
                                 holdings_htitem_htmember_jn 
                                 (volume_id, member_id, copy_count) 
