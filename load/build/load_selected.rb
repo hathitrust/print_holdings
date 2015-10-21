@@ -227,72 +227,39 @@ def optimize_table ()
   end
 end
 
-def check_values ()
-  # Add checks for status and item_type.
-  @log.d("Checking values...");
-  
-  @log.d("item_condition:");
-  condition_sql = %w<
-    SELECT member_id, item_condition, COUNT(item_condition) AS c 
-    FROM holdings_memberitem 
-    WHERE item_condition NOT IN ('', 'BRT') 
-    GROUP BY member_id, item_condition 
-    ORDER BY c;
-  >.join(' ');
-  @log.d(condition_sql);
-  condition_count = 0;
-  @conn.query(condition_sql) do |row|
-    condition_count += 1;
-    @log.d(row.to_a.map{|x| "'#{x}'"}.join(','));
+def check_values
+  @log.d("Checking values");
+  checks = [
+   {:col => 'item_condition', :ok_vals => ['', 'BRT']},
+   {:col => 'status',         :ok_vals => ['', 'CH', 'LM', 'WD']},
+   {:col => 'item_type',      :ok_vals => ['mono', 'multi', 'serial']},
+  ];
+  checks.each do |check|
+    col  = check[:col];
+    vals = check[:ok_vals].map{|x| "'#{x}'"}.join(',');
+    @log.d("#{col}:");
+    sql = %W<
+      SELECT member_id, #{col}, COUNT(#{col}) AS c 
+      FROM holdings_memberitem 
+      WHERE #{col} NOT IN (#{vals}) 
+      GROUP BY member_id, #{col}
+      ORDER BY c;
+    >.join(' ');
+    @log.d(sql);
+    
+    bad_count = 0;
+    @conn.query(sql) do |row|
+      bad_count += 1;
+      @log.d(row.to_a.map{|x| "'#{x}'"}.join(','));
+    end
+    if bad_count > 0 then
+      errmsg = "#{bad_count} bad values in #{col}!";
+      @log.e(errmsg);
+      raise errmsg;
+    end
+    @log.d("#{col} OK!");    
   end
-  if condition_count > 0 then
-    errmsg = "#{condition_count} bad values in item_condition!";
-    @log.e(errmsg);
-    raise errmsg;
-  end
-  @log.d("item_condition OK");
-
-  @log.d("status:");
-  status_sql = %w<
-    SELECT member_id, status, COUNT(status) AS c
-    FROM holdings_memberitem
-    WHERE status NOT IN ('', 'CH', 'LM', 'WD')
-    GROUP BY member_id, status
-    ORDER BY c;
-  >.join(' ');
-  @log.d(status_sql);
-  status_count = 0;
-  @conn.query(status_sql) do |row|
-    status_count += 1;
-    @log.d(row.to_a.map{|x| "'#{x}'"}.join(','));
-  end
-  if status_count > 0 then
-    errmsg = "#{status_count} bad values in status!";
-    @log.e(errmsg);
-    raise errmsg;
-  end
-  @log.d("status OK");
-
-  @log.d("item_type:");
-  item_type_sql = %w<
-    SELECT member_id, item_type, COUNT(item_type) AS c
-    FROM holdings_memberitem
-    WHERE item_type NOT IN ('mono', 'multi', 'serial')
-    GROUP BY member_id, item_type
-    ORDER BY c;
-  >.join(' ');
-  @log.d(item_type_sql);
-  item_type_count = 0;
-  @conn.query(item_type_sql) do |row|
-    item_type_count += 1;
-    @log.d(row.to_a.map{|x| "'#{x}'"}.join(','));
-  end
-  if item_type_count > 0 then
-    errmsg = "#{item_type_count} bad values in item_type!";
-    @log.e(errmsg);
-    raise errmsg;
-  end
-  @log.d("item_type OK");
+  @log.d("Done checking values.");
 end
 
 # MAIN:
