@@ -26,7 +26,7 @@ def assign_cluster_type()
   cluster_count   = 0;
   sel_cluster_id_sql = "SELECT cluster_id FROM holdings_cluster";
 
-  sel_item_type_sql = %W<
+  sel_item_type_sql = %w<
     SELECT DISTINCT
       item_type 
     FROM 
@@ -42,7 +42,7 @@ def assign_cluster_type()
   >.join(' ');
   sel_item_type_q = conn.prepare(sel_item_type_sql);
 
-  update_sql = %W<
+  update_sql = %w<
     UPDATE holdings_cluster 
     SET    cluster_type = ? 
     WHERE  cluster_id   = ?
