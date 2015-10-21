@@ -243,7 +243,7 @@ def check_values
       FROM holdings_memberitem 
       WHERE #{col} NOT IN (#{vals}) 
       GROUP BY member_id, #{col}
-      ORDER BY c;
+      ORDER BY c
     >.join(' ');
     @log.d(sql);
     
