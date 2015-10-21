@@ -117,7 +117,7 @@ def load_data (path, log)
   next_version = 0;
   version_sql  = "SELECT MAX(version) AS max_version FROM holdings_deltas";
 
-  load_sql = %W<
+  load_sql = %w<
     LOAD DATA LOCAL INFILE ? 
     INTO TABLE holdings_deltas (volume_id) 
     SET 
