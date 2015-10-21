@@ -28,7 +28,7 @@ db   = Hathidb::Db.new();
 conn = db.get_conn();
 log  = Hathilog::Log.new({:file_name => 'builds/current/relabel_mpm.log'});
 
-sql = %W<
+sql = %w<
 UPDATE
 holdings_memberitem
 SET
