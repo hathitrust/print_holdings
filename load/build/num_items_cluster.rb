@@ -23,7 +23,7 @@ conn = db.get_conn();
 log  = Hathilog::Log.new();
 log.i("Updating holdings_cluster with number of items.");
 
-sql  = %W<
+sql  = %w<
     UPDATE holdings_cluster SET num_of_items = (
         SELECT
         COUNT(hchj.volume_id)
