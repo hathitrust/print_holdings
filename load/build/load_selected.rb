@@ -50,7 +50,6 @@ def get_infiles
     line.strip!;
     next if line[/^#/];
     next if line[/^\s*$/];
-    puts line;
     m = /^([a-z]+)\t(mono|multi|serial)$/.match(line);
     if m != nil then
       member_id = m[1];
@@ -107,9 +106,9 @@ end
 def copy_files (infiles)
   @log.d("Backing up files...");
   htfiles = [];
-  backup_dir = @ht_backup_dir +'/'+ Time.new().strftime("%Y%m%d");
+  backup_dir = @ht_backup_dir + Time.new().strftime("%Y%m%d");
   infiles.each do |infile|
-    ht_file = @ht_dir +'/'+ infile.split('/').pop();
+    ht_file = @ht_dir + infile.split('/').last;
     # Check if file exists in ht00x
     if File.exists?(ht_file) then
       # If so, back it up.
@@ -133,12 +132,12 @@ end
 # Takes a list of files in the ht00x dir. For each file, performs
 # a reload of that type of record, i.e. one delete and one load.
 def process_htfiles (htfiles)
-  delete_sql = %W[
+  delete_sql = %w[
     DELETE FROM holdings_memberitem
      WHERE member_id = ?
        AND item_type = ?
   ].join(' ');
-  load_sql = %W[
+  load_sql = %w[
     LOAD DATA LOCAL INFILE ?
     INTO TABLE holdings_memberitem IGNORE 1 LINES
     (oclc, local_id, member_id, status, item_condition,
@@ -152,7 +151,7 @@ def process_htfiles (htfiles)
   load_query   = @conn.prepare(load_sql);
 
   htfiles.each do |infile|
-    m = /HT003_([a-z]+)\.(mono|multi|serial).tsv/.match(infile);
+    m = /HT003_([a-z]+)\.(mono|multi|serial).tsv/.match(infile.to_s);
     if m != nil then
       member_id = m[1];
       item_type = m[2];
@@ -198,7 +197,7 @@ end
 
 # Useful for logging change, run before and after a reload.
 def show_counts (member_id)
-  sql = %W<
+  sql = %w<
     SELECT
         COUNT(1) AS c,
         item_type
@@ -228,6 +227,74 @@ def optimize_table ()
   end
 end
 
+def check_values ()
+  # Add checks for status and item_type.
+  @log.d("Checking values...");
+  
+  @log.d("item_condition:");
+  condition_sql = %w<
+    SELECT member_id, item_condition, COUNT(item_condition) AS c 
+    FROM holdings_memberitem 
+    WHERE item_condition NOT IN ('', 'BRT') 
+    GROUP BY member_id, item_condition 
+    ORDER BY c;
+  >.join(' ');
+  @log.d(condition_sql);
+  condition_count = 0;
+  @conn.query(condition_sql) do |row|
+    condition_count += 1;
+    @log.d(row.to_a.map{|x| "'#{x}'"}.join(','));
+  end
+  if condition_count > 0 then
+    errmsg = "#{condition_count} bad values in item_condition!";
+    @log.e(errmsg);
+    raise errmsg;
+  end
+  @log.d("item_condition OK");
+
+  @log.d("status:");
+  status_sql = %w<
+    SELECT member_id, status, COUNT(status) AS c
+    FROM holdings_memberitem
+    WHERE status NOT IN ('', 'CH', 'LM', 'WD')
+    GROUP BY member_id, status
+    ORDER BY c;
+  >.join(' ');
+  @log.d(status_sql);
+  status_count = 0;
+  @conn.query(status_sql) do |row|
+    status_count += 1;
+    @log.d(row.to_a.map{|x| "'#{x}'"}.join(','));
+  end
+  if status_count > 0 then
+    errmsg = "#{status_count} bad values in status!";
+    @log.e(errmsg);
+    raise errmsg;
+  end
+  @log.d("status OK");
+
+  @log.d("item_type:");
+  item_type_sql = %w<
+    SELECT member_id, item_type, COUNT(item_type) AS c
+    FROM holdings_memberitem
+    WHERE item_type NOT IN ('mono', 'multi', 'serial')
+    GROUP BY member_id, item_type
+    ORDER BY c;
+  >.join(' ');
+  @log.d(item_type_sql);
+  item_type_count = 0;
+  @conn.query(item_type_sql) do |row|
+    item_type_count += 1;
+    @log.d(row.to_a.map{|x| "'#{x}'"}.join(','));
+  end
+  if item_type_count > 0 then
+    errmsg = "#{item_type_count} bad values in item_type!";
+    @log.e(errmsg);
+    raise errmsg;
+  end
+  @log.d("item_type OK");
+end
+
 # MAIN:
 if $0 == __FILE__ then
   begin
@@ -241,6 +308,7 @@ if $0 == __FILE__ then
     infiles = get_infiles();
     htfiles = copy_files(infiles);
     process_htfiles(htfiles);
+    check_values();
     optimize_table() unless @dry_run;
   ensure
     @log.d("Finished\n\n\n");
