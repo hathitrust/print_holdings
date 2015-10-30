@@ -8,7 +8,7 @@ source $SCRIPTPATH/build_lib.sh;
 
 # Replacement for build/hathi_grabber.rb, which is now placed in /experimental/.
 # A bit more concise than the previous version.
-# Get the most recent hathi_full_YYYYMMDD.txt.gz listed in http://www.hathitrust.org/hathifiles
+# Get the most recent hathi_full_YYYYMMDD.txt.gz listed in https://www.hathitrust.org/hathifiles
 # and gunzip to local file.
 
 list_url='https://www.hathitrust.org/hathifiles';
