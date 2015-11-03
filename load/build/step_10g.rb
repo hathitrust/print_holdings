@@ -49,6 +49,7 @@ prefix_member = {
   'mcg'  => 'mcgill',
   'osu'  => 'osu',
   'txa'  => 'tamu',
+  'txu'  => 'utexas',
   'ucw'  => 'uconn',
   'udel' => 'udel',
   'uma'  => 'umass',
