@@ -18,7 +18,7 @@ inner_query = conn.prepare(["SELECT COUNT(distinct ho.oclc) AS numoclc",
                             "FROM holdings_memberitem AS hm, holdings_htitem_oclc AS ho",
                             "WHERE ho.oclc = hm.oclc and member_id = ?"].join(' '));
 
-Hathidata.write('oclc_matchcounts.tsv') do |hdout|
+Hathidata.write('oclc_matchcounts_$ymd.tsv') do |hdout|
   hdout.file.sync = true;
   log.d(Hathiquery.get_all_members);
   conn.query(Hathiquery.get_all_members) do |mid_row|
