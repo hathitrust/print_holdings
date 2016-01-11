@@ -24,7 +24,8 @@ module Cost
       @coverage          = 0;
       # Multiply subtotal with @multiply_subtotal to get the total. 
       # Has traditionally been 1.5, until Mar 2015.
-      @multiply_subtotal = 1.4;
+      # Updated to 1.0 in Jan 2016.
+      @multiply_subtotal = 1.0;
 
       # Output goes here.
       @data = Hathidata::Data.new("costreport_$ymd.tsv").open('w');
