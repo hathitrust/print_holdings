@@ -2,13 +2,13 @@ use strict;
 use warnings;
 
 my $fi = 0;
-my $files = {map {++$fi => $_} @ARGV};
+my $files = {map {++$fi => $_} grep {$_ !~ /^--/} @ARGV};
 die "Need at least 2 infiles.\n" if keys %$files < 2;
 my $lines = {};
+my $delim = "\t"; # Value separator, change with --d=, for comma separated values.
+my $na    = 'N/A';
 my $member_ids = {};
 my $file_cols  = {};
-my $delim = "\t";
-my $na    = 'N/A';
 
 =pod
 
@@ -32,7 +32,18 @@ b 5 5
 a 1   3   5   8 9
 b N/A N/A N/A 5 5
 
+use --na=<value> to override the default value of $na ('N/A').
+use --d=<value> to override the default value of $delim ("\t").
+
 =cut
+
+foreach my $m (grep {$_ =~ /^--/} @ARGV) {
+    if ($m =~ /--na=(.+)/) {
+	$na = $1;
+    } elsif ($m =~ /^--d=(.+)/) {
+	$delim = $1;
+    }
+}
 
 # For each file, read in its contents line per line.
 foreach my $k (sort keys %$files) {
