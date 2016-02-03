@@ -20,6 +20,7 @@ def create_estimate(member_id, ave_ic_cost_per_vol, db)
 
   puts "#####\n# #{member_id}\n#####";
   table = "holdings_memberitem_#{member_id}";
+  table.gsub!('.', '_'); # So manoa.hawaii will work.
   iconn = db.get_interactive();
   create_table(table, iconn);
   load_table(table, member_id, iconn);
