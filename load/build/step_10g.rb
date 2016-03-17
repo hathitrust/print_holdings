@@ -55,6 +55,7 @@ prefix_member = {
   'udel' => 'udel',
   'uma'  => 'umass',
   'umd'  => 'umd',
+  'umn'  => 'umn',  
 };
 
 # Do update.
