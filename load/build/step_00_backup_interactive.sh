@@ -16,11 +16,14 @@ echo "vvv Going to need password here! vvv";
 
 # Back up holdings_htitem_oclc to file.
 bash $SCRIPTPATH/backup_table.sh holdings_htitem_oclc;
+echo -ne '\007';
 
 # Used to be 12b.
 bash $SCRIPTPATH/backup_table.sh holdings_H_counts
+echo -ne '\007';
 
 # Back up holdings_htitem_htmember_jn to file.
 bash $SCRIPTPATH/backup_table.sh holdings_htitem_htmember_jn;
+echo -ne '\007';
 
 echo "$0 done.";
