@@ -13,8 +13,7 @@ source $SCRIPTPATH/build_lib.sh;
 
 list_url='https://www.hathitrust.org/hathifiles';
 last_full_file_url=`curl ${list_url} | tr -d "\n" | grep -Po '<a[^>]+>hathi_full_\d+.txt.gz</a>' | sort -n | tail -1 | egrep -o 'https:\/\/www.hathitrust.org\/filebrowser\/download\/[0-9]+'`;
-# This stopped working Dec 2015.
-# last_full_file_url=`curl ${list_url} | grep -Po '\"https:.+hathi_full_\d+\.txt\.gz\"' | sort -n | tail -1 | tr -d '"'`;
+
 output_path=$DATADIR/builds/current/hathi_full.txt;
 
 if [ -z $last_full_file_url ]; then
