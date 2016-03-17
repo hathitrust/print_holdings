@@ -43,21 +43,6 @@ class Counter
     return count.to_i;
   end
 
-=begin
-
-  def get_actual_db_count (item_type)
-    print "db #{@member_id} #{item_type} ";
-    count = 0;
-    @@query.enumerate(@member_id, item_type) do |row|
-      count = row[:c];
-    end
-    puts count;
-
-    return count.to_i;
-  end
-
-=end
-
   def get_new_count (item_type)
     print "file #{@member_id} #{item_type} ";
     dpath = "memberdata/#{@member_id}/HT003_#{@member_id}.#{item_type}.tsv";
