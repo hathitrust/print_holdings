@@ -51,6 +51,7 @@ prefix_member = {
   'osu'  => 'osu',
   'txa'  => 'tamu',
   'txu'  => 'utexas',
+  'ucbk' => 'berkeley',
   'ucw'  => 'uconn',
   'udel' => 'udel',
   'uma'  => 'umass',
