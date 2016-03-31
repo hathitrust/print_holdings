@@ -141,7 +141,7 @@ def process_htfiles (htfiles)
     LOAD DATA LOCAL INFILE ?
     INTO TABLE holdings_memberitem IGNORE 1 LINES
     (oclc, local_id, member_id, status, item_condition,
-    process_date, enum_chron, item_type, issn, n_enum, n_chron)
+    process_date, enum_chron, item_type, issn, n_enum, n_chron, gov_doc)
   ].join(' ');
 
   @log.d(delete_sql);
