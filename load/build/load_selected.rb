@@ -17,9 +17,9 @@ require 'fileutils';
 # The script will pretty much scream and die if anything isn't
 # to its liking.
 
-@log  = Hathilog::Log.new({:file_name => 'builds/current/load_selected.log'});
-db    = Hathidb::Db.new();
-@conn = db.get_conn();
+@log             = Hathilog::Log.new({:file_name => 'builds/current/load_selected.log'});
+@db              = Hathidb::Db.new();
+@conn            = @db.get_conn();
 @member_data_dir = Hathidata::Data.new('memberdata/').path;
 @ht_dir          = Hathidata::Data.new('loadfiles/').path;
 @ht_backup_dir   = Hathidata::Data.new('backup/loadfiles/').path;
@@ -274,9 +274,13 @@ if $0 == __FILE__ then
 
     infiles = get_infiles();
     htfiles = copy_files(infiles);
+    @conn = @db.get_conn();
     process_htfiles(htfiles);
     check_values();
     optimize_table() unless @dry_run;
+  rescue StandardError => error
+    log.f("Something went wrong.");
+    @log.f(error);
   ensure
     @log.d("Finished\n\n\n");
     @log.close();
