@@ -40,7 +40,7 @@ conn.execute(trunc_sql);
 hdout = Hathidata::Data.new('holdings_htitem_htmember_jn.dat').open('w');
 get_members_q.enumerate do |mrow|
   member_id = mrow[:member_id];
-  puts select_sql.sub('?', member_id);
+  log.d("\n#{select_sql.sub('?', member_id)}");
   select_q.enumerate(member_id) do |row|
     hdout.file.puts(cols.map{ |x| row[x] }.join("\t"));
   end
