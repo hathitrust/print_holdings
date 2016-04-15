@@ -252,12 +252,13 @@ module Cost
       end
 
       # If we are off more than one dollar per member, adjust.
-      if diff.abs > @members.size then
+      if diff.abs > (@members.size / 100.0) then
         diff_per_member = diff.to_f / @members.size;
         @deet.file.puts "diff_per_member\t#{diff_per_member}";
         @members.each do |m|
           m.costs[:extra] += diff_per_member;
         end
+        puts "Adding #{diff_per_member} as extra cost to each member.";
         puts "Running the numbers again...";
         return coverage();
       else
