@@ -39,6 +39,7 @@ def main
   # header_lines: number of lines at top of file that shouldn't be parsed
   # infile: name of file relative to the data/memberdata/<member_id>/ dir.
   # min_cols: skip line if it has fewer cols than this.
+  # You can use comments of sorts in the json, by prefixing their keyss with '_'.
   conf_template = {
     "mono" => {
       "col_condition" => "optional",
@@ -121,10 +122,12 @@ def main
 
   # Make sure conf_hash only contains the keys in conf_template.
   conf_hash.keys.sort.each do |item_type|
+    next if item_type.start_with?('_');
     if !conf_template.has_key?(item_type) then
       raise "Conf contains disallowed item_type #{item_type}";
     end
     conf_hash[item_type].keys.sort.each do |attr|
+      next if attr.start_with?('_');
       if !conf_template[item_type].has_key?(attr) then
         raise "Conf contains disallowed attr #{attr} for item_type #{item_type}";
       end
@@ -153,6 +156,7 @@ def main
 
   # Generate an options hash for each item_type, send to MemberScrubber.
   conf_hash.keys.sort.each do |item_type|
+    next if item_type.start_with?('_');
     log.d(item_type);
     options = conf_hash[item_type];
     options["member_id"] = member_id;
