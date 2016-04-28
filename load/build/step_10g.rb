@@ -46,6 +46,7 @@ prefix_member = {
   'gri'  => 'getty',
   'ia'   => 'wfu',
   'iau'  => 'iowa',
+  'innd' => 'nd',
   'keio' => 'hathitrust',
   'mcg'  => 'mcgill',
   'osu'  => 'osu',
