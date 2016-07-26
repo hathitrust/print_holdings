@@ -39,7 +39,7 @@ def main
   # header_lines: number of lines at top of file that shouldn't be parsed
   # infile: name of file relative to the data/memberdata/<member_id>/ dir.
   # min_cols: skip line if it has fewer cols than this.
-  # You can use comments of sorts in the json, by prefixing their keyss with '_'.
+  # You can use comments of sorts in the json, by prefixing their keys with "_".
   conf_template = {
     "mono" => {
       "col_condition" => "optional",
@@ -399,6 +399,7 @@ class MemberScrubber
 
   def process_data ()
     @logger.i("Started scrubbing #{@data_type}s from #{@member_id}");
+    @logger.i(@hdin.path);
     @hdin.open('r');
     @hdout.open('w');
     @hdout.file.puts %w[OCN BIB MEMBER_ID STATUS CONDITION DATE ENUM_CHRON TYPE ISSN N_ENUM N_CHRON GOV_DOC].join("\t");
