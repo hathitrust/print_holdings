@@ -39,7 +39,7 @@ module Cost
       # Create and run members. This gives counts.
       @@conn.query(Hathiquery.get_active_members) do |m|
         member_id = m[:member_id];
-        member    = Cost::Member.new(m[:member_id], {:ic => true, :pd => (member_id != 'hathitrust')});
+        member    = Cost::Member.new(m[:member_id]);
         @members << member.run();
       end
 
@@ -279,6 +279,10 @@ module Cost
     # A Member has some counts and some costs. It can only figure out the counts itself.
     @@db   = Hathidb::Db.new();
     @@conn = @@db.get_conn();
+
+    # These do not participate in pd cost sharing.
+    @@no_pd = %w[hathitrust nrlf srlf];
+
     attr_reader :member_id, :ic_spm, :ic_mpm, :ic_ser, :num_pd, :participates_in_ic, :participates_in_pd, :count_h_sums;
     attr_accessor :costs;
 
@@ -286,6 +290,11 @@ module Cost
       @member_id          = member_id;
       @participates_in_ic = participates[:ic];
       @participates_in_pd = participates[:pd];
+
+      if @@no_pd.include?(@member_id) then
+        @participates_in_pd = false;
+      end
+
       @ic_spm = {};
       @ic_mpm = {};
       @ic_ser = {};
