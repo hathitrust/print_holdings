@@ -279,7 +279,6 @@ class MemberScrubber
       bi = bit.to_i;
       next if bi == 0;
       row    = @count_oclc_q.enumerate(bi);
-      # row    = @conn.query("SELECT COUNT(*) FROM holdings_htitem_oclc WHERE oclc = #{bi}");
       result = row.to_a.uniq[0];
       count  = result[0]; # grab the first term too
       if (count.to_i > 0)
@@ -538,6 +537,8 @@ class MemberScrubber
             if gov_doc == '1' then
               count(:gov_docs);
             end
+          elsif !gov_doc_raw.nil? then
+            count("bad_gov_doc_#{gov_doc_raw}".to_sym);            
           end
         end
 
