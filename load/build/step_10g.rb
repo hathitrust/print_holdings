@@ -41,6 +41,7 @@ count_before_after(conn, log);
 
 # Map of prefix->member_id, reads like:
 # volume "uma.ark:/13960/t5hb1q086" goes to "umass".
+# 2016-08-26 #mwarin: There are enough of these now that I think it should be moved to a table.
 prefix_member = {
   'aeu'  => 'ualberta',
   'gri'  => 'getty',
@@ -50,6 +51,7 @@ prefix_member = {
   'keio' => 'hathitrust',
   'mcg'  => 'mcgill',
   'osu'  => 'osu',
+  'pul1' => 'princeton',
   'txa'  => 'tamu',
   'txu'  => 'utexas',
   'ucbk' => 'berkeley',
@@ -59,6 +61,7 @@ prefix_member = {
   'uma'  => 'umass',
   'umd'  => 'umd',
   'umn'  => 'umn',  
+  'uq'   => 'uq',
 };
 
 # Do update.
