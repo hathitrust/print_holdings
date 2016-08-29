@@ -8,7 +8,7 @@ require 'hathidb';
 
 DB_SCH = 'ht_repository';
 DB_TAB = 'holdings_memberitem_counts';
-AWS_RE = Regexp.new('^part-r-[0-9]+$');
+AWS_RE = Regexp.new('^part-.+[0-9]+$');
 ZZZ    = 1;
 
 def start (dir, db, log)
