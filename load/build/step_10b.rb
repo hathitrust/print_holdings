@@ -14,7 +14,10 @@ def t_counts (conn, log, t)
   end
 end
 
-log = Hathilog::Log.new({:file_name => 'builds/current/step_10b.log'});
+log = Hathilog::Log.new(
+  {:file_name => 'builds/current/step_10b.log',
+   :log_sync  => true,
+  });
 log.d("Started");
 
 # This should pick the latest holdings_htitem_htmember.multi.*.data,
