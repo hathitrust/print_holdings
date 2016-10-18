@@ -62,6 +62,7 @@ prefix_member = {
   'umd'  => 'umd',
   'umn'  => 'umn',  
   'uq'   => 'uq',
+  'uiul' => 'uiuc',
 };
 
 # Do update.
