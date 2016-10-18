@@ -9,8 +9,6 @@ matplotlib.use('Agg') # need this if doing ssh
 import matplotlib.pyplot as plt
 import numpy as np
 
-MAX_H = 100 # it is terrible that this is hardcoded.
-
 def plot_H_stack(id, title, hcounts_spm, hcounts_mpm, hcounts_ser):
     """ Takes a list of H-counts and plots them as a bar chart """
     fig_name = "%s-Hplot-stacked.png" % id
@@ -34,15 +32,15 @@ def plot_H_stack(id, title, hcounts_spm, hcounts_mpm, hcounts_ser):
 
     # set axes
     axis = [int(x) for x in range(1, len(hcounts_spm)+1)]
-    xtics = [int(x) for x in range(0, len(hcounts_spm)+1, 5)]
+    xtics = [int(x) for x in range(0, len(hcounts_spm)+1, 10)]
     ptitle = "%s" % title
 
     plt.title(ptitle, font3)
 
     plt.xlabel('H', font3)
 
-    plt.ylabel('Count', font3)
-    plt.xticks(xtics)
+    plt.ylabel('Count')
+    plt.xticks(xtics, fontsize=10)
 
     plt.bar(axis, hcounts_spm, width=bwidth, align='center', color='#0000ee', edgecolor='#0000ee')
     plt.bar(axis, hcounts_mpm, width=bwidth, align='center', color='#eeaa00', edgecolor='#eeaa00', bottom=hcounts_spm)
@@ -90,7 +88,7 @@ def parse_Hfiles(spmfilen, mpmfilen, serfilen):
         np_mpm = np.array(data_mpm)
         np_ser = np.array(data_ser)
         plot_H_stack(member_id, member_name, np_spm, np_mpm, np_ser)
-        #sys.exit()
+        # sys.exit()
 
 if __name__ == '__main__':
 
