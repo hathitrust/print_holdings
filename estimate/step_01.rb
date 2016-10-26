@@ -27,7 +27,7 @@ def create_estimate(member_id, ave_ic_cost_per_vol, db)
   volume_id_file = get_volume_ids(table, iconn);
 
   narrative = get_narrative(table, iconn);
-  hd = Hathidata::Data.new("estimate/narrative_#{member_id}").open('w');
+  hd = Hathidata::Data.new("estimate/narrative_#{member_id}_$ymd.txt").open('w');
   hd.file.puts narrative;
   hd.close();
 
