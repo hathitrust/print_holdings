@@ -4,38 +4,61 @@
 
 module Hathiquery
   def Hathiquery.source_map
+    # Check regularly if there are values missing from here.
+    # SELECT DISTINCT source FROM holdings_htitem;
+    # Then look the missing ones up in prod:
+    # mwarin@mysql-sdr [ht_repository]> select collection,responsible_entity from ht_collections where collection IN ('AEU','AUBRU' ... );
+    # ... and add those member_ids here.
     {
-      'CHI'  => 'uchicago',
-      'COO'  => 'cornell',
-      'DUL'  => 'duke',
-      'FU'   => 'flbog',
-      'HVD'  => 'harvard',
-      'IEN'  => 'northwestern',
-      'INU'  => 'iu',
-      'LOC'  => 'loc',
-      'MCHB' => 'bc',
-      'MDL'  => 'umn',
-      'MIU'  => 'umich',
-      'NCSU' => 'ncsu',
-      'NJP'  => 'princeton',
-      'NNC'  => 'columbia',
-      'NYP'  => 'nypl',
-      'PST'  => 'psu',
-      'PUR'  => 'purdue',
-      'UC'   => 'berkeley',
-      'UCM'  => 'ucm',
-      'UIU'  => 'illinois',
-      'UMN'  => 'umn',
-      'UNC'  => 'unc',
-      'USU'  => 'usu',
-      'UVA'  => 'virginia',
-      'WU'   => 'wisc',
-      'YALE' => 'yale',
+      'AEU'    => 'ualberta',
+      'AUBRU'  => 'uq',
+      'CHI'    => 'uchicago',
+      'COO'    => 'cornell',
+      'CTU'    => 'uconn',
+      'DEU'    => 'udel',
+      'DUL'    => 'duke',
+      'FU'     => 'flbog',
+      'GEU'    => 'emory',
+      'HVD'    => 'harvard',
+      'IAU'    => 'uiowa',
+      'IEN'    => 'northwestern',
+      'INU'    => 'iu',
+      'LOC'    => 'loc',
+      'MCHB'   => 'bc',
+      'MDL'    => 'umn',
+      'MDU'    => 'umd',
+      'MIEM'   => 'msu',
+      'MIU'    => 'umich',
+      'MMET'   => 'tufts',
+      'MOU'    => 'missouri',
+      'MU'     => 'umass',
+      'MWICA'  => 'umich',
+      'NCSU'   => 'ncsu',
+      'NCWSW'  => 'wfu',
+      'NJP'    => 'princeton',
+      'NNC'    => 'columbia',
+      'NYP'    => 'nypl',
+      'PST'    => 'psu',
+      'PUR'    => 'purdue',
+      'QMM'    => 'mcgill',
+      'TXCM'   => 'tamu',
+      'TXU'    => 'utexas',
+      'UC'     => 'berkeley',
+      'UCM'    => 'ucm',
+      'UIU'    => 'illinois',
+      'UKLOKU' => 'hathitrust',
+      'UMN'    => 'umn',
+      'UNC'    => 'unc',
+      'USU'    => 'usu',
+      'UVA'    => 'virginia',
+      'WAU'    => 'washington',
+      'WU'     => 'wisc',
+      'YALE'   => 'yale'
     };
   end
 
-  def Hathiquery.cali_members 
-    %w(berkeley ucdavis uci ucla ucmerced ucr ucsb ucsc ucsd ucsf);
+  def Hathiquery.cali_members
+    %w{berkeley nrlf srlf ucdavis uci ucla ucmerced ucr ucsb ucsc ucsd ucsf};
   end
 
   def Hathiquery.check_count(table)
