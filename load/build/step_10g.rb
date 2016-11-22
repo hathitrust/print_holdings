@@ -54,6 +54,7 @@ prefix_member = {
   'pul1' => 'princeton',
   'txa'  => 'tamu',
   'txu'  => 'utexas',
+  'uc1'  => 'ucla',
   'ucbk' => 'berkeley',
   'ucmr' => 'ucmerced',
   'ucw'  => 'uconn',
