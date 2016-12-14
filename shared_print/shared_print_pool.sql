@@ -4,6 +4,8 @@ CREATE TABLE shared_print_pool (
     id INT NOT NULL AUTO_INCREMENT,
     holdings_memberitem_id INT NOT NULL,    
     member_id VARCHAR(20) NOT NULL,
+    item_condition ENUM ('','BRT') NULL,
+    gov_doc TINYINT(1) NULL,
     oclc bigint(20) NOT NULL,
     local_oclc bigint(20) NOT NULL,
     local_h SMALLINT NULL DEFAULT NULL,

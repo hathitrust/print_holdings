@@ -1,0 +1,14 @@
+{
+    "member_id"               : "OPT",
+    "oclc"                    : "REQ",
+    "local_id"                : "REQ",
+    "oclc_symbol"             : "REQ",
+    "local_item_id"           : "OPT",
+    "local_loc_shelving_type" : "OPT",
+    "ht_retention_date"       : "OPT",
+    "ht_retention_flag"       : "OPT",
+    "other_commitments"       : "OPT",
+    "lending_policy"          : "OPT",
+    "linkage_info"            : "OPT",
+    "ownership_history"       : "OPT"
+}
