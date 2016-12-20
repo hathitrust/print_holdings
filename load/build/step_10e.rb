@@ -7,21 +7,22 @@ require 'hathiquery';
 
 Part of step 10.
 
-Edited by mwarin, Dec 17 2013.
-Was getting a "Statement nesting level is too deep (likely a bug)"
-error when running, using jdbchelper 0.8.
+This routine accounts for original "source" hathitrust items.  Many items in HT
+do not match anything, even the print holdings of the member who submitted them
+to HT originally.  This routine updates the htitem_htmember_jn table with these
+entries.
 
-All changed code uses the var subconn.
+We look through the Hathifile, record by record:
+  "SELECT volume_id, source from holdings_htitem"
+and if the volume_id isn't already held (in holdings_htitem_htmember_jn)
+then we look up the holdings_htitem.source in a map and assign the volume id to 
+that member. If that source map is missing key-value pairs we're going to insert 
+null values, and they never make it to prod. Important to keep up to date.
 
-Jan 27 by The Same, using hathidb and hathiquery, also enumerating the
-selects instead of executing them and storing in var.
+BTW, the sub_insert should probably be rewritten as a LOAD DATA LOCAL INFILE
+instead of legion of single inserts.
 
 =end
-
-# This routine accounts for original "source" hathitrust items.  Many items in HT
-# do not match anything, even the print holdings of the member who submitted them
-# to HT originally.  This routine updates the htitem_htmember_jn table with these
-# entries.
 
 def add_source_items_to_htitem_htmember_jn(log)
   db              = Hathidb::Db.new();
@@ -42,7 +43,6 @@ def add_source_items_to_htitem_htmember_jn(log)
   source_h     = Hathiquery.source_map;
   cali_members = Hathiquery.cali_members;
 
-  ### loop through HT items ###
   rowcount   = 0;
   cali_total = 0;
   deposits   = 0;
@@ -60,12 +60,15 @@ def add_source_items_to_htitem_htmember_jn(log)
                                 >.join(" ")
                                );
 
+  ### loop through HT items ###
   conn.query("SELECT volume_id, source from holdings_htitem") do |row1|
     rowcount += 1;
 
     skip = false;
     if row1[:source] == 'UC' then # Cali.
       cali_total += 1;
+      # If the source is UC then check if a UC system member is holding it      
+      # (according to sub_select)
       sub_select.enumerate(row1[:volume_id]) do |t|
         if cali_members.include?(t[0].strip) then
           skip = true;
@@ -74,6 +77,8 @@ def add_source_items_to_htitem_htmember_jn(log)
         end
       end
     else # Non-Cali.
+      # Else look up source-to-memberid and see if that member is holding it
+      # (according to sub_select)
       member_id = source_h[row1[:source]];
       sub_select.enumerate(row1[:volume_id]) do |t|
         if t[0].strip == member_id then
@@ -84,6 +89,9 @@ def add_source_items_to_htitem_htmember_jn(log)
       end
     end
 
+    # If we didn't set skip to true, by satisfying one of the conditions above,
+    # look up source-to-memberid and insert pair of member_id and volume_id
+    # with sub_insert.
     unless skip then
       member_id = source_h[row1[:source]];
       deposits += 1;
@@ -92,7 +100,6 @@ def add_source_items_to_htitem_htmember_jn(log)
       hdout.file.puts(outstr);
     end
 
-    skip = false;
     if ((rowcount % 100000) == 0) then
       log.d("Rowcount:  #{rowcount}...");
       log.d("\tCaliTotal: #{cali_total}");
