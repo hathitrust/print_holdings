@@ -38,6 +38,7 @@ module Hathiquery
       'NJP'    => 'princeton',
       'NNC'    => 'columbia',
       'NYP'    => 'nypl',
+      'OSU'    => 'osu',
       'PST'    => 'psu',
       'PUR'    => 'purdue',
       'QMM'    => 'mcgill',
