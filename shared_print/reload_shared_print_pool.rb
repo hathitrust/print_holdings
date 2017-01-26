@@ -16,7 +16,7 @@ end
 
 shared_print_members = [];
 if test == true then
-  shared_print_members = %w[cornell duke emory];
+  shared_print_members = %w[cornell duke emory utexas];
 else
   Hathidata.read('shared_print_members.tsv') do |line|
     member_id = line.strip;
@@ -40,6 +40,16 @@ insert_sql = %w{
     AND hm.member_id = ?
 }.join(' ');
 
+# Special cases go here
+delete_special_sql = "DELETE FROM shared_print_pool WHERE id = ?";
+
+utexas_special_sql = %w[
+  SELECT spp.id 
+  FROM shared_print_pool   AS spp 
+  JOIN holdings_memberitem AS hm ON (spp.holdings_memberitem_id = hm.id) 
+  WHERE spp.member_id = 'utexas' AND hm.local_id NOT LIKE 'ut.b%'
+].join(' ');
+
 get_local_h_sql = %w{
     SELECT oclc, COUNT(DISTINCT member_id) AS h
     FROM shared_print_pool
@@ -61,7 +71,15 @@ if !just_h then
     insert_q.execute(member_id);
   end
 end
-  
+
+# Do special cases before calculating Hs.
+delete_special_q = conn.prepare(delete_special_sql);
+utexas_special_q = conn.prepare(utexas_special_sql);
+log.d("Narrowing down utexas.");
+utexas_special_q.enumerate() do |row|
+  delete_special_q.execute(row[:id]);
+end
+
 # Calculate local_h (H relative to pool)
 get_local_h_q    = conn.prepare(get_local_h_sql);
 update_local_h_q = conn.prepare(update_local_h_sql);
