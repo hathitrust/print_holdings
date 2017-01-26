@@ -4,6 +4,7 @@ require 'hathilog';
 require 'json';
 require 'set';
 require 'date';
+require 'scrub';
 
 # Description:
 # A shared print member sends us a file with their commitments.
@@ -11,7 +12,14 @@ require 'date';
 # They must also have a profile file telling this script which column is which. If none exists,
 # a copy of the default profile will be made, and then it needs to be edited.
 # When parsing the commitments file, only lines with 0 warnings will be added to the DB.
+# Lines with warnings get printed to a separate file (@bad_file) with comments.
 # Commitments with OCLC numbers that don't match the shared print pool will... be deleted?
+
+# For each member, generate a shared print profile based on default.json.
+# One will be made for you if you try to run this script without one.
+
+# Call like so:
+# ruby ingest_commitment_file.rb <member_id> <path_to_input_file>
 
 # Todos:
 # Data validation
@@ -21,7 +29,11 @@ def run
   @conn       = db.get_conn();
   @member_id  = ARGV.shift;
   @input_file = ARGV.shift;
-  @log        = Hathilog::Log.new();
+  @update     = ARGV.include?('--update');
+  @log        = Hathilog::Log.new({
+      :file_name => "shared_print/ingest/#{@member_id}_$ymd.log.txt",
+      :log_level => 1
+    });
 
   # Queries
   @in_pool_sql          = "SELECT COUNT(*) AS c FROM shared_print_pool WHERE member_id = ?";
@@ -30,23 +42,30 @@ def run
   @get_other_id_sql     = "SELECT other_commitment_id FROM shared_print_commitments WHERE member_id = ?";
   @delete_other_sql     = "DELETE FROM shared_print_other WHERE id = ?";
   @delete_sql           = "DELETE FROM shared_print_commitments WHERE member_id = ?";
+  @resolve_oclc_sql     = "SELECT oclc_x FROM oclc_resolution WHERE oclc_y = ?";
   @get_oclc_diff_sql    = %w{
-  SELECT spc.oclc
+  SELECT spc.resolved_oclc
     FROM shared_print_commitments AS spc
     LEFT JOIN shared_print_pool   AS spp
-    ON (spc.member_id = spp.member_id AND spc.oclc = spp.oclc)
+    ON (spc.member_id = spp.member_id AND spc.resolved_oclc = spp.oclc)
     WHERE spc.member_id = ?
     AND spp.oclc IS NULL
   }.join(' ');
+  @get_other_id_by_ocn  = "SELECT other_commitment_id FROM shared_print_commitments WHERE resolved_oclc = ? AND member_id = ?";
+  @del_oclc_diff_sql    = "DELETE FROM shared_print_commitments WHERE member_id = ? AND resolved_oclc = ?";
+
 
   # Prep queries
-  @in_pool_q           = @conn.prepare(@in_pool_sql);
-  @get_max_other_id_q  = @conn.prepare(@get_max_other_id_sql);
-  @insert_other_q      = @conn.prepare(@insert_other_sql);
-  @get_other_id_q      = @conn.prepare(@get_other_id_sql);
-  @delete_other_q      = @conn.prepare(@delete_other_sql);
-  @delete_q            = @conn.prepare(@delete_sql);
-  @get_oclc_diff_q     = @conn.prepare(@get_oclc_diff_sql);
+  @in_pool_q          = @conn.prepare(@in_pool_sql);
+  @get_max_other_id_q = @conn.prepare(@get_max_other_id_sql);
+  @insert_other_q     = @conn.prepare(@insert_other_sql);
+  @get_other_id_q     = @conn.prepare(@get_other_id_sql);
+  @delete_other_q     = @conn.prepare(@delete_other_sql);
+  @delete_q           = @conn.prepare(@delete_sql);
+  @resolve_oclc_q     = @conn.prepare(@resolve_oclc_sql);
+  @get_oclc_diff_q    = @conn.prepare(@get_oclc_diff_sql);
+  @get_other_id_by_ocn_q = @conn.prepare(@get_other_id_by_ocn);
+  @del_oclc_diff_q    = @conn.prepare(@del_oclc_diff_sql);
 
   @counts       = {};
   @profile_data = {};
@@ -55,22 +74,28 @@ def run
 
   # Make sure these match the ENUM declarations in ingest.sql.
   @enums = {
-    'local_shelving_type' => Set.new(%w[cloa clca sfca sfcahm sfcaasrs]),
-    'lending_policy'      => Set.new(%w[a b]),
+    'local_shelving_type'   => Set.new(%w[cloa clca sfca sfcahm sfcaasrs]),
+    'lending_policy'        => Set.new(%w[blo]),
+    'scanning_repro_policy' => Set.new(['do not reproduce']),
   };
-  @sp_program_enum = Set.new(%w[test east west north south]);
-  
+  @sp_program_enum = Set.new(%w[coppul east flare ivyplus mssc recap ucsp viva other]);
+  @scrubber        = MemberScrubber.new({'data_type' => 1});
+
   # Enough setup. Setup makes weak. Run makes strong. Run!
   check_member();
   check_profile();
-  delete_previous_commitments();
+  if @update == false then
+    delete_previous_commitments();
+  end
   parse_file();
   load_data();
-  check_loaded_oclcs();
+  check_loaded_records();
+
   log_counts();
 end
 
 def check_member
+  # Make sure member_id matches a kosher shared print member.
   sp_member = false;
   Hathidata.read('shared_print_members.tsv') do |line|
     if line.strip == @member_id then
@@ -93,6 +118,7 @@ def check_member
 end
 
 def check_profile
+  # Make sure member has an OK shared print profile file.
   profile         = Hathidata::Data.new("shared_print_profiles/#{@member_id}.json");
   default_profile = Hathidata::Data.new("shared_print_profiles/default.json");
   if profile.exists? then
@@ -161,7 +187,7 @@ end
 # Parse to MySQL-ready file using profile
 def parse_file
   @dat_file   = Hathidata::Data.new("ingest_commitment_#{@member_id}.dat").open('w');
-  @bad_file   = Hathidata::Data.new("ingest_commitment_#{@member_id}_$ymd.bad.tsv").open('w');
+  @bad_file   = Hathidata::Data.new("#{@member_id}_print_retention_warnings_$ymd.tsv").open('w');
   commitments = Hathidata::Data.new(@input_file).open('r');
   line_count  = 0;
   warn_count  = 0;
@@ -170,9 +196,9 @@ def parse_file
     line_count += 1;
     line.strip!
     # Skip header
-    if line_count == 1 then      
+    if line_count == 1 then
       # Copy line header to .bad file, add comments col.
-      @bad_file.file.puts("comments" + "\t" + line);
+      @bad_file.file.puts("lineno\tcomments\t" + line);
       next;
     end
     warnings   = [];
@@ -188,16 +214,29 @@ def parse_file
         @log.w("Missing value for required field #{k} on line #{line_count}");
         warnings << "missing_#{k}";
       end
-      # Check that enums arent violated
+      # Check that enums aren't violated
       if @enums.has_key?(k) && !@enums[k].include?(line_cols[v]) then
         @log.w("#{line_cols[v]} violates #{k} enum declaration on line #{line_count}");
         warnings << "bad_enum_#{k}";
       end
 
       query_cols[k] = line_cols[v];
+
+      ## Normalize/scrub individual fields here.
+      if k =~ /^(local|resolved)_oclc$/ then
+        # Scrub oclc
+        original = query_cols[k];
+        begin
+          query_cols[k] = @scrubber.parse_oclc(query_cols[k]);
+        rescue => e
+          @log.e("#{e.class} when parsing oclc '#{original}'");
+        end
+        if query_cols[k] == 0 then
+          @log.w("'#{original}' is a bad #{k} on line #{line_count}");
+          warnings << "bad_#{k}";
+        end
+      end
     end
-    ## Normalize/scrub individual fields here.
-    ## Do extra stuff for lending_policy/shelving type
 
     # Special treatment of "other_commitments"
     # Syntax allowed:
@@ -215,7 +254,7 @@ def parse_file
         program.strip!
         if !@sp_program_enum.include?(program) then
           @log.w("#{program} is invalid enum value for other_commitments on line #{line_count}");
-          warnings << "bad_enum_other_commitments";
+          warnings << "bad_other_commitments";
           next;
         end
         # Make sure date is kosher.
@@ -243,16 +282,23 @@ def parse_file
       query_cols['other_commitment_id'] = other_id;
     end
 
-    # Only print to dat file if no warnings.
+    # Only print to @dat_file if no warnings. Print to @bad_file otherwise.
     if warnings.size > 0 then
       warn_count += 1;
       # Count your ble-, um, warnings.
       warnings.map{|x| countx(x)};
-      @bad_file.file.puts(warnings.join(",") + "\t" + line);
+      @bad_file.file.puts("#{line_count}\t" + warnings.join(",") + "\t" + line);
     else
       # Make sure query_cols contains member_id.
       # If it wasnt given in the file, use the ARGV one.
       query_cols['member_id'] ||= @member_id;
+
+      # Use provided resolved_oclc or resolve local_oclc.
+      if !query_cols.has_key?('resolved_oclc') then
+        query_cols['resolved_oclc'] = resolve_oclc(query_cols['local_oclc']);
+      end
+      query_cols.delete('local_oclc');
+
       @dat_file.file.puts(query_cols.keys.sort.map{ |x| query_cols[x] }.join("\t"));
       countx(:output_file_lines);
     end
@@ -266,7 +312,20 @@ def parse_file
     @log.w("#{warn_count} lines skipped due to warnings");
   end
   commitments.close();
+  @bad_file.close();
   @dat_file.close();
+end
+
+def resolve_oclc (oclc)
+  # Take an oclc number as input. Look it up in resolution table.
+  # If no hit, return input.
+  resolved_oclc = oclc;
+  @resolve_oclc_q.enumerate(oclc) do |row|
+    resolved_oclc = row[:oclc_x];
+    countx(:oclc_resolution_lookups);
+    break;
+  end
+  return resolved_oclc;
 end
 
 def load_data
@@ -276,25 +335,36 @@ def load_data
     @profile_data.delete('other_commitments');
     @profile_data['other_commitment_id'] = true;
   end
+
+  # Don't actually keep local_oclc. We can link it in from shared print pool.
+  @profile_data.delete('local_oclc');
+  @profile_data['resolved_oclc'] ||= true;
+
   # Load file
   load_sql = %W{
     LOAD DATA LOCAL INFILE ?
     INTO TABLE shared_print_commitments
     (#{@profile_data.keys.sort.join(',')})
 }.join(' ')
-  @log.d(load_sql);
+  @log.i(load_sql);
   load_q = @conn.prepare(load_sql);
   load_q.execute(@dat_file.path);
   # @dat_file.delete;
 end
 
-def check_loaded_oclcs
+def check_loaded_records
   # Check that all inserted OCLCs match what the member has in shared_print_pool
   @get_oclc_diff_q.enumerate(@member_id) do |row|
-    @log.w("oclc #{row[:oclc]} does not match shared print pool");
+    bad_ocn = row[:resolved_oclc];
+    @log.w("oclc #{bad_ocn} does not match shared print pool, rejected");
     countx(:oclc_not_in_sp);
-    # Delete it?
-    # If so, also check other commitments.
+
+    # Check if there are any other_commitments that need to be deleted first.
+    @get_other_id_by_ocn_q.enumerate(bad_ocn, @member_id) do |row_oc|
+      @delete_other_q.execute(row_oc[:other_commitment_id]);
+    end
+    # Delete commitment
+    @del_oclc_diff_q.execute(@member_id, bad_ocn);
   end
 end
 
