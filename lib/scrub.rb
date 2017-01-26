@@ -248,9 +248,10 @@ class MemberScrubber
       end
       hd.close();
     else
-      body = open("http://www.oclc.org/apps/oclc/wwg").read;
+      max_oclc_url = "http://www.oclc.org/apps/oclc/wwg";
+      body = open(max_oclc_url).read;
       if body.empty? then
-        raise 'fail, body empty';
+        raise "Fail! Body empty. Check if #{max_oclc_url} is b0rk.";
       else
         j = JSON.parse(body);
         if (j.class.to_s == 'Hash' && j['oclcNumber']) then
@@ -335,7 +336,7 @@ class MemberScrubber
     end
     if (ocnp =~ /\D/)
       if @@VERBOSE
-        STDERR.puts("Adjusting '#{ocn}'->'#{ocnq}'->'#{ocni}'");
+        STDERR.puts("Adjusting '#{ocn}'->'#{ocnp}'->'#{ocni}'");
       end
       ocnp = ocnp.gsub(/\D/, '');
     end
