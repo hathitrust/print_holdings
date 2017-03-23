@@ -51,6 +51,7 @@ prefix_member = {
   'keio' => 'hathitrust',
   'mcg'  => 'mcgill',
   'osu'  => 'osu',
+  'penn' => 'upenn',
   'pul1' => 'princeton',
   'txa'  => 'tamu',
   'txu'  => 'utexas',
