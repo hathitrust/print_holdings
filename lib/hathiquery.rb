@@ -23,6 +23,7 @@ module Hathiquery
       'IAU'    => 'uiowa',
       'IEN'    => 'northwestern',
       'INU'    => 'iu',
+      'JTKU'   => 'hathitrust', # Keio
       'LOC'    => 'loc',
       'MCHB'   => 'bc',
       'MDL'    => 'umn',
@@ -38,8 +39,9 @@ module Hathiquery
       'NJP'    => 'princeton',
       'NNC'    => 'columbia',
       'NYP'    => 'nypl',
-      'OSU'    => 'osu',
+      'OU'     => 'osu', # was OSU=>osu
       'PST'    => 'psu',
+      'PU'     => 'upenn',
       'PUR'    => 'purdue',
       'QMM'    => 'mcgill',
       'TXCM'   => 'tamu',
