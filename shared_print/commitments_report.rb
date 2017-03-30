@@ -3,22 +3,23 @@ require 'hathidata';
 require 'json';
 
 member_id = ARGV.shift;
+db        = Hathidb::Db.new();
+conn      = db.get_conn();
+hdout     = Hathidata::Data.new("reports/shared_print/commitment_report_#{member_id}_$ymd.tsv").open('w');
 
-db   = Hathidb::Db.new();
-conn = db.get_conn();
 if ARGV.include?("--brief") then
   # Brief report using --brief
   sql  = %w[
-    SELECT spc.resolved_oclc, spc.local_id
-    FROM shared_print_commitments AS spc
-    WHERE spc.member_id = ?
-    ORDER BY spc.local_id
+    SELECT local_id, local_oclc, resolved_oclc
+    FROM shared_print_commitments
+    WHERE member_id = ?
+    ORDER BY local_id
   ].join(" ");
 
   q = conn.prepare(sql);
-  puts [:local_id, :resolved_oclc].join("\t");
+  hdout.file.puts [:local_id, :local_oclc, :resolved_oclc].join("\t");
   q.enumerate(member_id) do |row|
-    puts [row[:local_id], row[:resolved_oclc]].join("\t");
+    hdout.file.puts [row[:local_id], row[:local_oclc], row[:resolved_oclc]].join("\t");
   end
 else
   # Default to full report, using member profile to make it
@@ -39,12 +40,12 @@ else
     if k == 'other_commitments' then
       # Values stored in another table, so we have to do some tricks with this one.
       cols << 'other_commitment_id';
-    elsif k == 'local_oclc' && !cols.include?('resolved_oclc')
-      # We don't actually store their local oclc specifically for SP.
-      # Make sure we at least give them the resolved oclc.
-      cols << 'resolved_oclc';
     else
       cols << k;
+    end
+
+    if !cols.include?('resolved_oclc')
+      cols << 'resolved_oclc';
     end
   end
 
@@ -63,11 +64,10 @@ else
   main_q = conn.prepare(main_sql);
   oc_q   = conn.prepare(oc_sql);
 
+  # Need to know which col, if any, has other_commitments in it.
   oc_index = cols.index('other_commitment_id');
-  if !oc_index.nil? then
-    cols[oc_index] = 'other_commitment_id';
-  end
-  puts cols.join("\t");
+
+  hdout.file.puts(cols.join("\t").sub('other_commitment_id', 'other_commitments'));
   main_q.enumerate(member_id) do |row|
     out = row.to_a;
     if !oc_index.nil? then
@@ -79,6 +79,7 @@ else
       end
       row[oc_index] = ocs.join(' ; ')
     end
-    puts row.to_a.join("\t");
+  hdout.file.puts(row.to_a.join("\t"));
   end
 end
+hdout.close();
