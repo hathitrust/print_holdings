@@ -94,10 +94,15 @@ def add_source_items_to_htitem_htmember_jn(log)
     # with sub_insert.
     unless skip then
       member_id = source_h[row1[:source]];
-      deposits += 1;
-      sub_insert.execute(row1[:volume_id], member_id)
-      outstr = "#{row1[:volume_id]}\t#{member_id}";
-      hdout.file.puts(outstr);
+
+      if member_id == '' then
+        log.w("Could not map source to member id for source '#{row1[:source]}', volume_id #{row1[:volume_id]}");
+      else
+        deposits += 1;
+        sub_insert.execute(row1[:volume_id], member_id)
+        outstr = "#{row1[:volume_id]}\t#{member_id}";
+        hdout.file.puts(outstr);
+      end
     end
 
     if ((rowcount % 100000) == 0) then
