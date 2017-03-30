@@ -7,3 +7,6 @@ cat ../data/shared_print_members.tsv |
     do :
        ruby print_holdings_review_report.rb $line;
     done
+
+ruby print_holdings_review_report.rb ivyplus;
+ruby print_holdings_review_report.rb big10;
