@@ -19,10 +19,9 @@ require 'scrub';
 # One will be made for you if you try to run this script without one.
 
 # Call like so:
-# ruby ingest_commitment_file.rb <member_id> <path_to_input_file>
-
-# Todos:
-# Data validation
+#   ruby ingest_commitment_file.rb <member_id> <path_to_input_file>
+# In case you just want to ADD records (partial update) add --update:
+#   ruby ingest_commitment_file.rb <member_id> <path_to_input_file> --update
 
 def run
   db          = Hathidb::Db.new();
@@ -38,7 +37,7 @@ def run
   # Queries
   @in_pool_sql          = "SELECT COUNT(*) AS c FROM shared_print_pool WHERE member_id = ?";
   @get_max_other_id_sql = "SELECT COALESCE(MAX(id), 0) + 1 AS max_id FROM shared_print_other";
-  @insert_other_sql     = "INSERT INTO shared_print_other (id, sp_program, retention_date) VALUES (?,?,?)";
+  @insert_other_sql     = "INSERT INTO shared_print_other (id, sp_program, retention_date, indefinite) VALUES (?,?,?,?)";
   @get_other_id_sql     = "SELECT other_commitment_id FROM shared_print_commitments WHERE member_id = ?";
   @delete_other_sql     = "DELETE FROM shared_print_other WHERE id = ?";
   @delete_sql           = "DELETE FROM shared_print_commitments WHERE member_id = ?";
@@ -47,9 +46,9 @@ def run
   SELECT spc.resolved_oclc
     FROM shared_print_commitments AS spc
     LEFT JOIN shared_print_pool   AS spp
-    ON (spc.member_id = spp.member_id AND spc.resolved_oclc = spp.oclc)
+    ON (spc.member_id = spp.member_id AND spc.resolved_oclc = spp.resolved_oclc)
     WHERE spc.member_id = ?
-    AND spp.oclc IS NULL
+    AND spp.resolved_oclc IS NULL
   }.join(' ');
   @get_other_id_by_ocn  = "SELECT other_commitment_id FROM shared_print_commitments WHERE resolved_oclc = ? AND member_id = ?";
   @del_oclc_diff_sql    = "DELETE FROM shared_print_commitments WHERE member_id = ? AND resolved_oclc = ?";
@@ -79,7 +78,7 @@ def run
     'scanning_repro_policy' => Set.new(['do not reproduce']),
   };
   @sp_program_enum = Set.new(%w[coppul east flare ivyplus mssc recap ucsp viva other]);
-  @scrubber        = MemberScrubber.new({'data_type' => 1});
+  @scrubber        = MemberScrubber.new({'data_type' => 1, 'logger' => Hathilog::Log.new()});
 
   # Enough setup. Setup makes weak. Run makes strong. Run!
   check_member();
@@ -90,8 +89,8 @@ def run
   parse_file();
   load_data();
   check_loaded_records();
-
   log_counts();
+  @log.close();
 end
 
 def check_member
@@ -194,7 +193,7 @@ def parse_file
 
   commitments.file.each_line do |line|
     line_count += 1;
-    line.strip!
+    line.chomp! # Was strip but that removes leading tab :(
     # Skip header
     if line_count == 1 then
       # Copy line header to .bad file, add comments col.
@@ -215,7 +214,7 @@ def parse_file
         warnings << "missing_#{k}";
       end
       # Check that enums aren't violated
-      if @enums.has_key?(k) && !@enums[k].include?(line_cols[v]) then
+      if @enums.has_key?(k) && !line_cols[v].empty? && !@enums[k].include?(line_cols[v]) then
         @log.w("#{line_cols[v]} violates #{k} enum declaration on line #{line_count}");
         warnings << "bad_enum_#{k}";
       end
@@ -240,9 +239,10 @@ def parse_file
 
     # Special treatment of "other_commitments"
     # Syntax allowed:
-    # single   | program : date
-    # multiple | program1 : date1; program2 : date2
+    # single   | program : [date|indefinite]
+    # multiple | program1 : [date|indefinite] ; program2 : [date|indefinite]
     # Date format: YYYY-MM-DD
+    # Indefinite format: "indefinite", use this if there is no end date.
     if query_cols.has_key?('other_commitments') && !query_cols['other_commitments'].nil? then
       pairs    = query_cols['other_commitments'].split(';');
       ok_pairs = [];
@@ -252,19 +252,24 @@ def parse_file
         # Check that program doesn't violate enum
         program.downcase!
         program.strip!
+        date.downcase!
+        date.strip!
         if !@sp_program_enum.include?(program) then
           @log.w("#{program} is invalid enum value for other_commitments on line #{line_count}");
           warnings << "bad_other_commitments";
           next;
         end
         # Make sure date is kosher.
-        (yyyy, mm, dd) = date.split('-').map{|x| x.to_i};
-        begin
-          Date.new(yyyy, mm, dd);
-        rescue ArgumentError
-          @log.w("Bad date #{date} for other_commitment on line #{line_count}");
-          warnings << "bad_date_other_commitments";
-          next;
+        # Date can be 'indefinite'.
+        if date != 'indefinite' then
+          (yyyy, mm, dd) = date.split('-').map{|x| x.to_i};
+          begin
+            Date.new(yyyy, mm, dd);
+          rescue ArgumentError
+            @log.w("Bad date #{date} for other_commitment on line #{line_count}");
+            warnings << "bad_date_other_commitments";
+            next;
+          end
         end
         ok_pairs << [program, date];
       end
@@ -274,7 +279,12 @@ def parse_file
           other_id = row[:max_id];
         end
         ok_pairs.each do |program, date|
-          @insert_other_q.execute(other_id, program, date);
+          indef = 0;
+          if date == 'indefinite' then
+            indef = 1;
+            date  = nil;
+          end
+          @insert_other_q.execute(other_id, program, date, indef);
           countx(:other_commitment_ok);
         end
       end
@@ -297,7 +307,6 @@ def parse_file
       if !query_cols.has_key?('resolved_oclc') then
         query_cols['resolved_oclc'] = resolve_oclc(query_cols['local_oclc']);
       end
-      query_cols.delete('local_oclc');
 
       @dat_file.file.puts(query_cols.keys.sort.map{ |x| query_cols[x] }.join("\t"));
       countx(:output_file_lines);
@@ -336,8 +345,6 @@ def load_data
     @profile_data['other_commitment_id'] = true;
   end
 
-  # Don't actually keep local_oclc. We can link it in from shared print pool.
-  @profile_data.delete('local_oclc');
   @profile_data['resolved_oclc'] ||= true;
 
   # Load file
