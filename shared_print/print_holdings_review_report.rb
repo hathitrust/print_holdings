@@ -13,7 +13,7 @@ group      = false;
 # Predefined groups that may be given as input.
 # Note that some groups contain members that aren't (yet?) in SP. They will be ignored.
 groups = {
-  'foo'     => %w[brynmawr haverford],
+  'foo'     => %w[ucmerced brynmawr],
   'ivyplus' => %w[brown columbia cornell dartmouth duke harvard jhu mit princeton stanford uchicago upenn yale],
   'big10'   => %w[illinois iu msu northwestern osu psu purdue rutgers uiowa umd umich umn unl wisc],
   'uc'      => %w[berkeley nrlf srlf ucdavis uci ucla ucmerced ucr ucsb ucsc ucsd ucsf],
@@ -35,18 +35,26 @@ report_sql = %W{
   spp.gov_doc,
   spp.item_condition,
   spp.local_oclc,
-  spp.oclc AS resolved_oclc,
-  hhh.H AS overlap_ht,
+  spp.resolved_oclc,
+  MAX(hhh.H) AS overlap_ht,
   spp.local_h AS overlap_sp
   FROM shared_print_pool          AS spp
-  JOIN holdings_cluster_oclc      AS hco  ON (spp.oclc       = hco.oclc)
+  JOIN holdings_cluster_oclc      AS hco  ON (spp.resolved_oclc = hco.oclc)
   JOIN holdings_cluster           AS hc   ON (hco.cluster_id = hc.cluster_id)
   JOIN holdings_cluster_htitem_jn AS hchj ON (hc.cluster_id  = hchj.cluster_id)
   JOIN holdings_htitem_H          AS hhh  ON (hchj.volume_id = hhh.volume_id)
   JOIN holdings_memberitem        AS hm   ON (spp.holdings_memberitem_id = hm.id)
   WHERE spp.member_id IN (#{qmarks})
   AND hc.cluster_type = 'spm'
-  ORDER BY spp.oclc, spp.member_id
+  GROUP BY
+  spp.member_id,
+  hm.local_id,
+  spp.gov_doc,
+  spp.item_condition,
+  spp.local_oclc,
+  resolved_oclc,
+  overlap_sp
+  ORDER BY spp.resolved_oclc, spp.member_id
 }.join(' ');
 
 # If doing a group report, use this to get overlap_group
