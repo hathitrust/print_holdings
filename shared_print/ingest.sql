@@ -1,6 +1,7 @@
 create table shared_print_commitments (
     id                   bigint(20)  NOT NULL AUTO_INCREMENT,
     member_id            varchar(20) NOT NULL,
+    local_oclc           bigint(20)  NOT NULL,
     resolved_oclc        bigint(20)  NOT NULL, -- not required in input field, but always inserted
     local_id             varchar(50) NOT NULL,
     local_bib_id         varchar(50),
@@ -16,13 +17,16 @@ create table shared_print_commitments (
     ownership_history 	 varchar(100),
     PRIMARY KEY (id),
     INDEX sp_commitment_member_id (member_id),
-    INDEX sp_commitment_oclc (resolved_oclc)
+    INDEX sp_commitment_local_oclc (local_oclc),
+    INDEX sp_commitment_resolved_oclc (resolved_oclc)
 ); 
 
 create table shared_print_other (
     id 	     	   bigint(20)  NOT NULL,
     sp_program     ENUM('coppul', 'east', 'flare', 'ivyplus', 'mssc', 'recap', 'ucsp', 'viva', 'other') NOT NULL,
     retention_date DATE,
-    INDEX shared_print_other_id (id)
+    indefinite     TINYINT DEFAULT 0,
+    INDEX shared_print_other_id (id),
+    INDEX shared_print_other_indefinite (indefinite)
 );
 
