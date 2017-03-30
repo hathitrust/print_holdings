@@ -30,7 +30,7 @@ conn = db.get_conn();
 trunc_sql  = "TRUNCATE TABLE shared_print_pool";
 
 insert_sql = %w{
-    INSERT INTO shared_print_pool (holdings_memberitem_id, member_id, item_condition, gov_doc, oclc, local_oclc)
+    INSERT INTO shared_print_pool (holdings_memberitem_id, member_id, item_condition, gov_doc, resolved_oclc, local_oclc)
     SELECT hm.id, hm.member_id, hm.item_condition, hm.gov_doc, COALESCE(o.oclc_x, hm.oclc) AS oclc, hm.oclc AS local_oclc
     FROM holdings_memberitem AS hm
     LEFT JOIN oclc_resolution AS o ON (hm.oclc = o.oclc_y)
@@ -51,13 +51,13 @@ utexas_special_sql = %w[
 ].join(' ');
 
 get_local_h_sql = %w{
-    SELECT oclc, COUNT(DISTINCT member_id) AS h
+    SELECT resolved_oclc, COUNT(DISTINCT member_id) AS h
     FROM shared_print_pool
-    GROUP BY oclc
-    ORDER BY oclc
+    GROUP BY resolved_oclc
+    ORDER BY resolved_oclc
 }.join(' ');
 
-update_local_h_sql = 'UPDATE shared_print_pool SET local_h = ? WHERE oclc = ?';
+update_local_h_sql = 'UPDATE shared_print_pool SET local_h = ? WHERE resolved_oclc = ?';
 
 if !just_h then
   # Empty pool.
@@ -91,7 +91,7 @@ get_local_h_q.enumerate() do |row|
   if i % 10000 == 0 then
     log.d(i);
   end
-  oclc = row[:oclc];
+  oclc = row[:resolved_oclc];
   h    = row[:h];
   update_local_h_q.execute(h, oclc);
 end
