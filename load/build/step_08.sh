@@ -13,7 +13,7 @@ hhhmd="${DATADIR}/builds/current/holdings_htitem_htmember.multi.data";
 # Fairly quick.
 cmd1="jruby $SCRIPTPATH/relabel_mpm.rb";
 # Takes ~9h.
-cmd2="jruby -J-Xmx2000m $SCRIPTPATH/multipart_cluster_mapper.rb $chmd";
+cmd2="jruby -J-Xmx4000m $SCRIPTPATH/multipart_cluster_mapper.rb $chmd";
 # Takes a couple of  minutes.
 cmd3="jruby $SCRIPTPATH/generate_htitem_htmember_jn_data.rb $chmd $hhhmd";
 
