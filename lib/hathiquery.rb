@@ -61,7 +61,7 @@ module Hathiquery
   end
 
   def Hathiquery.cali_members
-    %w{berkeley nrlf srlf ucdavis uci ucla ucmerced ucr ucsb ucsc ucsd ucsf};
+    %w{berkeley ucdavis uci ucla ucmerced ucr ucsb ucsc ucsd ucsf};
   end
 
   def Hathiquery.check_count(table)
