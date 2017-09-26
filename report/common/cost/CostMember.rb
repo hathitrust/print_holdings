@@ -281,7 +281,7 @@ module Cost
     @@conn = @@db.get_conn();
 
     # These do not participate in pd cost sharing.
-    @@no_pd = %w[hathitrust nrlf srlf];
+    @@no_pd = %w[hathitrust];
 
     attr_reader :member_id, :ic_spm, :ic_mpm, :ic_ser, :num_pd, :participates_in_ic, :participates_in_pd, :count_h_sums;
     attr_accessor :costs;
