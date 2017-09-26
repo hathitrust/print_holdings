@@ -1,0 +1,17 @@
+Put here a dile called hathiconf.prop, with values for:
+
+db_driver = com.mysql.jdbc.Driver
+db_url    = DUMMY
+db_user   = DUMMY
+db_pw     = DUMMY
+db_host   = DUMMY
+db_name   = DUMMY
+db_port   = DUMMY
+
+prod_db_driver = com.mysql.jdbc.Driver
+prod_db_url    = DUMMY
+prod_db_user   = DUMMY
+prod_db_pw     = DUMMY
+prod_db_host   = DUMMY
+prod_db_name   = DUMMY
+prod_db_port   = DUMMY
