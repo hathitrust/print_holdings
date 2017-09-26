@@ -1,4 +1,4 @@
-Put here a dile called hathiconf.prop, with values for:
+Put here a file called hathiconf.prop, with values for:
 
 db_driver = com.mysql.jdbc.Driver
 db_url    = DUMMY
