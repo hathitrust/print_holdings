@@ -9,7 +9,7 @@ require 'hathidata';
 db   = Hathidb::Db.new();
 conn = db.get_conn();
 
-get_oclc_sql     = "SELECT oclc, COUNT(DISTINCT gov_doc) AS c FROM holdings_memberitem GROUP BY oclc HAVING c = 2 ORDER BY oclc";
+get_oclc_sql     = "SELECT DISTINCT oclc FROM holdings_memberitem WHERE gov_doc = '1'";
 
 get_deets_sql    = "SELECT DISTINCT oclc, member_id, gov_doc FROM holdings_memberitem WHERE oclc = ? AND gov_doc IS NOT NULL";
 get_deets_q      = conn.prepare(get_deets_sql);
