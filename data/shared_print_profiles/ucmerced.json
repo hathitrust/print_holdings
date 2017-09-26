@@ -1,0 +1,8 @@
+{
+    "member_id"             : 0,
+    "local_oclc"            : 1,
+    "resolved_oclc"         : 2,
+    "local_id"              : 3,
+    "oclc_symbol"           : 4,
+    "other_commitments"     : 5
+}

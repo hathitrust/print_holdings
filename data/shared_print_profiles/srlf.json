@@ -1,0 +1,9 @@
+{
+    "member_id"             : 0,
+    "local_oclc"            : 2,
+    "local_id"              : 1,
+    "local_item_id"         : 3,
+    "oclc_symbol"           : 4,
+    "local_item_location"   : 5,
+    "local_shelving_type"   : 6
+}

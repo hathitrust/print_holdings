@@ -1,0 +1,12 @@
+{
+    "lending_policy"        : 0,
+    "local_bib_id"          : 1,
+    "local_id"              : 2,
+    "local_item_id"         : 3,
+    "local_item_location"   : 4,
+    "local_oclc"            : 5,
+    "local_shelving_type"   : 6,
+    "member_id"             : 7,
+    "oclc_symbol"           : 8,
+    "other_commitments"     : 9
+}

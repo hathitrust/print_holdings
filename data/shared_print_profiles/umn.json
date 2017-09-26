@@ -1,0 +1,12 @@
+{
+    "member_id"             : 0,
+    "local_oclc"            : 1,
+    "resolved_oclc"         : 2,
+    "local_id"              : 3,
+    "local_bib_id"          : 4,
+    "local_item_id"         : 5,
+    "oclc_symbol"           : 6,
+    "local_item_location"   : 7,
+    "local_shelving_type"   : 8,
+    "other_commitments"     : 9
+}

@@ -1,0 +1,8 @@
+{
+    "member_id"             : 0,
+    "local_oclc"            : 1,
+    "local_id"              : 2,
+    "oclc_symbol"           : 4,
+    "local_shelving_type"   : 5,
+    "other_commitments"     : 6
+}
