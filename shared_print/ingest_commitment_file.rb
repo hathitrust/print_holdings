@@ -77,7 +77,7 @@ def run
     'lending_policy'        => Set.new(%w[blo]),
     'scanning_repro_policy' => Set.new(['do not reproduce']),
   };
-  @sp_program_enum = Set.new(%w[coppul east flare ivyplus mssc recap ucsp viva other]);
+  @sp_program_enum = Set.new(%w[coppul east fdlp flare ivyplus mssc recap ucsp viva other]);
   @scrubber        = MemberScrubber.new({'data_type' => 1, 'logger' => Hathilog::Log.new()});
 
   # Enough setup. Setup makes weak. Run makes strong. Run!
@@ -214,7 +214,7 @@ def parse_file
         warnings << "missing_#{k}";
       end
       # Check that enums aren't violated
-      if @enums.has_key?(k) && !line_cols[v].empty? && !@enums[k].include?(line_cols[v]) then
+      if @enums.has_key?(k) && !line_cols[v].nil? && !line_cols[v].empty? && !@enums[k].include?(line_cols[v]) then
         @log.w("#{line_cols[v]} violates #{k} enum declaration on line #{line_count}");
         warnings << "bad_enum_#{k}";
       end
