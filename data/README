@@ -1,0 +1,3 @@
+Mount HathiTrust print holdings data dir here.
+
+The lib/Hathidata.rb module will assume files are located here, unless given absolute path.
