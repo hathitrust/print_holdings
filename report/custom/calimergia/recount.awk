@@ -16,8 +16,8 @@
 }
 
 END {
-    ic_cost = 0.1512107841;
-    multi   = 1.5;
+    ic_cost = 0.21328463955220106;
+    multi   = 1;
 
     for (h in new_hcounts) {
 	h_cost       = (new_hcounts[h] / h) * ic_cost;
