@@ -23,7 +23,7 @@ create table shared_print_commitments (
 
 create table shared_print_other (
     id 	     	   bigint(20)  NOT NULL,
-    sp_program     ENUM('coppul', 'east', 'flare', 'ivyplus', 'mssc', 'recap', 'ucsp', 'viva', 'other') NOT NULL,
+    sp_program     ENUM('coppul', 'east', 'flare', 'ivyplus', 'mssc', 'recap', 'ucsp', 'viva', 'other', 'fdlp') NOT NULL,
     retention_date DATE,
     indefinite     TINYINT DEFAULT 0,
     INDEX shared_print_other_id (id),
