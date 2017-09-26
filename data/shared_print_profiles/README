@@ -1,0 +1,2 @@
+This dir contains JSON files with column mappings (map member-data to db-ready .tsv) for the shared print project.
+Used by shared_print/ingest_commitment_file.rb (which takes a member_id and looks here for a matching .json).
