@@ -27,6 +27,9 @@ OCLC  <TAB> ID   <TAB> STATUS  <TAB> CONDITION  <TAB> ENUMC     <TAB> GOVDOC
 In the examples above, "<TAB>" is used for illustration purposes.
 In reality, use the actual horizontal tab character.
 
+Copy this script to the relevant memberdata subdir, renane and make
+the necessary changes.
+
 =cut
 
 # Using tab as column delimiter, replace as appropriate.
