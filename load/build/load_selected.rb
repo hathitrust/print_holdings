@@ -279,7 +279,7 @@ if $0 == __FILE__ then
     check_values();
     optimize_table() unless @dry_run;
   rescue StandardError => error
-    log.f("Something went wrong.");
+    @log.f("Something went wrong:");
     @log.f(error);
   ensure
     @log.d("Finished\n\n\n");
