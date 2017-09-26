@@ -3,7 +3,7 @@ require 'hathidb';
 require 'hathilog';
 
 # List the oclcs of spms that are in HathiTrust but not in Shared Print.
-# Might need ruby -J-Xmx2000m
+# Might need ruby -J-Xmx8000m
 
 db    = Hathidb::Db.new();
 conn  = db.get_conn();
@@ -20,8 +20,8 @@ main_sql = %w{
   FROM holdings_cluster_oclc  AS hco
   JOIN holdings_cluster       AS hc  ON (hco.cluster_id = hc.cluster_id)
   LEFT JOIN oclc_resolution   AS o   ON (hco.oclc = o.oclc_y)
-  LEFT JOIN shared_print_pool AS spp ON (COALESCE(o.oclc_x, hco.oclc) = spp.oclc)
-  WHERE spp.oclc IS NULL AND hc.cluster_type = 'spm'
+  LEFT JOIN shared_print_pool AS spp ON (COALESCE(o.oclc_x, hco.oclc) = spp.resolved_oclc)
+  WHERE spp.resolved_oclc IS NULL AND hc.cluster_type = 'spm'
   ORDER BY hco.oclc
 }.join(' ');
 main_q = conn.prepare(main_sql);
