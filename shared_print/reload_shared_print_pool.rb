@@ -2,7 +2,7 @@ require 'hathidata';
 require 'hathidb';
 require 'hathilog';
 
-log = Hathilog::Log.new();
+log = Hathilog::Log.new({:log_sync=>true});
 
 test   = false;
 just_h = false;
@@ -27,7 +27,8 @@ end
 db   = Hathidb::Db.new();
 conn = db.get_conn();
 
-trunc_sql  = "TRUNCATE TABLE shared_print_pool";
+# Special treatment for gatech, who is no longer a print holdings member, but is still a shared print member.
+trunc_sql  = "DELETE FROM shared_print_pool WHERE member_id != 'gatech'";
 
 insert_sql = %w{
     INSERT INTO shared_print_pool (holdings_memberitem_id, member_id, item_condition, gov_doc, resolved_oclc, local_oclc)
@@ -70,15 +71,16 @@ if !just_h then
     log.d(insert_sql.sub('?', "'#{member_id}'"));
     insert_q.execute(member_id);
   end
+
+  # Do special cases before calculating Hs.
+  delete_special_q = conn.prepare(delete_special_sql);
+  utexas_special_q = conn.prepare(utexas_special_sql);
+  log.d("Narrowing down utexas.");
+  utexas_special_q.enumerate() do |row|
+    delete_special_q.execute(row[:id]);
+  end
 end
 
-# Do special cases before calculating Hs.
-delete_special_q = conn.prepare(delete_special_sql);
-utexas_special_q = conn.prepare(utexas_special_sql);
-log.d("Narrowing down utexas.");
-utexas_special_q.enumerate() do |row|
-  delete_special_q.execute(row[:id]);
-end
 
 # Calculate local_h (H relative to pool)
 get_local_h_q    = conn.prepare(get_local_h_sql);
