@@ -1,0 +1,8 @@
+This dir stores the current HT003-files for each member. Normally 3 per member, like:
+
+  HT003_allegheny.mono.tsv
+  HT003_allegheny.multi.tsv
+  HT003_allegheny.serial.tsv
+
+They are copied here from data/memberdata/${member_id}/ by load/build/load_selected.rb,
+and old files are (instead of being overwritten) copied from here to data/backups/loadfiles/${YYYYMMDD}.
