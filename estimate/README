@@ -1,0 +1,26 @@
+When a prospective member wants to know approximately what their membership fee will be,
+they send us their holdings. Download into data/memberdata/${member_id}.estimate/ and scrub.
+
+Look up the avg_cost_per_vol from the most recent cost report:
+
+$ grep '^@avg_cost_per_vol' costreport_${YYYYMMDD}_details.tsv
+
+Finally, you need to know username and password for a user with (pretty much) full mysql
+privileges for ht_repository.
+
+Run:
+
+$ ruby step_01.rb <avg_cost_per_vol> <member_id>
+
+... and give mysql login info when prompted.
+
+The script will output a .tsv to STDERR and write a "narrative" file to
+data/estimate/narrative_ida_${YYYYMMDD}.txt
+
+Upload the .tsv to Google Drive, PHDB>Estimates, add PD cost from last cost report...
+
+$ grep '^pd_cost_per_m' costreport_20170912_details.tsv
+
+... add graph to sheet, and change access to "anyone with the link".
+
+Add link and narrative text to Jira ticket and close data/memberdata/${member_id}.estimate/. 
