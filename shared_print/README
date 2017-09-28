@@ -1,0 +1,9 @@
+This dir contains the Shared Print sub-project. It piggybacks extensively on Print Holdings,
+and so far I have not seen a strong enough reason to split it out.
+
+The most noteworthy file is ingest_commitment_file.rb which uses a shared print profile
+from data/shared_print_profiles to map a member's shared print commitments into a
+MySQL-insertable format, which ends up in ht_repository.shared_print_commitments.
+
+If a Shared Print member wants to know what their ingested commitments look like,
+use commitments_report.rb.

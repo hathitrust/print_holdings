@@ -2,6 +2,8 @@ require 'hathidb';
 require 'hathidata';
 require 'hathilog';
 
+# Lets a member know which of their holdings are eligible for shared print.
+
 db = Hathidb::Db.new();
 conn = db.get_conn();
 log = Hathilog::Log.new();
