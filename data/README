@@ -1,3 +1,8 @@
-Mount HathiTrust print holdings data dir here.
+Mount or symlink the HathiTrust print holdings dirs:
+
+  data/memberdata/
+  data/loadfiles/
+
+... here, it's too much data to put in Git.
 
 The lib/Hathidata.rb module will assume files are located here, unless given absolute path.
