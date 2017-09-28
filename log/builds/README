@@ -1,2 +1,2 @@
-Current build logs to log/build/current/ which gets renamed to log/build/${YYYY-MM-DD}/
+Current build logs to log/builds/current/ which gets renamed to log/builds/${YYYY-MM-DD}/
 at the end of build.
