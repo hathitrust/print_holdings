@@ -1,0 +1,5 @@
+The Washington Research Library Consortium (WRLC) wants to maybe join as a consortium. They already have one member in HT, Georgetown.
+
+So, perhaps the easiest way is to decrease H with 1 for all records in holdings_htitem_H where a volume_id is held by Georgetown, then just do a regular estimate.
+
+Gotta wait for the build to finish first.
