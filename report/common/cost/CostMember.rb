@@ -2,6 +2,23 @@ require 'hathidata';
 require 'hathidb';
 require 'hathiquery';
 
+=begin 
+
+This report script takes a "total operating cost" as only input.
+It then calculates how much each member owes in membership fee,
+in order to fully cover the total operating cost.
+
+Call thusly:
+
+$ ruby CostMember.rb <TOTAL_OPERATING_COST>
+
+It generates 2 datestamped .tsv files in the data/ directory:
+
+* costreport_$ymd.tsv contains the actual cost report.
+* costreport_$ymd_details.tsv contains some detailed background figures.
+
+=end
+
 module Cost
   # This module has 2 classes: Report and Member.
   class Report
