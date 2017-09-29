@@ -1,0 +1,4 @@
+common/ contains reports that are run on a regular basis and rarely change.
+
+custom/ contains ad-hoc and one-off reports that MAY be useful to keep as templates
+for other future reports.
