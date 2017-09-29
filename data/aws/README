@@ -1,1 +1,2 @@
-store output downloaded from AWS here
+Store output downloaded from AWS (s3://umich-lib-phdb-1) here.
+Files get gzipped at the end of the build.
