@@ -1,12 +1,10 @@
-All of these files came into being when I was generating stuff for the "PHDB Member Counts - November 2013" Google Doc.
+Run the member counts report like:
 
-Some of it is crap. Need to clean up before I do anything else with these.
-Not all code needed lives here, some is still scattered in /htapps/pulintz/???.
+$ nohup bash run_all.sh > member_counts.log &
 
-Gotta say the monthly was a bit confusing on some of these parts. Should be able to hack together a script
-that gets all of this going, writing to a couple of outfiles, then some perl or awk that compiles the outfiles
-to one uploadable .tsv per sheet.
+It takes several hours, and produces several files under data/.
+Append some of those files thusly (with $ymd replaced appropriately):
 
-Annoyingly, most problems have been with oclc_matchcount_query.rb.
+[print_holdings]$ perl report/append_sheets.pl --na=0 data/total_member_counts_2_$ymd.tsv data/matching_oclc_counts_2_$ymd.tsv data/matching_item_counts_2_$ymd.tsv | column -t > data/member_counts_appended_$ymd.tsv
 
-Again, the need to separate the scripts and the data files becomes apparent.
+This gives you a .tsv that you can incorporate into the "current month" tab of the Member Counts report.
