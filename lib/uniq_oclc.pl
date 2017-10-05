@@ -22,10 +22,25 @@ into
   (OCoLC)828626853,(OCoLC)ocn820123724
 
 Alter default behavior with:
+
   --column_delim
+    Give a string to use as column delimiter
+
   --data_delim
-  --oclc_column
-  --verbose
+    Give a string to use as data delimiter between multiple ocns
+
+  --oclc_column=\d
+    Give the (zero-indexed) column number where ocn is expected
+
+  --verbose=\d
+    Give 1 to turn on verbose output
+
+  --header=\d
+    Give a number for number of lines at the top of the file to skip
+
+  --strict=\d
+    Give 0 to turn off strict ocn checking. Under strict, bare numbers
+    such as 555 are not considered ocns. Strict ocns must match /oc.+(\d+)/i
 
 =cut
 
@@ -34,13 +49,15 @@ my $default = {
     data_delim   => ",",
     oclc_column  => 0,
     verbose      => 0,
+    header       => 1,
+    strict       => 0,
 };
 
 # Look for default overrides in @ARGV and set accordingly.
 foreach my $k (keys %$default) {
     my ($input) = map {/^--$k=(.+)/ ? $1 : ()} @ARGV;
     $default->{$k} = $input if $input;
-    print STDERR "$k:[$default->{$k}]\n";
+    print STDERR "## $k:[$default->{$k}]\n";
 }
 
 # Filter out --option_name from ARGV.
@@ -49,28 +66,50 @@ foreach my $k (keys %$default) {
 while (<>) {
     my $line = $_;
     chomp $line;
+
+    # Fast-forward past header.
+    if ($default->{header} > 0) {
+	$default->{header}--;
+	print $line . "\n";
+	print STDERR "Skipping header [$line]\n" if $default->{verbose};
+	next;
+    }
+
     my $old_line = $line;
     $line =~ s/\"//g;
     # Split line into columns
     my @columns = split($default->{column_delim}, $line);
-    my @ocns    = split($default->{data_delim}, $columns[$default->{oclc_column}]);
-    my %uniq    = ();
+    if (!defined $columns[$default->{oclc_column}]) {
+	print STDERR "No oclc_column ($default->{oclc_column}) in line [$line]\n" if $default->{verbose};
+	next;
+    }
+
+    my @ocns = split($default->{data_delim}, $columns[$default->{oclc_column}]);
+    my %uniq = ();
     OCN_LOOP: foreach my $ocn (@ocns) {
-	# Only deal with ocns that loosely resemble oclc numbers.
-	# Strictly numeric ocns can, after some sampling and experimentation, not be trusted.
-	# Get the numeric ocn out.
 	my $number;
-	if ($ocn =~ m/oc.+(\d+)/i) {
-	    $number = $1;
+	if ($default->{strict}) {
+	    # Under strict, only deal with ocns that at least loosely resemble oclc numbers.
+	    # Strictly numeric ocns can, after some sampling and experimentation, not be trusted.
+	    # Get the numeric ocn out.
+	    if ($ocn =~ m/oc.+(\d+)/i) {
+		$number = $1;
+		$number =~ s/^0+//;
+		$ocn   =~ s/\s//g;
+		# One number can only map to one surface representation.
+		$uniq{$number} = $ocn;
+	    } else {
+		print STDERR "$ocn failed strict\n" if $default->{verbose};
+		next OCN_LOOP;
+	    }
 	} else {
-	    print STDERR "Rejected $ocn\n" if $default->{verbose};
-	    next OCN_LOOP;
+	    # When not strict, at least get uniqueness.
+	    if ($ocn =~ m/[^ocmnl\(\)0-9]/i) {
+		print STDERR "Rejecting weird ocn [$ocn]\n" if $default->{verbose};
+		next OCN_LOOP;
+	    }
+	    $uniq{$ocn} = $ocn;
 	}
-	# strip leading zeroes.
-	$number =~ s/^0+//;
-	$ocn   =~ s/\s//g;
-	# One number can only map to one surface representation.
-	$uniq{$number} = $ocn;
     }
     # Return one surface representation per number in %uniq.
     $columns[$default->{oclc_column}] = join($default->{data_delim}, sort values %uniq);
