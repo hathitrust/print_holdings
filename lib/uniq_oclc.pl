@@ -36,8 +36,8 @@ my $default = {
     verbose      => 0,
 };
 
+# Look for default overrides in @ARGV and set accordingly.
 foreach my $k (keys %$default) {
-    # Look for default overrides in @ARGV and set accordingly.
     my ($input) = map {/^--$k=(.+)/ ? $1 : ()} @ARGV;
     $default->{$k} = $input if $input;
     print "$k:[$default->{$k}]\n";
@@ -56,8 +56,8 @@ while (<>) {
     my @ocns    = split($default->{data_delim}, $columns[$default->{oclc_column}]);
     my %uniq    = ();
     OCN_LOOP: foreach my $ocn (@ocns) {
-	# Only deal with columns that loosely resemble oclc numbers.
-	# Strictly numeric columns can, after some sampling and experimentation, not be trusted.
+	# Only deal with ocns that loosely resemble oclc numbers.
+	# Strictly numeric ocns can, after some sampling and experimentation, not be trusted.
 	# Get the numeric ocn out.
 	my $number;
 	if ($ocn =~ m/oc.+(\d+)/i) {
