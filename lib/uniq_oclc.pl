@@ -40,7 +40,7 @@ my $default = {
 foreach my $k (keys %$default) {
     my ($input) = map {/^--$k=(.+)/ ? $1 : ()} @ARGV;
     $default->{$k} = $input if $input;
-    print "$k:[$default->{$k}]\n";
+    print STDERR "$k:[$default->{$k}]\n";
 }
 
 # Filter out --option_name from ARGV.
@@ -75,7 +75,7 @@ while (<>) {
     # Return one surface representation per number in %uniq.
     $columns[$default->{oclc_column}] = join($default->{data_delim}, sort values %uniq);
     # Put line back together
-    my $new_line           = join($default->{column_delim}, @columns);
+    my $new_line = join($default->{column_delim}, @columns);
     if ($default->{verbose} && $old_line ne $new_line) {
 	print STDERR "-$old_line\n";
 	print STDERR "+$new_line\n";
