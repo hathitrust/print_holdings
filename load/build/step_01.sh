@@ -16,7 +16,7 @@ latest_hathi_file=`ls -w1 $DATADIR/builds/current/ | egrep '^hathi_full.txt$' | 
 echo "latest_hathi_file = ${latest_hathi_file}";
 
 # Assuming this was manually placed here.
-latest_serial_file=`ls -w1 $SERIALDIR | tail -1`;
+latest_serial_file=`ls -w1 $SERIALDIR | grep -v README | tail -1`;
 echo "latest_serial_file = ${latest_serial_file}";
 
 # Generate a hathi_full_YYYYMMDD.data file
