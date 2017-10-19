@@ -51,7 +51,7 @@ def generate_hplot(dbusr, dbpw):
         if row == None:
             break
         # putting these together so's I can sort together
-        member_key = "%s-%s" % (row[0].strip(), row[1].strip())
+        member_key = "%s!%s" % (row[0].strip(), row[1].strip())
         members.append(member_key)
     members.sort()
     #print members
@@ -62,11 +62,11 @@ def generate_hplot(dbusr, dbpw):
         outfile = file(outfn, 'w')
         # query2
         for member in members:
-            bits = member.split('-')
+            bits = member.split('!')
             print bits
             member_id = bits[0]
             member_name = bits[1]
-            member_name = re.sub(',', ' -', member_name)
+            member_name = re.sub(',', ' !', member_name)
             q2string = "select H_id, H_count from holdings_H_counts where member_id='%s' and access = 'deny' and item_type = '%s' group by H_id;" % (member_id, itype)
             cursor.execute(q2string)
     

@@ -47,6 +47,7 @@ def plot_H_stack(id, title, hcounts_spm, hcounts_mpm, hcounts_ser):
     plt.bar(axis, hcounts_ser, width=bwidth, align='center', color='#004400', edgecolor='#004400', bottom=(hcounts_spm+hcounts_mpm))
 
     plt.savefig(fig_name)
+    plt.close(fig)
 
 def parse_Hfiles(spmfilen, mpmfilen, serfilen):
     """ Parses the 'h_distribution_report.py' outfile to plot all distributions.  Assumes
