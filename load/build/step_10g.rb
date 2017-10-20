@@ -44,6 +44,7 @@ count_before_after(conn, log);
 # 2016-08-26 #mwarin: There are enough of these now that I think it should be moved to a table.
 prefix_member = {
   'aeu'  => 'ualberta',
+  'aub'  => 'aub',
   'gri'  => 'getty',
   'ia'   => 'wfu',
   'iau'  => 'uiowa',
