@@ -5,8 +5,9 @@ my $fi = 0;
 my $files = {map {++$fi => $_} grep {$_ !~ /^--/} @ARGV};
 die "Need at least 2 infiles.\n" if keys %$files < 2;
 my $lines = {};
-my $delim = "\t"; # Value separator, change with --d=, for comma separated values.
-my $na    = 'N/A';
+my $delim = "\t";  # Value separator, change with --d=.
+my $na    = 'N/A'; # The default for missing values. Change with --na.
+my $header = 0;    # Whether to use a header. Change with --header.
 my $member_ids = {};
 my $file_cols  = {};
 
@@ -34,6 +35,7 @@ b N/A N/A N/A 5 5
 
 use --na=<value> to override the default value of $na ('N/A').
 use --d=<value> to override the default value of $delim ("\t").
+use --header to sneak in the filenames in the appended sheet.
 
 =cut
 
@@ -42,6 +44,8 @@ foreach my $m (grep {$_ =~ /^--/} @ARGV) {
 	$na = $1;
     } elsif ($m =~ /^--d=(.+)/) {
 	$delim = $1;
+    } elsif ($m =~ /--header/) {
+	$header = 1;
     }
 }
 
@@ -50,6 +54,12 @@ foreach my $k (sort keys %$files) {
     open(F, $files->{$k});
     # Store lines here, with the first cell value as key (assuming no dups)
     my $lines_in_file = {};
+    if ($header) {
+	# If --header set, fake a member_id called _header with the file as val.
+	# This way you can see which value came from which file.
+	$lines_in_file->{'_header'} = [$files->{$k}];
+	$member_ids->{'_header'} = 1;
+    }
     while (<F>) {
 	my $line = $_;
 	chomp $line;
