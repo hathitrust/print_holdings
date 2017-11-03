@@ -4,6 +4,8 @@ use warnings;
 my $fi = 0;
 my $files = {map {++$fi => $_} @ARGV};
 my $lines = {};
+my $rec_sep = "\t";
+my $number_rx = qr/^[0-9]+(\.[0-9]+)?$/;
 
 # Take any number of files greater than or equal to 2.
 # Compare the cells in the nth file with the n+1th.
@@ -19,7 +21,7 @@ foreach my $k (sort keys %$files) {
     while (<F>) {
 	my $line = $_;
 	chomp $line;
-	my @cols = split(',', $line);
+	my @cols = split($rec_sep, $line);
 	# Save first cell value for hash key.
 	my $member_id = shift @cols;
 	# The other cells to array ref, store as hash value.
@@ -38,8 +40,8 @@ foreach my $k (sort keys %$files) {
 	print "#### DIFF $k ==> $kplus ####\n";
 	my ($h1, $h2) = ($lines->{$files->{$k}}, $lines->{$files->{$kplus}});
 	# Get all member_ids from both hashes.
-	my $all_member_ids = {map {$_ => 1} (keys %$h1, keys %$h2)};
-	foreach my $m (sort {$a cmp $b} keys %$all_member_ids) {
+	my %all_member_ids = map {$_ => 1} (keys %$h1, keys %$h2);
+	foreach my $m (sort {$a cmp $b} keys %all_member_ids) {
 	    # Create null-row if member_id is missing in either hash.
 	    $h1->{$m} ||= [map {0} @{$h2->{$m}}];
 	    $h2->{$m} ||= [map {0} @{$h1->{$m}}];
@@ -48,9 +50,19 @@ foreach my $k (sort keys %$files) {
 	    print join(
 		"\t",
 		map {
-		    $h2->{$m}->[$_] - $h1->{$m}->[$_]
+		    compare_cells($h2->{$m}->[$_], $h1->{$m}->[$_]);
 		} (0 .. @{$h1->{$m}} - 1)
 	    ) . "\n";
 	}
+    }
+}
+
+sub compare_cells {
+    my $x = shift;
+    my $y = shift;
+    if ($x =~ $number_rx && $y =~ $number_rx) {
+	return $x - $y;
+    } else {
+	return $x;
     }
 }
