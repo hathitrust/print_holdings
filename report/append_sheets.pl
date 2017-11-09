@@ -10,6 +10,7 @@ my $delim      = "\t";  # Value separator, change with --d=.
 my $na         = 'N/A'; # The default for missing values. Change with --na.
 my $header     = 0;     # Whether to use a header. Change with --header.
 my $operator   = '';    # Choose operator to compare cells with, if any, with --op=
+my $fields     = [];    # Specify which fields to take from sheet. Sort of like cut -f<fields>.
 my $member_ids = {};
 my $file_cols  = {};
 my $number_rx  = qr/^[0-9]+(\.[0-9]+)?$/;
@@ -40,9 +41,14 @@ use --na=<value> to override the default value of $na ('N/A').
 use --d=<value> to override the default value of $delim ("\t").
 use --header to sneak in the filenames in the appended sheet.
 use --op=<operator> to choose operator to compare cells with. Supported: - and %.
+use --f=<fields> to specify which fields in the input sheet to use.
+    <fields> is a comma-sep index list, like --f=1,3,5
+    The first field in the list will be assumed to be member_id.
+    Zero-indexed, unlike "cut -f".
 
 =cut
 
+# Get/set all flags.
 foreach my $m (grep {$_ =~ /^--/} @ARGV) {
     if ($m =~ /--na=(.+)/) {
 	$na = $1;
@@ -57,6 +63,8 @@ foreach my $m (grep {$_ =~ /^--/} @ARGV) {
  	} elsif ($test_op eq '%') {
 	    $operator = '%';
 	}
+    } elsif ($m =~ /--f=((-?[0-9]+,?)+)/) {
+	$fields = [split(',', $1)];
     }
 }
 
@@ -75,6 +83,12 @@ foreach my $k (sort {$a<=>$b} keys %$files) {
 	my $line = $_;
 	chomp $line;
 	my @cols = split($delim, $line);
+
+	# If --f, extract desired cols.
+	if (@$fields) {
+	    @cols = @cols[@$fields];
+	}
+
 	# Save first cell value for hash key.
 	my $member_id = shift @cols;
 	# The other cells to array ref, store as hash value.
