@@ -2,6 +2,8 @@
 # MW Nov 2017.
 # Attempting to automate the construction of the cost report so that it takes as little manual work as possible.
 # Re-creates the whole cost history from scratch each time, and outputs 3 separate report files.
+# Be aware that this will slurp up any cost report under data/costreport/ so don't let experimental ones sit
+# around when running this.
 
 root_dir="/htapps/mwarin.babel/phdb_scripts";
 ymd=`date +'%Y-%m-%d'`;

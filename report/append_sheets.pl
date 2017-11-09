@@ -1,20 +1,6 @@
 use strict;
 use warnings;
 
-my $fi = 0;
-my $files = {map {++$fi => $_} grep {$_ !~ /^--/} @ARGV};
-
-die "Need at least 2 infiles.\n" if keys %$files < 2;
-my $lines      = {};
-my $delim      = "\t";  # Value separator, change with --d=.
-my $na         = 'N/A'; # The default for missing values. Change with --na.
-my $header     = 0;     # Whether to use a header. Change with --header.
-my $operator   = '';    # Choose operator to compare cells with, if any, with --op=
-my $fields     = [];    # Specify which fields to take from sheet. Sort of like cut -f<fields>.
-my $member_ids = {};
-my $file_cols  = {};
-my $number_rx  = qr/^[0-9]+(\.[0-9]+)?$/;
-
 =pod
 
 Take any number of tsv files greater than or equal to 2.
@@ -42,7 +28,7 @@ b N/A N/A N/A 5 5
 use --na=<value> to override the default value of $na ('N/A').
 use --d=<value> to override the default value of $delim ("\t").
 use --header to sneak in the filenames in the appended sheet.
-use --op=<operator> to choose operator to compare cells with. 
+use --op=<operator> to choose operator to compare cells with.
     Supported: - and %.
 use --f=<fields> to specify which fields in the input sheet to use.
     <fields> is a comma-sep index list, like --f=1,3,5
@@ -50,6 +36,21 @@ use --f=<fields> to specify which fields in the input sheet to use.
     Zero-indexed, unlike "cut -f". For the last field, do -1.
 
 =cut
+
+my $fi = 0;
+# Separate input files from --flags, assign an index to each file and put in $files.
+my $files = {map {++$fi => $_} grep {$_ !~ /^--/} @ARGV};
+
+die "Need at least 2 infiles.\n" if keys %$files < 2;
+my $lines      = {};
+my $delim      = "\t";  # Value separator, change with --d=.
+my $na         = 'N/A'; # The default for missing values. Change with --na.
+my $header     = 0;     # Whether to use a header. Change with --header.
+my $operator   = '';    # Choose operator to compare cells with, if any, with --op=
+my $fields     = [];    # Specify which fields to take from sheet. Sort of like cut -f<fields>.
+my $member_ids = {};
+my $file_cols  = {};
+my $number_rx  = qr/^[0-9]+(\.[0-9]+)?$/;
 
 # Get/set all flags.
 foreach my $m (grep {$_ =~ /^--/} @ARGV) {
