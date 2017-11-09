@@ -3,13 +3,16 @@ use warnings;
 
 my $fi = 0;
 my $files = {map {++$fi => $_} grep {$_ !~ /^--/} @ARGV};
+
 die "Need at least 2 infiles.\n" if keys %$files < 2;
-my $lines = {};
-my $delim = "\t";  # Value separator, change with --d=.
-my $na    = 'N/A'; # The default for missing values. Change with --na.
-my $header = 0;    # Whether to use a header. Change with --header.
+my $lines      = {};
+my $delim      = "\t";  # Value separator, change with --d=.
+my $na         = 'N/A'; # The default for missing values. Change with --na.
+my $header     = 0;     # Whether to use a header. Change with --header.
+my $operator   = '';    # Choose operator to compare cells with, if any, with --op=
 my $member_ids = {};
 my $file_cols  = {};
+my $number_rx  = qr/^[0-9]+(\.[0-9]+)?$/;
 
 =pod
 
@@ -36,6 +39,7 @@ b N/A N/A N/A 5 5
 use --na=<value> to override the default value of $na ('N/A').
 use --d=<value> to override the default value of $delim ("\t").
 use --header to sneak in the filenames in the appended sheet.
+use --op=<operator> to choose operator to compare cells with. Supported: - and %.
 
 =cut
 
@@ -46,11 +50,18 @@ foreach my $m (grep {$_ =~ /^--/} @ARGV) {
 	$delim = $1;
     } elsif ($m =~ /--header/) {
 	$header = 1;
+    } elsif ($m =~ /--op=(.+)/) {
+	my $test_op = $1;
+	if ($test_op eq '-') {
+	    $operator = '-';
+ 	} elsif ($test_op eq '%') {
+	    $operator = '%';
+	}
     }
 }
 
 # For each file, read in its contents line per line.
-foreach my $k (sort keys %$files) {
+foreach my $k (sort {$a<=>$b} keys %$files) {
     open(F, $files->{$k});
     # Store lines here, with the first cell value as key (assuming no dups)
     my $lines_in_file = {};
@@ -81,7 +92,7 @@ foreach my $k (sort keys %$files) {
 my $combined = {map {$_ => []} keys %$member_ids};
 
 # For each file in the file hash:
-foreach my $k (sort keys %$files) {
+foreach my $k (sort {$a<=>$b} keys %$files) {
     # Check if there is a next file-hash to compare with
     my $h = $lines->{$files->{$k}};
     foreach my $m (sort {$a cmp $b} keys %$member_ids) {
@@ -100,5 +111,47 @@ foreach my $k (sort keys %$files) {
 
 # Print the combined sheet using the same delimiter.
 foreach my $m (sort keys %$combined) {
-    print $m . $delim . (join($delim, @{$combined->{$m}})) . "\n";
+    if ($operator eq '-') {
+	my @vals = @{$combined->{$m}};
+	print $m . $delim . join(
+	    $delim,
+	    map {
+		subtract($vals[$_], $vals[$_+1])
+	    } (0 .. @vals - 1)
+	) . "\n";
+    } elsif ($operator eq '%') {
+	my @vals = @{$combined->{$m}};
+	print $m . $delim . join(
+	    $delim,
+	    map {
+		diff_percent($vals[$_], $vals[$_+1])
+	    } (0 .. @vals - 1)
+	) . "\n";
+    } else {
+	print $m . $delim . (join($delim, @{$combined->{$m}})) . "\n";
+    }
+}
+
+sub subtract {
+    my $x = shift;
+    my $y = shift;
+    return '' if !defined $y;
+    # print "x[$x] y[$y]\n";
+    if ($x =~ $number_rx && $y =~ $number_rx) {
+	return $y - $x;
+    } else {
+	return $x;
+    }
+}
+
+sub diff_percent {
+    my $x = shift; # b2
+    my $y = shift; # c2
+    return '' if !defined $y;
+    # print "x[$x] y[$y]\n";
+    if ($x =~ $number_rx && $y =~ $number_rx) {
+	return (100 * ($y - $x) / $x) . "%";
+    } else {
+	return $x;
+    }
 }
