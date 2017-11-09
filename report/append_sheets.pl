@@ -28,7 +28,9 @@ which is not constantly reappended to the combined sheet.
 So 2 files like:
 
 a 1 3 5
+
 and
+
 a 8 9
 b 5 5
 
@@ -40,11 +42,12 @@ b N/A N/A N/A 5 5
 use --na=<value> to override the default value of $na ('N/A').
 use --d=<value> to override the default value of $delim ("\t").
 use --header to sneak in the filenames in the appended sheet.
-use --op=<operator> to choose operator to compare cells with. Supported: - and %.
+use --op=<operator> to choose operator to compare cells with. 
+    Supported: - and %.
 use --f=<fields> to specify which fields in the input sheet to use.
     <fields> is a comma-sep index list, like --f=1,3,5
     The first field in the list will be assumed to be member_id.
-    Zero-indexed, unlike "cut -f".
+    Zero-indexed, unlike "cut -f". For the last field, do -1.
 
 =cut
 
@@ -83,12 +86,10 @@ foreach my $k (sort {$a<=>$b} keys %$files) {
 	my $line = $_;
 	chomp $line;
 	my @cols = split($delim, $line);
-
 	# If --f, extract desired cols.
 	if (@$fields) {
 	    @cols = @cols[@$fields];
 	}
-
 	# Save first cell value for hash key.
 	my $member_id = shift @cols;
 	# The other cells to array ref, store as hash value.
@@ -114,8 +115,8 @@ foreach my $k (sort {$a<=>$b} keys %$files) {
 	# that has as many cols as any row in that file should.
 	$h->{$m} ||= [($na) x $file_cols->{$k}];
 	if (@{$h->{$m}} < $file_cols->{$k}) {
-	    my $diff = $file_cols->{$k} - @{$h->{$m}};
-	    push(@{$h->{$m}}, $na) for (1 .. $diff);
+	    my $missing_vals = $file_cols->{$k} - @{$h->{$m}};
+	    push(@{$h->{$m}}, $na) for (1 .. $missing_vals);
 	}
 	foreach my $cell (@{$h->{$m}}) {
 	    push(@{$combined->{$m}}, $cell);
@@ -130,7 +131,7 @@ foreach my $m (sort keys %$combined) {
 	print $m . $delim . join(
 	    $delim,
 	    map {
-		subtract($vals[$_], $vals[$_+1])
+		diff($vals[$_], $vals[$_+1])
 	    } (0 .. @vals - 1)
 	) . "\n";
     } elsif ($operator eq '%') {
@@ -146,11 +147,11 @@ foreach my $m (sort keys %$combined) {
     }
 }
 
-sub subtract {
+sub diff {
+    # Get the y-x diff for each 2 cells.
     my $x = shift;
     my $y = shift;
     return '' if !defined $y;
-    # print "x[$x] y[$y]\n";
     if ($x =~ $number_rx && $y =~ $number_rx) {
 	return $y - $x;
     } else {
@@ -159,10 +160,10 @@ sub subtract {
 }
 
 sub diff_percent {
-    my $x = shift; # b2
-    my $y = shift; # c2
+    # Get the y-x diff% for each 2 cells.
+    my $x = shift;
+    my $y = shift;
     return '' if !defined $y;
-    # print "x[$x] y[$y]\n";
     if ($x =~ $number_rx && $y =~ $number_rx) {
 	return (100 * ($y - $x) / $x) . "%";
     } else {
