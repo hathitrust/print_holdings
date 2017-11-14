@@ -493,6 +493,10 @@ class MemberScrubber
           if test_condition(condition)
             count(:condition_items);
             count("condition_#{condition}".to_sym);
+          else
+            @logger.i("Bad condition on line #{i}: (#{condition}) '#{line.strip}'");
+            count(:bad_condition);
+            condition = '';
           end
         end
         if (@mapper.enum_chron)
