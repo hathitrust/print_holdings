@@ -362,7 +362,7 @@ class MemberScrubber
   end
 
   def test_condition(condition)
-    condition_list = %w[BRT DAMAGED];
+    condition_list = ['BRT', 'DAMAGED', nil, ''];
     if condition_list.include?(condition)
       return true;
     else
