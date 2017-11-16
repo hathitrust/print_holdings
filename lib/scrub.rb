@@ -158,15 +158,7 @@ def main
     next if item_type.start_with?('_');
     conf_hash[item_type].keys.each do |attr|
       value = conf_hash[item_type][attr];
-      if attr == "infile" then
-        if value.class != String then
-          raise "Value for #{item_type}.#{attr} must be a String instance. Check your quote marks in #{conf.path}";
-        end
-      else
-        if value.class != Fixnum then
-          raise "Value for #{item_type}.#{attr} must be a Fixnum instance. Check your quote marks in #{conf.path}";
-        end
-      end
+      require_class(value, attr == "infile" ? String : Fixnum, "#{item_type}.#{attr}");
     end
   end
   
@@ -189,6 +181,12 @@ def main
     MemberScrubber.new(options).process_data();
   end
   scrub_log.close();
+end
+
+def require_class (value, cl, json_path)
+  if value.class != cl then
+    raise "Value for #{json_path} must be a #{cl} instance. Check the quotes in the conf JSON file.";
+  end
 end
 
 # Stores the information on which data are in which member-submitted columns
