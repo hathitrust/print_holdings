@@ -151,6 +151,25 @@ def main
     end
   end
 
+  # Make sure the values are of the right class.
+  # infile must be a string (with ""s in the JSON),
+  # all other values ints (unquoted in the JSON).
+  conf_hash.keys.sort.each do |item_type|
+    next if item_type.start_with?('_');
+    conf_hash[item_type].keys.each do |attr|
+      value = conf_hash[item_type][attr];
+      if attr == "infile" then
+        if value.class != String then
+          raise "Value for #{item_type}.#{attr} must be a String instance. Check your quote marks in #{conf.path}";
+        end
+      else
+        if value.class != Fixnum then
+          raise "Value for #{item_type}.#{attr} must be a Fixnum instance. Check your quote marks in #{conf.path}";
+        end
+      end
+    end
+  end
+  
   scrub_log_path = Hathidata::Data.new("#{dir.path.to_s}/scrub_#{member_id}_$ymd.log.txt").path.to_s;
   scrub_log      = Hathilog::Log.new({:file_path => scrub_log_path});
 
