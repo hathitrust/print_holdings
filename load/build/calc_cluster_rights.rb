@@ -48,9 +48,9 @@ def calc_cluster_rights()
     ON (hchj.volume_id = hh.volume_id)
     WHERE hchj.cluster_id = ?
   ].join(' ');
-  query2 = conn.prepare(sql2);
+  query2 = conn.prepare(sql2); 
 
-  sql3   = "UPDATE holdings_cluster SET cost_rights_id = ? WHERE cluster_id = ?";
+  sql3   = "UPDATE holdings_cluster SET cost_rights_id = ?, last_mod = SYSDATE() WHERE cluster_id = ?";
   query3 = conn.prepare(sql3);
 
   citer = 0;
