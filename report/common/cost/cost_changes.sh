@@ -13,7 +13,7 @@ totals_file="$out_dir/append_totals_$ymd.tsv";
 diff_file="$out_dir/diff_totals_$ymd.tsv";
 diffp_file="$out_dir/diff_percent_totals_$ymd.tsv";
 
-# Get the lines with a current member_id (or header).
+# Get the lines whose first col is a current member_id (or header).
 member_list=`ruby $root_dir/lib/active_members.rb add=ucm | tr '\n' '|'`;
 keep_lines="^($member_list";
 keep_lines+="_header)\t";
