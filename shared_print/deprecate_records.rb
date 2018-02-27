@@ -30,13 +30,8 @@ to shared_print_deprecated and add the status.
 
 =end
 
-class NoDupError < StandardError
-
-end
-
-class BadStatusError < StandardError
-
-end
+class NoDupError     < StandardError; end
+class BadStatusError < StandardError; end
 
 db   = Hathidb::Db.new();
 conn = db.get_conn();
