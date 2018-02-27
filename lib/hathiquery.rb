@@ -17,6 +17,7 @@ module Hathiquery
       'CTU'    => 'uconn',
       'DEU'    => 'udel',
       'DUL'    => 'duke',
+      'FMU'    => 'miami',
       'FU'     => 'flbog',
       'GEU'    => 'emory',
       'HVD'    => 'harvard',
