@@ -86,7 +86,7 @@ def generate_htitem_table(infilen, serialsfn)
       itype = 'multi';
       multi_count += 1;
     end
-    outline = [bits[0..7], bits[13..14], itype, 0,  n_enum, n_chron, bits[15..19]].flatten.join("\t");
+    outline = [bits[0..7], bits[13..14], itype, 0,  n_enum, n_chron, bits[15..20]].flatten.join("\t");
     out_count += 1;
     outf.file.puts(outline);
   end
