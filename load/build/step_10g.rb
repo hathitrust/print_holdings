@@ -64,6 +64,7 @@ prefix_member = {
   'udel' => 'udel',
   'uma'  => 'umass',
   'umd'  => 'umd',
+  'uml'  => 'miami',
   'umn'  => 'umn',  
   'uq'   => 'uq',
   'uiul' => 'uiuc',
