@@ -87,8 +87,7 @@ end
 
 # Set up logfile.
 member_id = header.split("\t").first;
-# log  = Hathilog::Log.new({:file_name => "#{member_id}_sp_status_update_$ymd.log"});
-log  = Hathilog::Log.new();
+log  = Hathilog::Log.new({:file_name => "#{member_id}_sp_status_update_$ymd.log"});
 log.i("Updating shared print status for #{member_id}, using #{infn}");
 
 # Prep queries.
@@ -114,11 +113,11 @@ hdin.file.each_line do |line|
     # If C=duplicate Copy, make sure there are duplicates before you deprecate.
     if new_status == 'C' then
       # cols[0,3] = [member_id, local_oclc, (resolved_oclc)]
-      dups.enumerate(*cols[0,3]) do |row|
+      dups_q.enumerate(*cols[0,3]) do |row|
         dup_count = row[:c].to_i;
         if dup_count < 2 then
           raise NoDupError.new(
-                  "Status is C=duplicate Copy, but #{dup_count} copy/ies found. On input line #{i}\n#{line}";
+                  "Status is C=duplicate Copy, but #{dup_count} copy/ies found. Will not remove. On input line #{i}\n#{line}"
                 );
         end
       end
@@ -127,7 +126,6 @@ hdin.file.each_line do |line|
     select_q.enumerate(*cols) do |row|
       row_h = row.to_h;
       row_h["deprecation_status"] = new_status;
-      i.log(row_h);
       match_rows << row_h;
     end
 
@@ -137,6 +135,7 @@ hdin.file.each_line do |line|
       match_rows.each do |h|
         # Copy records over to shared_print_deprecated
         log.i("Inserting #{h} into shared_print_deprecated");
+        log.i(h.values);
         insert_q.execute(*h.values);
         # Delete them from shared_print_commitments
         log.i("Deleting #{h} from shared_print_commitments");
@@ -144,9 +143,9 @@ hdin.file.each_line do |line|
       end
     end
   rescue BadStatusError => bse
-    log.i(bse.message);
+    log.w(bse.message);
   rescue NoDupError => nde
-    log.i(nde.message);
+    log.w(nde.message);
   end
 end
 
