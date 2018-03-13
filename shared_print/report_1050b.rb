@@ -65,15 +65,15 @@ distinct_non_sp_oclc_q = conn.prepare(distinct_non_sp_oclc_sql);
 # show how many of those are in a non-Retention Library.
 distinct_non_sp_h_1_sql = %w<
   SELECT COUNT(DISTINCT hco.oclc) AS c
-  FROM holdings_cluster             AS hc
-  JOIN holdings_cluster_oclc        AS hco ON (hc.cluster_id = hco.cluster_id)
-  JOIN holdings_cluster_htmember_jn AS hcm ON (hc.cluster_id = hcm.cluster_id)
-  JOIN holdings_cluster_htitem_jn   AS hci ON (hc.cluster_id = hci.cluster_id)
-  JOIN holdings_htitem_H            AS hhh ON (hci.volume_id = hhh.volume_id)
-  LEFT JOIN shared_print_pool       AS spp ON (hco.oclc = spp.resolved_oclc)
+  FROM holdings_cluster              AS hc
+  JOIN holdings_cluster_oclc         AS hco ON (hc.cluster_id = hco.cluster_id)
+  JOIN holdings_cluster_htmember_jn  AS hcm ON (hc.cluster_id = hcm.cluster_id)
+  JOIN holdings_cluster_htitem_jn    AS hci ON (hc.cluster_id = hci.cluster_id)
+  JOIN holdings_htitem_H             AS hhh ON (hci.volume_id = hhh.volume_id)
+  LEFT JOIN shared_print_commitments AS spc ON (hco.oclc = spc.resolved_oclc)
   WHERE hc.cluster_type = 'spm' 
   AND hcm.member_id = ? 
-  AND spp.resolved_oclc IS NULL
+  AND spc.resolved_oclc IS NULL
   AND hhh.H = 1
 >.join(' ');
 distinct_non_sp_h_1_q = conn.prepare(distinct_non_sp_h_1_sql);
