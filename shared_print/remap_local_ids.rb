@@ -51,3 +51,6 @@ end
 
 commitments_file.close();
 commitments_remap.close();
+
+# Now re-ingest the commitments_remap file.
+# $ ruby ingest_commitment_file.rb <member_id> <remap_file>
