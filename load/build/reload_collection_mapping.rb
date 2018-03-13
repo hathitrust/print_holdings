@@ -11,20 +11,53 @@ dc = db.get_conn();
 pc = db.get_prod_conn();
 
 del_sql = "TRUNCATE TABLE hathi_collection_map";
-get_sql = "SELECT collection, billing_entity FROM ht_collections ORDER BY collection";
+get_source_sql = "SELECT collection, billing_entity FROM ht_collections ORDER BY collection";
+get_target_sql = "SELECT collection, member_id FROM hathi_collection_map ORDER BY collection";
 ins_sql = "INSERT INTO hathi_collection_map (collection, member_id) VALUES (?,?)";
 
+get_target_q = dc.prepare(get_target_sql)
 del_q = dc.prepare(del_sql); 
-get_q = pc.prepare(get_sql);
+get_source_q = pc.prepare(get_source_sql);
 ins_q = dc.prepare(ins_sql);
+
+# Get current mapping in dev (for diff purposes).
+old_map = [];
+get_target_q.enumerate() do |row|
+  old_map << row.to_a;
+  puts "Old: #{row.to_a.join(' => ')}";
+end
 
 # Clean out dev.
 del_q.execute();
 
 # Get each record from prod and insert in dev.
-get_q.enumerate() do |row|
+get_source_q.enumerate() do |row|
   collection = row[:collection];
   member_id  = row[:billing_entity];
   log.d("#{collection} => #{member_id}");
   ins_q.execute(collection, member_id);
+end
+
+# Get even currenter mapping in dev (for diff purposes).
+new_map = [];
+get_target_q.enumerate() do |row|
+  new_map << row.to_a;
+  puts "New: #{row.to_a.join(' => ')}";
+end
+
+diff_added   = new_map - old_map;
+diff_removed = old_map - new_map;
+
+# Show diff.
+if diff_added.size > 0 then
+  puts "Diff (added) :";
+  diff_added.each do |d|
+    puts d.join(" => ");
+  end
+end
+if diff_removed.size > 0 then
+  puts "Diff (removed) :";
+  diff_removed.each do |d|
+    puts d.join(" => ");
+  end
 end
