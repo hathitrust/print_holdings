@@ -19,6 +19,12 @@ SERIALDIR="$DATADIR/serials";
 LOGROOT=`readlink -e $SCRIPTPATH/../../log`;
 LOGDIR="$LOGROOT/builds/current";
 
+CONFDIR=`readlink -e $SCRIPTPATH/../../conf`;
+
+# Read in conf file values.
+conf_file=$CONFDIR/hathiconf.prop;
+source <(grep -v '^#' $conf_file | grep -P '.+=.+' | sed -r 's/ += +/=/g');
+
 HTDIR=/htapps/mwarin.babel/phdb_scripts/data/loadfiles;
 
 function check_exit_code() {
