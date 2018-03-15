@@ -18,8 +18,8 @@ module Hathidb
       conn = JDBCHelper::Connection.new(
        :driver           => @conf.get('db_driver'),
        :url              => @conf.get('db_url'),
-       :user             => @conf.get('db_user'),
-       :password         => @conf.get('db_pw'),
+       :user             => ENV['CMDLINE_ENV_DB_USER']     || @conf.get('db_user'),
+       :password         => ENV['CMDLINE_ENV_DB_PASSWORD'] || @conf.get('db_pw'),
        :useCursorFetch   => 'true', 
        :defaultFetchSize => 10000,
        );
