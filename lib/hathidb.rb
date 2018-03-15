@@ -1,4 +1,3 @@
-#require 'rubygems'; # Not needed?
 require 'java';
 require 'jdbc-helper';
 require 'mysql-connector-java-5.1.17-bin.jar';
@@ -45,14 +44,15 @@ module Hathidb
     end
 
     def get_interactive()
-      # Like get_conn but getting username & password from stdin.
+      # Like get_conn but getting username & password from stdin.      
       print "\n";
-      print "User: >>";
-      db_user = STDIN.noecho(&:gets).strip;
+      print "DB User: >>";
+      db_user = ENV['CMDLINE_ENV_DB_USER'] || STDIN.noecho(&:gets).strip;
       print "\n";
-      print "Password: >>";
-      db_pw   = STDIN.noecho(&:gets).strip;
+      print "DB Password: >>";
+      db_pw   = ENV['CMDLINE_ENV_DB_PASSWORD'] || STDIN.noecho(&:gets).strip;
       print "\n";
+      
       conn = JDBCHelper::Connection.new(
        :driver           => @conf.get('db_driver'),
        :url              => @conf.get('db_url'),
@@ -72,10 +72,10 @@ module Hathidb
       end
 
       print "\n";
-      print "User: >>";
+      print "Prod DB User: >>";
       db_user = STDIN.noecho(&:gets).strip;
       print "\n";
-      print "Password: >>";
+      print "Prod DB Password: >>";
       db_pw   = STDIN.noecho(&:gets).strip;
       print "\n";
       conn = JDBCHelper::Connection.new(
