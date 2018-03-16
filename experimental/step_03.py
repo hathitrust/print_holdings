@@ -78,7 +78,7 @@ def create_cluster(ccursor, ocns, vol_id):
     
     # insert into cluster, get id
     ocn0 = ocns[0]
-    query2 = "INSERT INTO holdings_cluster (cost_rights_id, osici, last_mod) VALUES (0, '%s', '%s')" % (ocn0, NOW)
+    query2 = "INSERT INTO holdings_cluster_test (cost_rights_id, osici, last_mod) VALUES (0, '%s', '%s')" % (ocn0, NOW)
     try:
         if VERBOSE:
             print query2
@@ -102,7 +102,7 @@ def create_cluster(ccursor, ocns, vol_id):
             Oclc_cluster_d[oc] = pkid    
              
     # insert volume_id into cluster_htitem_jn
-    query4 =  """ INSERT INTO holdings_cluster_htitem_jn (cluster_id, volume_id)
+    query4 =  """ INSERT INTO holdings_cluster_htitem_jn_test (cluster_id, volume_id)
                   VALUES (%s, '%s') """ % (pkid, vol_id)
     try:
         if VERBOSE:
@@ -128,14 +128,14 @@ def merge_clusters(cid1, cid2):
     lcursor = lconn.cursor()
     
     # get volume_ids
-    queryc1a = "SELECT volume_id FROM holdings_cluster_htitem_jn WHERE cluster_id = %s" % cid1
-    queryc2a = "SELECT volume_id FROM holdings_cluster_htitem_jn WHERE cluster_id = %s" % cid2
+    queryc1a = "SELECT volume_id FROM holdings_cluster_htitem_jn_test WHERE cluster_id = %s" % cid1
+    queryc2a = "SELECT volume_id FROM holdings_cluster_htitem_jn_test WHERE cluster_id = %s" % cid2
     c1vids = run_list_query(lcursor, queryc1a)
     c2vids = run_list_query(lcursor, queryc2a)
     # insert c2 vol_ids into c1
     for vid in c2vids:
         if not (vid in c1vids):
-            mcquery2 = """ INSERT INTO holdings_cluster_htitem_jn (cluster_id, volume_id)  
+            mcquery2 = """ INSERT INTO holdings_cluster_htitem_jn_test (cluster_id, volume_id)  
                            VALUES (%s, '%s') """ % (cid1, vid)
             try:
                 if VERBOSE:
@@ -155,8 +155,8 @@ def merge_clusters(cid1, cid2):
     # delete c2
     del Cluster_oclc_d[cid2]
     
-    mcquery5a = "DELETE FROM holdings_cluster_htitem_jn WHERE cluster_id = %s" % cid2
-    mcquery5c = "DELETE FROM holdings_cluster WHERE cluster_id = %s" % cid2
+    mcquery5a = "DELETE FROM holdings_cluster_htitem_jn_test WHERE cluster_id = %s" % cid2
+    mcquery5c = "DELETE FROM holdings_cluster_test WHERE cluster_id = %s" % cid2
     try:
         lcursor.execute(mcquery5a)
         lcursor.execute(mcquery5c)
@@ -178,7 +178,7 @@ def truncate_tables():
     """
     conn   = get_connection()
     cursor = conn.cursor()
-    tables = ['holdings_cluster', 'holdings_cluster_oclc', 'holdings_cluster_htitem_jn']
+    tables = ['holdings_cluster_test', 'holdings_cluster_oclc_test', 'holdings_cluster_htitem_jn_test']
     for t in tables:
         count_q = "SELECT COUNT(*) AS c FROM %s" % t
         count_r = run_single_query(cursor, count_q)
@@ -191,7 +191,7 @@ def truncate_tables():
 
 def load_table():
     infile = get_loadfile_path()
-    q      = "LOAD DATA LOCAL INFILE '%s' INTO TABLE holdings_cluster_oclc" % infile
+    q      = "LOAD DATA LOCAL INFILE '%s' INTO TABLE holdings_cluster_oclc_test" % infile
     conn   = get_connection()
     cursor = conn.cursor()
     print q
@@ -235,7 +235,7 @@ def cluster_main():
             continue
                 
         ## get the OCNs for each volume_id ##
-        query3 = "SELECT oclc FROM holdings_htitem_oclc WHERE volume_id = '%s'" % vid
+        query3 = "SELECT oclc FROM holdings_htitem_oclc_test WHERE volume_id = '%s'" % vid
         ocns = run_list_query(cursor, query3)
         # skip htitems with no oclc number
         if (len(ocns) == 0):
@@ -254,7 +254,7 @@ def cluster_main():
             cids = list(pclusters)
             cids.sort()
             lcid = cids.pop(0)
-            query4 =  """ INSERT INTO holdings_cluster_htitem_jn (cluster_id, volume_id)
+            query4 =  """ INSERT INTO holdings_cluster_htitem_jn_test (cluster_id, volume_id)
                   VALUES (%s, '%s') """ % (lcid, vid)
             try:
                 if VERBOSE:
