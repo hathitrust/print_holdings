@@ -8,7 +8,7 @@ popd > /dev/null;
 source $SCRIPTPATH/build_lib.sh;
 
 loadfile=$DATADIR/builds/current/load.tsv;
-input_current="s3://umich-lib-phdb-1/input/Current";
+input_current="s3://$s3_main_bucket/input/Current";
 
 echo `date` Started;
 
