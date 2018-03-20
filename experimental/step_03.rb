@@ -3,6 +3,9 @@ require 'hathidb';
 require 'hathilog';
 
 def setup
+  @log = Hathilog::Log.new();
+  @log.i("Started");
+
   db     = Hathidb::Db.new();
   @conn  = db.get_conn();
   @outfn = Hathidata::Data.new('builds/current/cluster_oclc.data_rb').open('w')
@@ -16,6 +19,7 @@ end
 def teardown
   @conn.close();
   @outfn.close();
+  @log.i("Finished");
 end
 
 def run_list_query
