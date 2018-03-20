@@ -7,6 +7,11 @@ SCRIPTPATH=`pwd`;
 popd > /dev/null;
 source $SCRIPTPATH/build_lib.sh;
 
+if [ -z "$s3_main_bucket" ]; then
+    echo "You must set s3_main_bucket in conf/hathiconf.prop";
+    exit 1;
+fi
+
 loadfile=$DATADIR/builds/current/load.tsv;
 input_current="s3://$s3_main_bucket/input/Current";
 
