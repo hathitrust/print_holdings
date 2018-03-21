@@ -1,5 +1,19 @@
 #!/bin/bash
 
-echo "Opening $1";
-tar -xvzf $1.tar.gz && rm $1.tar.gz;
-echo "Done.";
+# if foo.estimate.tar.gz exists, then valid inputs are
+# open_tgz.sh foo
+# open_tgz.sh foo.estimate
+# open_tgz.sh foo.estimate.tar.gz
+# if foo.tar.gz exists, then valid inputs are
+# open_tgz.sh foo
+# open_tgz.sh foo.tar.gz
+
+member=`ls | grep -Po "^$1(\.estimate)?(\.tar\.gz)?$" | sed -r 's/\.tar\.gz//'`;
+
+if [ -z "$member" ]; then
+    echo "Could not find member dir for $member";
+else
+    echo "Opening $member";
+    tar -xvzf $member.tar.gz && rm $member.tar.gz;
+    echo "Done.";
+fi
