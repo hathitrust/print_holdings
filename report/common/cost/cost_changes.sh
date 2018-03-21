@@ -5,7 +5,7 @@
 # Be aware that this will slurp up any cost report under data/costreport/ so don't let experimental ones sit
 # around when running this.
 
-root_dir="/htapps/mwarin.babel/phdb_scripts";
+root_dir="$RUBYLIB/..";
 out_dir="$root_dir/data/costreport";
 ymd=`date +'%Y-%m-%d'`;
 
