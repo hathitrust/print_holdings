@@ -64,7 +64,7 @@ class CostEstimator
     return h_array
   end
 
-  def estimate_cost(ave_cost_per_vol, bump, vidfn)
+  def estimate_cost(ave_cost_per_vol, bump, vidfn, output_stream=$stdout)
     # 'bump' is an int, indicating whether to bump the H counts by one
     # for a potential member or leave at 0 for a regular member
     if not (bump==1 or bump==0)
@@ -79,7 +79,7 @@ class CostEstimator
       next if not h.integer?
       h_cost = (h * (ave_cost_per_vol/ind))
       total_cost += h_cost
-      puts "#{ind}\t#{h}\t#{h_cost}\t#{total_cost}"
+      output_stream.puts("#{ind}\t#{h}\t#{h_cost}\t#{total_cost}");
     end
     return total_cost
   end
