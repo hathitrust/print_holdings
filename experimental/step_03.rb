@@ -28,7 +28,7 @@ def setup
     :get_oclc_from_volid    => prep_q('SELECT oclc FROM holdings_htitem_oclc WHERE volume_id = ?'),
     :last_id                => prep_q('SELECT LAST_INSERT_ID() AS id')
   }
-  
+
   @cluster_oclc_d = {}
   @oclc_cluster_d = {}
 end
@@ -82,9 +82,8 @@ def create_cluster(ocns, vol_id)
   return pkid
 end
 
-# Merges clusters together.  Uses c1's id, adds
-# c2 OCNs and volume_ids to c1, resolves rights, deletes c2 entries from
-# tables.
+# Merges clusters together.  Uses c1's id, adds c2 OCNs and 
+# volume_ids to c1, resolves rights, deletes c2 entries from tables.
 def merge_clusters (cid1, cid2)
   @log.d("Merging cluster id #{cid1}  (ocns #{@cluster_oclc_d[cid1].join(',')})")
   @log.d("... with cluster id #{cid2} (ocns #{@cluster_oclc_d[cid2].join(',')})")
@@ -137,7 +136,7 @@ def cluster_main
     viter += 1
     next if vid.length < 3
 
-    # get the OCNs for each volume_id  
+    # get the OCNs for each volume_id
     ocns = run_list_query(@queries[:get_oclc_from_volid][:prep].enumerate(vid))
     # skip htitems with no oclc number
     next unless ocns.any?
@@ -185,7 +184,7 @@ def clusters_with_ocns (ocns)
       pclusters << cid
     end
   end
-  return pclusters.uniq  
+  return pclusters.uniq
 end
 
 def load_table
@@ -194,8 +193,8 @@ def load_table
   @conn.execute(q)
 end
 
-# Exports one of the table data structures to a flatfile.  Structs are
-# hashes of lists (sets). """
+# Exports one of the table data structures to a flatfile.
+# Structs are hashes of lists (sets).
 def dump_data_structure
   @cluster_oclc_d.each do |cid, oclcs|
     oclcs.each do |o|
