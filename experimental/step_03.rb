@@ -20,7 +20,7 @@ def setup
 
   # These get called all the time, so worth preparing.
   @queries = {
-    :create_cluster_q       => prep_q('INSERT INTO holdings_cluster (cost_rights_id, osici, last_mod) VALUES (0, ?, SYSDATE())'),
+    :create_cluster       => prep_q('INSERT INTO holdings_cluster (cost_rights_id, osici, last_mod) VALUES (0, ?, SYSDATE())'),
     :insert_hchj            => prep_q('INSERT INTO holdings_cluster_htitem_jn (cluster_id, volume_id) VALUES (?, ?)'),
     :get_volid_from_cluster => prep_q('SELECT volume_id FROM holdings_cluster_htitem_jn WHERE cluster_id = ?'),
     :del_hchj               => prep_q('DELETE FROM holdings_cluster_htitem_jn WHERE cluster_id = ?'),
@@ -64,7 +64,7 @@ end
 def create_cluster(ocns, vol_id)
   # insert into cluster, get id
   ocn0 = ocns[0]
-  @queries[:create_cluster_q][:prep].execute(ocn0)
+  @queries[:create_cluster][:prep].execute(ocn0)
   # get last inserted id
   pkid = nil
   @queries[:last_id][:prep].enumerate() do |row|
@@ -172,13 +172,10 @@ def cluster_main
       # merge remaining clusters into root cluster
       cids.each do |cid|
         merge_clusters(lowest_cid, cid.to_i)
-        # do not leave in
-        dump_data_structure()
-        exit
       end
     end
 
-    if viter % 1000 == 0
+    if viter % 10000 == 0
       @log.i viter
     end
   end
