@@ -20,7 +20,7 @@ def setup
 
   # These get called all the time, so worth preparing.
   @queries = {
-    :create_cluster       => prep_q('INSERT INTO holdings_cluster (cost_rights_id, osici, last_mod) VALUES (0, ?, SYSDATE())'),
+    :create_cluster         => prep_q('INSERT INTO holdings_cluster (cost_rights_id, osici, last_mod) VALUES (0, ?, SYSDATE())'),
     :insert_hchj            => prep_q('INSERT INTO holdings_cluster_htitem_jn (cluster_id, volume_id) VALUES (?, ?)'),
     :get_volid_from_cluster => prep_q('SELECT volume_id FROM holdings_cluster_htitem_jn WHERE cluster_id = ?'),
     :del_hchj               => prep_q('DELETE FROM holdings_cluster_htitem_jn WHERE cluster_id = ?'),
@@ -44,19 +44,11 @@ def prep_q(sql)
 end
 
 # runs query, returns array of items
-# pass it a query string or a resultset
 def run_list_query(query)
   items = []
-  if query.class == String then
-    @conn.enumerate(query) do |row|
-      items << row[0]
-    end
-  elsif query.class == JDBCHelper::Connection::ResultSet then
-    query.each do |row|
-      items << row[0]
-    end
+  query.each do |row|
+    items << row[0]
   end
-
   return items
 end
 
@@ -137,12 +129,11 @@ end
 
 def cluster_main
   puts "Grabbing volume_ids..."
-  query1 = "SELECT DISTINCT(volume_id) FROM holdings_htitem"
-  all_vids = run_list_query(query1)
-  puts "#{all_vids.size} ids received..."
+  get_all_volids_sql = "SELECT DISTINCT(volume_id) FROM holdings_htitem"
 
   viter = 0
-  all_vids.each do |vid|
+  @conn.query(get_all_volids_sql) do |row|
+    vid = row[:volume_id]
     viter += 1
     next if vid.length < 3
 
