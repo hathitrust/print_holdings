@@ -23,9 +23,11 @@ nohuppable=$(cat <<EOF
     bash   step_09a.sh       ;
 EOF
 )
-echo $nohuppable;
-echo $nohuppable > runthis.sh;
-nohup bash runthis.sh > nohup.log &
+
+# Echo quoted preserves the newlines from the heredoc.
+echo "$nohuppable";
+echo "$nohuppable" > runthis.sh;
+nohup bash runthis.sh >> build.log &
 
 # Now do the Amazon EMR if there were any changes.
 # When that's done, do batch_build_02.sh
