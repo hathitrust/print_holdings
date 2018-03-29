@@ -81,6 +81,11 @@ def generate_htitem_table(infilen, serialsfn)
       if ecparser.chron_str.length > 0
         n_chron = ecparser.normalized_chron.strip;
       end
+
+      [n_enum, n_chron].each do |n_ec|
+        n_ec.gsub!(/\\/, '');
+      end
+
     end
     if (itype == 'mono' and n_enum.length > 0)
       itype = 'multi';
