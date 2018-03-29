@@ -8,11 +8,15 @@ db   = Hathidb::Db.new();
 conn = db.get_conn();
 
 # So we can measure progress.
-def count_before_after (conn, log)
+def count_before_after (conn, log, before_after = :between)
   q = "SELECT COUNT(*) AS c FROM holdings_htitem_htmember_jn WHERE member_id = ''";
   log.d(q);
   conn.query(q) do |r|
     log.d(r[:c]);
+    if before_after == :before && r[:c].to_i == 0 then
+      log.d("There is no need to do anything further in this step.");
+      exit 0;
+    end
   end
 
   # List how many by who.
@@ -37,7 +41,7 @@ end
 
 # Check initial count.
 log.d("Unclaimed count before update:");
-count_before_after(conn, log);
+count_before_after(conn, log, :before);
 
 # Map of prefix->member_id, reads like:
 # volume "uma.ark:/13960/t5hb1q086" goes to "umass".
@@ -107,7 +111,7 @@ end
 
 # Check final count.
 log.d("Unclaimed count after update:");
-count_before_after(conn, log);
+count_before_after(conn, log, :after);
 
 conn.close();
 log.i("Finished");

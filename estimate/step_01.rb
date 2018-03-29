@@ -24,14 +24,12 @@ def create_estimate(member_id, ave_ic_cost_per_vol, db)
   iconn = db.get_interactive();
   create_table(table, iconn);
   load_table(table, member_id, iconn);
-  volume_id_file = get_volume_ids(table, iconn);
+  get_volume_ids(table, iconn);
 
   narrative = get_narrative(table, iconn);
-  hd = Hathidata::Data.new("estimate/narrative_#{member_id}_$ymd.txt").open('w');
-  hd.file.puts narrative;
-  hd.close();
+  @narrative_hdout.file.puts narrative;
 
-  run_ic_estimate(table, iconn, volume_id_file, ave_ic_cost_per_vol);
+  run_ic_estimate(table, iconn, ave_ic_cost_per_vol);
 
   drop_table(table, iconn);
   iconn.close();
@@ -83,13 +81,12 @@ end
 def get_volume_ids(table, conn)
   # Airlifted in from:
   # /htapps/pete.babel/Code/phdb/bin/estimate_pull_ic_volumes.rb
-  outfn   = "#{table}-volume_id.$ymd.out";
-  outfile = Hathidata::Data.new(outfn);
 
-  if File.exists?(outfile.path) then
-    return outfile.path;
+  if @volume_id_hd.exists? then
+    return @volume_id_hd.path.to_s;
   end
 
+  @volume_id_hd.open('w');
   ### query to supplement the cost estimation ###
   query = "SELECT DISTINCT ho.volume_id FROM holdings_htitem_oclc as ho,
          holdings_htitem as h, #{table} as mt
@@ -97,18 +94,16 @@ def get_volume_ids(table, conn)
          AND h.volume_id = ho.volume_id
          AND h.access = 'deny'";
 
-  pull_query(conn, query, outfile.path);
-
-  $log.d("Output written to file #{outfile.path}");
-
-  return outfile.path;
+  pull_query(conn, query, @volume_id_hd.path.to_s);
+  @volume_id_hd.close();
+  $log.d("Output written to file #{@volume_id_hd.path}");
 end
 
-def run_ic_estimate(table, conn, volume_id_file, ave_cost_per_vol)
+def run_ic_estimate(table, conn, ave_cost_per_vol)
   # Airlifted in from:
   # /htapps/pete.babel/Code/phdb/bin/estimate_ic_costs_for_member.rb
   estimator = CostEstimator.new(table, conn);
-  cost = estimator.estimate_cost(ave_cost_per_vol, 1, volume_id_file);
+  cost = estimator.estimate_cost(ave_cost_per_vol, 1, @volume_id_hd.path.to_s, @estimate_hdout.file);
   cost_str = "%.2f" % cost;
   puts "total ic cost = $#{cost_str}";
 end
@@ -219,6 +214,12 @@ if $0 == __FILE__ then
 
   db = Hathidb::Db.new();
   ARGV.each do |member_id|
+    # Get some file handles, and open the ones we know we'll write to.
+    @volume_id_hd    = Hathidata::Data.new("holdings_memberitem_#{member_id}-volume_id.$ymd.out");
+    @narrative_hdout = Hathidata::Data.new("estimate/narrative_#{member_id}_$ymd.txt").open('w');
+    @estimate_hdout  = Hathidata::Data.new("estimate/estimate_#{member_id}_$ymd.txt").open('w');
     create_estimate(member_id, ave_ic_cost_per_vol, db);
+    @narrative_hdout.close();
+    @estimate_hdout.close();
   end
 end
