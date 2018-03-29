@@ -25,7 +25,7 @@ CONFDIR=`readlink -e $SCRIPTPATH/../../conf`;
 conf_file=$CONFDIR/hathiconf.prop;
 source <(grep -v '^#' $conf_file | grep -P '.+=.+' | sed -r 's/ += +/=/g');
 
-HTDIR=/htapps/mwarin.babel/phdb_scripts/data/loadfiles;
+HTDIR="$DATADIR/loadfiles";
 
 function check_exit_code() {
     exit_st=$1;
