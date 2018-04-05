@@ -21,6 +21,9 @@ The new script assigns a member_id based on collection_code, if collection_code-
 
 =end
 
+log = Hathilog::Log.new();
+log.i("Started");
+
 get_all_sql = %w<
   SELECT hh.volume_id, hcm.member_id, COUNT(DISTINCT h3j.member_id) AS c
   FROM holdings_htitem AS hh
@@ -28,7 +31,6 @@ get_all_sql = %w<
   ON (hh.collection_code = hcm.collection)
   LEFT JOIN holdings_htitem_htmember_jn AS h3j 
   ON (hh.volume_id = h3j.volume_id AND hcm.member_id = h3j.member_id)
-  WHERE h3j.member_id != ''
   GROUP BY hh.volume_id, hcm.member_id
   HAVING c = 0
 >.join(" ")
@@ -36,7 +38,7 @@ get_all_sql = %w<
 get_all_q = conn.prepare(get_all_sql);
 out_path  = "builds/current/deposits_sans_holdings.tsv";
 hdout     = Hathidata::Data.new(out_path).open('w');
-log       = Hathilog::Log.new();
+
 log.d(get_all_sql);
 
 i = 0;
@@ -51,6 +53,7 @@ get_all_q.enumerate() do |row|
   hdout.file.puts [volume_id, member_id, 1].join("\t");
 end
 log.i(i);
+hdout.close();
 
 # Load file.
 load_sql = %W<
@@ -61,7 +64,6 @@ load_sql = %W<
 
 log.d(load_sql);
 load_q = conn.prepare(load_sql);
-puts "Not actually inserting!!!";
-# load_q.execute(hdout.path.to_s);
-
-hdout.close();
+load_q.execute(hdout.path.to_s);
+conn.close();
+log.i("Finished");
