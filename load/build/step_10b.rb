@@ -43,9 +43,10 @@ t_counts(conn, log, t);
 # Prepare them first so that we fail early.
 # This is where we actually truncate holdings_htitem_htmember_jn, in a roundabout way.
 qs = [
-      conn.prepare("RENAME TABLE #{t} TO #{t}_#{curmon}"),
-      conn.prepare("CREATE TABLE #{t} LIKE #{t}_#{curmon}"),
-      conn.prepare("LOAD DATA LOCAL INFILE '#{infile.path}' INTO TABLE #{t}")
+  conn.prepare("DROP TABLE IF EXISTS #{t}_#{curmon}"),
+  conn.prepare("RENAME TABLE #{t} TO #{t}_#{curmon}"),
+  conn.prepare("CREATE TABLE #{t} LIKE #{t}_#{curmon}"),
+  conn.prepare("LOAD DATA LOCAL INFILE '#{infile.path}' INTO TABLE #{t}")
 ];
 
 qs.each_with_index do |q,i|
