@@ -4,6 +4,8 @@ require 'hathiquery';
 
 # Reinterpretation of:
 # /htapps/pete.babel/Code/phdb/lib/sql/create_htitem_htmember_jn_v1.4_nonmulti_stored_procedure.sql
+# Todo: this could be multi-threaded? Most of the work is happening in the db so maybe not.
+# Todo: rewrite main_sql to use JOIN
 
 log = Hathilog::Log.new();
 log.d("Started");
