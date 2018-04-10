@@ -15,6 +15,8 @@ utilizes the 'access' column of htitem and assigns either '2' or '1'
 'allow' or 'deny' indicators for a cluster.  All items must have the
 same access indication, otherwise it'll be marked as '0' ('undetermined').
 
+TODO: remove run_list_query.
+
 =end
 
 def run_list_query(conn, query, fetch_size=50000)
@@ -90,7 +92,7 @@ def calc_cluster_rights()
 
     query3.execute(rid, cid);
 
-    log.d(citer) if (citer % 500000) == 0;
+    log.d(citer) if (citer % 50000) == 0;
   end
 
   conn.close();
