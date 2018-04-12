@@ -51,8 +51,9 @@ puts "---";
 # Who has a retention commitment?
 puts "Who has a commitment?";
 sp_q = conn.prepare(%w{
-  SELECT DISTINCT member_id FROM shared_print_commitments WHERE resolved_oclc = ? ORDER BY member_id
+  SELECT DISTINCT member_id, local_oclc, resolved_oclc FROM shared_print_commitments WHERE resolved_oclc = ? ORDER BY member_id
 }.join(' '));
+puts [:member_id, :local_oclc, :resolved_oclc].join("\t")
 sp_q.enumerate(resolved_oclc) do |row|
   puts row.to_a.join("\t");
 end
