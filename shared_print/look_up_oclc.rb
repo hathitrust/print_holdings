@@ -31,9 +31,11 @@ if check_alternates then
   end
 end
 alternates.uniq!
-puts "Alternate forms: #{alternates.join(',')}"
-puts "---";
-
+if !alternates.empty? then
+  puts "Alternate forms: #{alternates.join(',')}"
+  puts "---";
+end
+  
 # Who has it in their print holdings?
 ph_q = conn.prepare(%W{
   SELECT member_id, item_type, status, item_condition, COUNT(*)
