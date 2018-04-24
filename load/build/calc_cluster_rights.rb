@@ -66,6 +66,13 @@ conn.query(sql1) do |row|
     else
       log.w("problem rights string = #{rstring} (#{cid})");
     end
+<<<<<<< HEAD
+=======
+
+    query3.execute(rid, cid);
+
+    log.d(citer) if (citer % 50000) == 0;
+>>>>>>> b313cb1d6676b2b2fd9d19cd53161d21075ae4c0
   end
   if rid < 0 then
     log.f("'-1' rights id, shouldn't happen.");

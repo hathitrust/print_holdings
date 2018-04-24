@@ -50,6 +50,7 @@ prefix_member = {
   'aeu'  => 'ualberta',
   'aub'  => 'aub',
   'gri'  => 'getty',
+  'hva'  => 'vcu',     # HTS-127466
   'hvd'  => 'harvard', # HTS-121664
   'ia'   => 'wfu',
   'iau'  => 'uiowa',
