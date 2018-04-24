@@ -12,14 +12,13 @@ def setup
   @hdout = Hathidata::Data.new("reports/shared_print/holdings_matching_sp_#{@member_id}_$ymd.tsv");
   @log   = Hathilog::Log.new();
 
+  # There are currently no OCLC with more than 50 variants, so this is a safe-ish magic number.
   @qmarks_magic_number = 50;
   
   get_ph_overlap_sql = %W[
    SELECT COUNT(DISTINCT hm.member_id) AS ph_overlap_count
    FROM holdings_memberitem AS hm
-   WHERE hm.oclc IN (
-     #{(['?'] * @qmarks_magic_number).join(',')}
-   )
+   WHERE hm.oclc IN ( #{('?,' * @qmarks_magic_number).chop} )
  ].join(' ');
  @get_ph_overlap_q = @conn.prepare(get_ph_overlap_sql);
 
@@ -33,7 +32,6 @@ def shutdown
 end
 
 def main
-
   # join against hco if you want to make sure we are only talking about things in HT:
   # JOIN holdings_cluster_oclc AS hco ON (hco.oclc = COALESCE(o.oclc_x, hm.oclc))
   sql = %w[
@@ -48,7 +46,6 @@ def main
 
   q = @conn.prepare(sql);
   q.enumerate(@member_id) do |row|
-
     variant_oclcs = [row[:resolved_oclc]];
     @get_variant_oclcs_q.enumerate(row[:resolved_oclc]) do |o_row|
       variant_oclcs << o_row[:oclc_y]
