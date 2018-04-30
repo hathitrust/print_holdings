@@ -23,7 +23,7 @@ nohuppable=$(cat <<EOF
     env CMDLINE_ENV_DB_USER="$db_user" CMDLINE_ENV_DB_PASSWORD="$db_password" ruby step_10b.rb &&
     ruby step_10c.rb &&
     ruby step_10d.rb &&
-    ruby step_10e_new.rb &&
+    ruby step_10e.rb &&
     ruby step_10f.rb &&
     ruby step_10g.rb &&
     ruby step_10h.rb &&
