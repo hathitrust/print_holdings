@@ -50,7 +50,7 @@ def get_infiles
     line.strip!;
     next if line[/^#/];
     next if line[/^\s*$/];
-    m = /^([a-z]+)\t(mono|multi|serial)$/.match(line);
+    m = /^([a-z\.\-]+)\t(mono|multi|serial)$/.match(line);
     if m != nil then
       member_id = m[1];
       type      = m[2];
