@@ -64,6 +64,10 @@ def get_infiles
         members[member_id] = [];
       end
       members[member_id] << type;
+    else
+      msg = "Failed to recognize #{line} as an OK input.";
+      @log.f(msg);
+      raise msg;
     end
   end
   hdin.close();
@@ -239,14 +243,14 @@ def check_values
     vals = check[:ok_vals].map{|x| "'#{x}'"}.join(',');
     @log.d("#{col}:");
     sql = %W<
-      SELECT member_id, #{col}, COUNT(#{col}) AS c 
-      FROM holdings_memberitem 
-      WHERE #{col} NOT IN (#{vals}) 
+      SELECT member_id, #{col}, COUNT(#{col}) AS c
+      FROM holdings_memberitem
+      WHERE #{col} NOT IN (#{vals})
       GROUP BY member_id, #{col}
       ORDER BY c
     >.join(' ');
     @log.d(sql);
-    
+
     bad_count = 0;
     @conn.query(sql) do |row|
       bad_count += 1;
@@ -257,7 +261,7 @@ def check_values
       @log.e(errmsg);
       raise errmsg;
     end
-    @log.d("#{col} OK!");    
+    @log.d("#{col} OK!");
   end
   @log.d("Done checking values.");
 end
