@@ -33,11 +33,19 @@ def get_cluster
 end
 
 def get_volume_ids
-  puts "## Volume ids:";
-  sql = "SELECT volume_id FROM holdings_cluster_htitem_jn WHERE cluster_id = ? ORDER BY volume_id";
+  puts "## Volume ids (+ HathiFile data):";
+  cols = %w[volume_id access rights oclcs item_type];
+  sql = %W<
+    SELECT #{cols.map{|x| 'hi.' + x}.join(', ')}
+    FROM holdings_cluster_htitem_jn AS hc
+    JOIN holdings_htitem AS hi ON (hc.volume_id = hi.volume_id)
+    WHERE cluster_id = ?
+    ORDER BY volume_id
+  >.join(' ');
   q = @conn.prepare(sql);
+  puts cols.join("\t");
   q.enumerate(@cluster_id) do |row|
-    puts row[:volume_id];
+    puts cols.map{|x| row[x]}.join("\t");
   end
 end
 
