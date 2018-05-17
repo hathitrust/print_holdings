@@ -16,13 +16,7 @@ conn = db.get_conn();
 # Preparing the queries.
 
 sql_check = %w<
-SELECT
-    item_type,
-    COUNT(*) AS c
-FROM
-    holdings_htitem
-GROUP BY
-    item_type;
+  SELECT item_type, COUNT(*) AS c FROM holdings_htitem GROUP BY item_type
 >.join(' ');
 query_check = conn.prepare(sql_check);
 
@@ -31,31 +25,19 @@ sql_select_1 = %w<
 SELECT
     DISTINCT(cluster_id) AS cid
 FROM
-    holdings_cluster_htitem_jn AS chtij,
-    holdings_htitem            AS h
+     holdings_cluster_htitem_jn AS chtij
+JOIN holdings_htitem            AS h ON (h.volume_id = chtij.volume_id)
 WHERE
-    h.volume_id = chtij.volume_id
-    AND
     h.item_type = 'multi'
 >.join(' ');
 
 sql_select_2 = %w<
-SELECT
-    DISTINCT(volume_id)
-FROM
-    holdings_cluster_htitem_jn
-WHERE
-    cluster_id = ?
+  SELECT DISTINCT(volume_id) FROM holdings_cluster_htitem_jn WHERE cluster_id = ?
 >.join(' ');
 query_select_2 = conn.prepare(sql_select_2);
 
 sql_update = %w<
-UPDATE
-    holdings_htitem
-SET
-    item_type = 'multi'
-WHERE
-    volume_id = ?
+  UPDATE holdings_htitem SET item_type = 'multi' WHERE volume_id = ?
 >.join(' ');
 query_update = conn.prepare(sql_update);
 
