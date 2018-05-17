@@ -72,6 +72,7 @@ log.d("\t\t" + sql_update);
 conn.query(sql_select_1) do |row|
   cid = row[:cid];
   # get volume_ids associated with the cluster
+  log.d("Updating cluster #{cid} to item_type=multi");
   query_select_2.enumerate(cid) do |vrow|
     vid = vrow[0];
     query_update.execute(vid);
