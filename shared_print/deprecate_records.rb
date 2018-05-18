@@ -85,8 +85,13 @@ if !spec_ok then
         );
 end
 
+# wang-jangle the enumerator to get the member_id from the first line after header:
+member_id = hdin.file.lines.peek.split("\t").first;
+# and then rewind and step forward one time to skip header.
+hdin.file.lines.rewind;
+hdin.file.lines.first;
+
 # Set up logfile.
-member_id = header.split("\t").first;
 log  = Hathilog::Log.new({:file_name => "#{member_id}_sp_status_update_$ymd.log"});
 log.i("Updating shared print status for #{member_id}, using #{infn}");
 
@@ -150,3 +155,4 @@ hdin.file.each_line do |line|
 end
 
 hdin.close();
+log.close();
