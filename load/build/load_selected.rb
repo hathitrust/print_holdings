@@ -155,7 +155,7 @@ def process_htfiles (htfiles)
   load_query   = @conn.prepare(load_sql);
 
   htfiles.each do |infile|
-    m = /HT003_([a-z]+)\.(mono|multi|serial).tsv/.match(infile.to_s);
+    m = /HT003_([a-z\.\-]+)\.(mono|multi|serial).tsv/.match(infile.to_s);
     if m != nil then
       member_id = m[1];
       item_type = m[2];
