@@ -9,10 +9,11 @@ def setup
   @member_id = ARGV.shift; # || raise "Need member_id as arg.";
   db = Hathidb::Db.new();
   @conn  = db.get_conn();
-  @hdout = Hathidata::Data.new("reports/shared_print/holdings_matching_sp_#{@member_id}_$ymd.tsv");
+  @hdout = Hathidata::Data.new("reports/shared_print/holdings_matching_sp_#{@member_id}_$ymd.tsv").open('w');
   @log   = Hathilog::Log.new();
 
   # There are currently no OCLC with more than 50 variants, so this is a safe-ish magic number.
+  # NB in the new (Apr 2018) OCLC mapping, there are ~60 OCLCs with more than 100 variants. So, TODO...
   @qmarks_magic_number = 50;
   
   get_ph_overlap_sql = %W[
@@ -50,6 +51,7 @@ def main
     @get_variant_oclcs_q.enumerate(row[:resolved_oclc]) do |o_row|
       variant_oclcs << o_row[:oclc_y]
     end
+    # Pad with nils so we can use the same prepped query no matter how many oclcs we send in.
     variant_oclcs += ([nil] * (@qmarks_magic_number - variant_oclcs.count));
     ph_overlap = get_ph_overlap(variant_oclcs);
     out_row = row.to_a;
