@@ -526,7 +526,16 @@ class MemberScrubber
             # "c.1" intervention
             enum_chron = enum_chron.gsub(/c\.1$/, '');
             enum_chron = enum_chron.gsub(/c\. 1$/, '');
+
+            # Filter out some common non-print enumchrons.
+            if enum_chron =~ /^((cd|dvd)(-?rom)?)$/i then
+              @logger.i("Skipping record with non-print enumchron on line #{i}: (#{enum_chron}) '#{line.strip}'");
+              count(:non_print_enumchron);
+              next;
+            end
+
             ecparser.parse(enum_chron);
+
             if ecparser.enum_str.length > 0 then
               n_enum = ecparser.normalized_enum.strip;
             end
