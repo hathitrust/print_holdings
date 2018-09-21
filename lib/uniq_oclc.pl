@@ -49,7 +49,7 @@ my $default = {
     data_delim   => ",",
     oclc_column  => 0,
     verbose      => 0,
-    header       => 1,
+    header       => 0,
     strict       => 0,
 };
 
@@ -71,7 +71,7 @@ while (<>) {
     if ($default->{header} > 0) {
 	$default->{header}--;
 	print $line . "\n";
-	print STDERR "Skipping header [$line]\n" if $default->{verbose};
+	print STDERR "Skipping header [$line]\n";
 	next;
     }
 
@@ -92,14 +92,17 @@ while (<>) {
 	    # Under strict, only deal with ocns that at least loosely resemble oclc numbers.
 	    # Strictly numeric ocns can, after some sampling and experimentation, not be trusted.
 	    # Get the numeric ocn out.
-	    if ($ocn =~ m/oc.+(\d+)/i) {
+	    if ($ocn =~ m/oc.+?(\d+)/i) {
 		$number = $1;
 		$number =~ s/^0+//;
 		$ocn   =~ s/\s//g;
+		# delete any trailing crap e.g. (OCoLC)38150217kkh3/4/99 -> (OCoLC)38150217
+		$ocn =~ s/(\d)\D+.*/$1/;
 		# One number can only map to one surface representation.
+		print "$number => $ocn\n" if $default->{verbose};
 		$uniq{$number} = $ocn;
 	    } else {
-		print STDERR "$ocn failed strict\n" if $default->{verbose};
+		print STDERR "[$ocn] failed strict\n" if $default->{verbose};
 		next OCN_LOOP;
 	    }
 	} else {
@@ -112,12 +115,12 @@ while (<>) {
 	}
     }
     # Return one surface representation per number in %uniq.
-    $columns[$default->{oclc_column}] = join($default->{data_delim}, sort values %uniq);
+    $columns[$default->{oclc_column}] = join($default->{data_delim}, sort grep { /\d/ } values %uniq);
     # Put line back together
     my $new_line = join($default->{column_delim}, @columns);
     if ($default->{verbose} && $old_line ne $new_line) {
 	print STDERR "-$old_line\n";
-	print STDERR "+$new_line\n";
+	print STDERR "+$new_line\n\n";
     }
     print $new_line . "\n";
 }
