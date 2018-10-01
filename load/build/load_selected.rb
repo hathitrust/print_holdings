@@ -17,7 +17,7 @@ require 'fileutils';
 # The script will pretty much scream and die if anything isn't
 # to its liking.
 
-@log             = Hathilog::Log.new({:file_name => 'builds/current/load_selected.log'});
+@log             = Hathilog::Log.new({:file_name => 'builds/current/load_selected_rb.log'});
 @db              = Hathidb::Db.new();
 @conn            = @db.get_conn();
 @member_data_dir = Hathidata::Data.new('memberdata/').path;
