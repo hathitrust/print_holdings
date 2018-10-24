@@ -8,12 +8,16 @@
 # open_tgz.sh foo
 # open_tgz.sh foo.tar.gz
 
-member=`ls | grep -Po "^$1(\.estimate)?(\.tar\.gz)?$" | sed -r 's/\.tar\.gz//'`;
 
-if [ -z "$member" ]; then
-    echo "Could not find member dir for $member";
-else
-    echo "Opening $member";
-    tar -xvzf $member.tar.gz && rm $member.tar.gz;
-    echo "Done.";
-fi
+for var in "$@";
+do :
+   member=`ls | grep -Po "^$var(\.estimate)?(\.tar\.gz)?$" | sed -r 's/\.tar\.gz//'`;
+
+   if [ -z "$member" ]; then
+       echo "Could not find member dir for $member";
+   else
+       echo "Opening $member";
+       tar -xvzf $member.tar.gz && rm $member.tar.gz;
+       echo "Done.";
+   fi
+done
