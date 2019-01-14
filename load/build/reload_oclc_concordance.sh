@@ -24,7 +24,7 @@ OCLCDIR="$DATADIR/oclc_concordance";
 
 # Get the most recent concordance and unzip it.
 echo "Getting the most recent OCLC concordance file from $OCLCDIR";
-OCLC_FILE_GZ=`ls $OCLCDIR | grep -P '^\d+_concordance.txt.gz$' | sort -n | head -1`;
+OCLC_FILE_GZ=`ls $OCLCDIR | grep -P '^\d+_concordance.txt.gz$' | sort -n | tail -1`;
 OCLC_FILE="";
 
 date;
@@ -36,7 +36,7 @@ else
     time gunzip $OCLCDIR/$OCLC_FILE_GZ;
 fi
 
-OCLC_FILE=`ls $OCLCDIR | grep -P '^\d+_concordance.txt$' | sort -n | head -1`;
+OCLC_FILE=`ls $OCLCDIR | grep -P '^\d+_concordance.txt$' | sort -n | tail -1`;
 
 date;
 if [ -z "$OCLC_FILE" ]; then
