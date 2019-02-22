@@ -14,16 +14,14 @@ CREATE TABLE oclc_concordance (
 -- Returns resolved oclc if found, otherwise returns input.
 -- SELECT resolve_oclc(1000624734) --> 9939612
 -- SELECT resolve_oclc(666)        --> 666
-SELECT "Creating function" 
-DROP FUNCTION IF EXISTS resolve_oclc;
+
+SELECT "Creating function";
+DROP FUNCTION resolve_oclc; -- DROP FUNCTION IF EXISTS is not standard mysql
 DELIMITER //
 CREATE FUNCTION resolve_oclc(unresolved_oclc INT) RETURNS INT
   BEGIN
-  DECLARE resolved_oclc INT DEFAULT 0;
-  SELECT resolved INTO resolved_oclc FROM oclc_concordance WHERE variant = unresolved_oclc;
-  IF (resolved_oclc = 0) THEN
-     SET resolved_oclc := unresolved_oclc;
-  END IF;
+  DECLARE resolved_oclc INT UNSIGNED DEFAULT 0;
+  SELECT COALESCE(MIN(resolved), unresolved_oclc) INTO resolved_oclc FROM oclc_concordance WHERE variant = unresolved_oclc;
   RETURN resolved_oclc;
 END //
 DELIMITER ;
