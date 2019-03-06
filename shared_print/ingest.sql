@@ -20,7 +20,7 @@ create table shared_print_commitments (
     INDEX sp_commitment_local_oclc (local_oclc),
     INDEX sp_commitment_resolved_oclc (resolved_oclc)
 ); 
-
+ALTER TABLE shared_print_commitments ADD committed_date DATE DEFAULT '2017-09-30'; -- added 2018-09-26, Jira # HT-812
 create table shared_print_other (
     id 	     	   bigint(20)  NOT NULL,
     sp_program     ENUM('coppul', 'east', 'flare', 'ivyplus', 'mssc', 'recap', 'ucsp', 'viva', 'other', 'fdlp') NOT NULL,
