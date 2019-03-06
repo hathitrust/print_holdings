@@ -14,7 +14,6 @@ trump      994682109    994682109      tr.12345  L
 trump      994682109    994682109      tr.12346  L
 trump      994682109    994682109      tr.12347  L
 
-
 ... where the only deviation allowed is the optional resolved_oclc, so also OK:
 
 member_id  local_oclc  local_id  new_status
@@ -22,8 +21,12 @@ trump      994682109   tr.12345  L
 trump      994682109   tr.12346  L
 trump      994682109   tr.12347  L
 
-The value for new_status can be: L, D or E.
-L=Lost, D=Damaged, E=committed in Error, C=duplicate Copy
+The value for new_status can be: C,D,E,L,M
+C=duplicate Copy, 
+D=Damaged, 
+E=committed in Error, 
+L=Lost, 
+M=Missing from Print Holdings
 
 Look up matching records in shared_print_commitments and move them over
 to shared_print_deprecated and add the status.
@@ -38,6 +41,12 @@ conn = db.get_conn();
 infn = ARGV.shift;
 hdin = Hathidata::Data.new(infn).open('r');
 
+# Use flag -n for a no-op run.
+no_op = false;
+if ARGV.include?("-n") then
+  no_op = true;
+end
+
 # Queries
 select_sql = %w<
   SELECT * 
@@ -49,8 +58,8 @@ insert_sql = %w<
   INSERT INTO shared_print_deprecated
   (id, member_id, local_oclc, resolved_oclc, local_id, local_bib_id, local_item_id, oclc_symbol, 
   local_item_location, local_shelving_type, ht_retention_date, ht_retention_flag, other_commitment_id,
-  lending_policy, scanning_repro_policy, ownership_history, deprecation_status)
-  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  lending_policy, scanning_repro_policy, ownership_history, committed_date, deprecation_status)
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 >.join(" ");
 
 delete_sql = "DELETE FROM shared_print_commitments WHERE id = ?";
@@ -66,7 +75,7 @@ check_dup_sql = %w{
 header_spec = %w{member_id local_oclc resolved_oclc local_id new_status};
 spec_ok     = false;
 header      = hdin.file.lines.first.strip;
-allowed_status = %w{L D E C};
+allowed_status = %w{C D E L M};
 
 if header == header_spec.join("\t") then
   spec_ok = true;
@@ -92,8 +101,15 @@ hdin.file.lines.rewind;
 hdin.file.lines.first;
 
 # Set up logfile.
-log  = Hathilog::Log.new({:file_name => "#{member_id}_sp_status_update_$ymd.log"});
+log  = case no_op
+       when false 
+         Hathilog::Log.new({:file_name => "#{member_id}_sp_status_update_$ymd.log"});
+       when true
+         Hathilog::Log.new();
+       end
+
 log.i("Updating shared print status for #{member_id}, using #{infn}");
+log.d("no_op (-n) is: #{no_op}");
 
 # Prep queries.
 select_q = conn.prepare(select_sql);
@@ -131,6 +147,7 @@ hdin.file.each_line do |line|
     select_q.enumerate(*cols) do |row|
       row_h = row.to_h;
       row_h["deprecation_status"] = new_status;
+      row_h["committed_date"]     = row_h["committed_date"].to_s;
       match_rows << row_h;
     end
 
@@ -141,10 +158,14 @@ hdin.file.each_line do |line|
         # Copy records over to shared_print_deprecated
         log.i("Inserting #{h} into shared_print_deprecated");
         log.i(h.values);
-        insert_q.execute(*h.values);
+        if !no_op then
+          insert_q.execute(*h.values);
+        end
         # Delete them from shared_print_commitments
         log.i("Deleting #{h} from shared_print_commitments");
-        delete_q.execute(h["id"]);
+        if !no_op then
+          delete_q.execute(h["id"]);
+        end
       end
     end
   rescue BadStatusError => bse

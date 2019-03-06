@@ -11,10 +11,10 @@ alternates       = [oclc];
 
 # Do oclc resolution.
 oclc_res_q = conn.prepare(
-  "SELECT oclc_x FROM oclc_resolution WHERE oclc_y = ?"
+  "SELECT resolved FROM oclc_concordance WHERE variant = ?"
 );
 oclc_res_q.enumerate(oclc) do |row|
-  resolved_oclc = row[:oclc_x].to_i;
+  resolved_oclc = row[:resolved].to_i;
   check_alternates = true;
   alternates << resolved_oclc;
 end
@@ -23,11 +23,11 @@ puts "---";
 
 # Get alternate forms.
 alternates_q = conn.prepare(%w{
-  SELECT oclc_y FROM oclc_resolution WHERE oclc_x = ?
+  SELECT variant FROM oclc_concordance WHERE resolved = ?
 }.join(' '));
 if check_alternates then
   alternates_q.enumerate(resolved_oclc) do |row|
-    alternates << row[:oclc_y].to_i;
+    alternates << row[:variant].to_i;
   end
 end
 alternates.uniq!

@@ -41,7 +41,7 @@ def run
   @get_other_id_sql     = "SELECT other_commitment_id FROM shared_print_commitments WHERE member_id = ?";
   @delete_other_sql     = "DELETE FROM shared_print_other WHERE id = ?";
   @delete_sql           = "DELETE FROM shared_print_commitments WHERE member_id = ?";
-  @resolve_oclc_sql     = "SELECT oclc_x FROM oclc_resolution WHERE oclc_y = ?";
+  @resolve_oclc_sql     = "SELECT resolved FROM oclc_concordance WHERE variant = ?";
   @get_oclc_diff_sql    = %w{
   SELECT spc.resolved_oclc
     FROM shared_print_commitments AS spc
@@ -304,7 +304,7 @@ def parse_file
       query_cols['member_id'] ||= @member_id;
 
       # Use provided resolved_oclc or resolve local_oclc.
-      if !query_cols.has_key?('resolved_oclc') then
+      if "Short-circuiting this condition so that we re-resolve all OCNs using new OCLC concordance, not the old thing we did when we first generated these".class == String || !query_cols.has_key?('resolved_oclc') then
         query_cols['resolved_oclc'] = resolve_oclc(query_cols['local_oclc']);
       end
 
@@ -330,7 +330,7 @@ def resolve_oclc (oclc)
   # If no hit, return input.
   resolved_oclc = oclc;
   @resolve_oclc_q.enumerate(oclc) do |row|
-    resolved_oclc = row[:oclc_x];
+    resolved_oclc = row[:resolved];
     countx(:oclc_resolution_lookups);
     break;
   end
