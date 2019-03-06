@@ -27,15 +27,17 @@ end
 db   = Hathidb::Db.new();
 conn = db.get_conn();
 
-# Special treatment for gatech, who is no longer a print holdings member, but is still a shared print member.
-trunc_sql  = "DELETE FROM shared_print_pool WHERE member_id != 'gatech'";
+# Special treatment for those who are no longer print holdings members, but still shared print members.
+trunc_sql  = "DELETE FROM shared_print_pool WHERE member_id NOT IN ('gatech', 'nrlf', 'srlf')";
+
+# in the old way, oclc_x is the resolved, oclc_y is the variant
 
 insert_sql = %w{
     INSERT INTO shared_print_pool (holdings_memberitem_id, member_id, item_condition, gov_doc, resolved_oclc, local_oclc)
-    SELECT hm.id, hm.member_id, hm.item_condition, hm.gov_doc, COALESCE(o.oclc_x, hm.oclc) AS oclc, hm.oclc AS local_oclc
+    SELECT hm.id, hm.member_id, hm.item_condition, hm.gov_doc, COALESCE(o.resolved, hm.oclc) AS oclc, hm.oclc AS local_oclc
     FROM holdings_memberitem AS hm
-    LEFT JOIN oclc_resolution AS o ON (hm.oclc = o.oclc_y)
-    JOIN holdings_cluster_oclc AS hco ON (hco.oclc = COALESCE(o.oclc_x, hm.oclc))
+    LEFT JOIN oclc_concordance AS o ON (hm.oclc = o.variant)
+    JOIN holdings_cluster_oclc AS hco ON (hco.oclc = COALESCE(o.resolved, hm.oclc))
     WHERE hm.item_type = 'mono'
     AND hm.status NOT IN ('LM', 'WD')
     AND hm.member_id = ?
