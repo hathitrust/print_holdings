@@ -3,6 +3,7 @@ require 'json';
 
 # Minimal wrapper for HathiTrust Bib API.
 # Does not work in JRuby for some reason.
+# Works in 2.6.3.
 
 class HathiBibAPI
   @@host = 'https://catalog.hathitrust.org';
