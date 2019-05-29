@@ -13,6 +13,7 @@ module Hathiquery
       'AEU'    => 'ualberta',
       'AUBRU'  => 'uq',
       'CHI'    => 'uchicago',
+      'CMALG'  => 'getty',
       'COO'    => 'cornell',
       'CTU'    => 'uconn',
       'DEU'    => 'udel',

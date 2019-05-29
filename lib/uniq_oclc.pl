@@ -45,12 +45,13 @@ Alter default behavior with:
 =cut
 
 my $default = {
-    column_delim => "\t",
-    data_delim   => ",",
-    oclc_column  => 0,
-    verbose      => 0,
-    header       => 0,
-    strict       => 0,
+    column_delim  => "\t",
+    data_delim    => ",",
+    oclc_column   => 0,
+    verbose       => 0,
+    header        => 0,
+    strict        => 0,
+    semi_strict   => 0,
 };
 
 # Look for default overrides in @ARGV and set accordingly.
@@ -88,34 +89,39 @@ while (<>) {
     my %uniq = ();
     OCN_LOOP: foreach my $ocn (@ocns) {
 	my $number;
-	if ($default->{strict}) {
+
+	# Conditions for failing:
+	if ($default->{strict} && $ocn !~ /oc.*?\d+/i) {
 	    # Under strict, only deal with ocns that at least loosely resemble oclc numbers.
-	    # Strictly numeric ocns can, after some sampling and experimentation, not be trusted.
-	    # Get the numeric ocn out.
-	    if ($ocn =~ m/oc.+?(\d+)/i) {
-		$number = $1;
-		$number =~ s/^0+//;
-		$ocn   =~ s/\s//g;
-		# delete any trailing crap e.g. (OCoLC)38150217kkh3/4/99 -> (OCoLC)38150217
-		$ocn =~ s/(\d)\D+.*/$1/;
-		# One number can only map to one surface representation.
-		print "$number => $ocn\n" if $default->{verbose};
-		$uniq{$number} = $ocn;
-	    } else {
-		print STDERR "[$ocn] failed strict\n" if $default->{verbose};
+	    # When, like "(orkla)555" and just plain "555" gotta go.
+	    print STDERR "ocn failed strict: [$ocn]\n" if $default->{verbose};
+	    next OCN_LOOP;
+	} elsif ($default->{semi_strict} && $ocn =~ /^([^\d]+)/) {
+	    # under semi_strict, allow plain numbers but not any non-oclc prefixes
+	    my $prefix = $1;
+	    if ($prefix !~ /oc/i) {
+		print STDERR "bad prefix ($prefix), failed semi_strict: [$ocn]\n" if $default->{verbose};
 		next OCN_LOOP;
 	    }
+	}
+
+	if ($ocn =~ m/(\d+)/i) {
+	    # Get the (first) numeric part out.
+	    $number = $1;
+	    $number =~ s/^0+//;
+	    $ocn    =~ s/\s//g;
+	    # delete any trailing crap e.g. (OCoLC)38150217kkh3/4/99 -> (OCoLC)38150217
+	    $ocn =~ s/(\d)\D+.*/$1/;
+	    # One number can only map to one surface representation.
+	    print "$number => $ocn\n" if $default->{verbose};
+	    $uniq{$number} = $ocn;
 	} else {
-	    # When not strict, at least get uniqueness.
-	    if ($ocn =~ m/[^ocmnl\(\)0-9]/i) {
-		print STDERR "Rejecting weird ocn [$ocn]\n" if $default->{verbose};
-		next OCN_LOOP;
-	    }
-	    $uniq{$ocn} = $ocn;
+	    print STDERR "[$ocn] lacks  numbers\n" if $default->{verbose};
+	    next OCN_LOOP;
 	}
     }
     # Return one surface representation per number in %uniq.
-    $columns[$default->{oclc_column}] = join($default->{data_delim}, sort grep { /\d/ } values %uniq);
+    $columns[$default->{oclc_column}] = join(';', sort grep { /\d/ } values %uniq);
     # Put line back together
     my $new_line = join($default->{column_delim}, @columns);
     if ($default->{verbose} && $old_line ne $new_line) {
