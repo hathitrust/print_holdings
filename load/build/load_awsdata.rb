@@ -6,7 +6,6 @@ require 'hathidb';
 # Takes a directory as input and loads files matching a pattern
 # into a database table.
 
-DB_SCH = 'ht_repository';
 DB_TAB = 'holdings_memberitem_counts';
 AWS_RE = Regexp.new('^part-.+[0-9]+$');
 ZZZ    = 1;
@@ -37,7 +36,7 @@ def ensure_table_empty (db, log)
   has_rows = check_counts(db, log);
   conn = db.get_conn();
   if has_rows then
-    q = "TRUNCATE TABLE #{DB_SCH}.#{DB_TAB}";
+    q = "TRUNCATE TABLE #{DB_TAB}";
     log.d(q);
     conn.execute(q);
   end
@@ -47,7 +46,7 @@ end
 # Called before and after the reload.
 def check_counts(db, log)
   conn = db.get_conn();
-  q = "SELECT COUNT(*) AS rc FROM #{DB_SCH}.#{DB_TAB}";
+  q = "SELECT COUNT(*) AS rc FROM #{DB_TAB}";
   has_rows = true;
   log.d(q);
   conn.query(q) do |res|
@@ -64,7 +63,7 @@ def load_aws_file (path, db, log)
   log.i("Started #{path}");
   begin
     conn = db.get_conn();
-    q = "LOAD DATA LOCAL INFILE '#{path}' INTO TABLE #{DB_SCH}.#{DB_TAB}";
+    q = "LOAD DATA LOCAL INFILE '#{path}' INTO TABLE #{DB_TAB}";
 
     log.d(q);
     conn.update(q);
