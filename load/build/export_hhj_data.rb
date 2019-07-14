@@ -44,10 +44,12 @@ def export_data_files(db, log)
   conf = Hathiconf::Conf.new();
   # Dev conf
   htrep_dev_host  = conf.get('db_host');
+  htrep_dev_name  = conf.get('db_name');
   htrep_dev_user  = conf.get('db_user');
   htrep_dev_pw    = conf.get('db_pw');
   # Prod conf
   htrep_prod_host = conf.get('prod_db_host');
+  htrep_prod_name = conf.get('prod_db_name');
   htrep_prod_user = conf.get('prod_db_user');
   htrep_prod_pw   = conf.get('prod_db_pw');
 
@@ -59,12 +61,13 @@ def export_data_files(db, log)
   while slice_seen < count_rows do
     # Generate a mysqldump command in dev 
     # that pipes into a mysql command in prod.
+
     command = %W[
         mysqldump
         -h #{htrep_dev_host}
         -u #{htrep_dev_user}
         -p#{htrep_dev_pw}
-        #{htrep_dev_user} holdings_htitem_htmember_jn_dev
+        #{htrep_dev_name} holdings_htitem_htmember_jn_dev
         -w"1 LIMIT #{slice_seen}, #{slice_size}"
         --skip-add-drop-table
         --skip-disable-keys
@@ -78,7 +81,7 @@ def export_data_files(db, log)
         -h #{htrep_prod_host}
         -u #{htrep_prod_user}
         -p#{htrep_prod_pw}
-        #{htrep_prod_user}
+        #{htrep_prod_name}
         ].join(' ');
 
     ta = Time.new();
