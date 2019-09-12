@@ -18,14 +18,14 @@ def get_password_from_file(fn):
     return line.rstrip()
 
 
-def get_connection(usr, pw):
+def get_connection(hst, dbn, usr, pw):
     # open DB connection
     try:
-        conn = MySQLdb.connect (host = "mysql-htprep",
+        conn = MySQLdb.connect (host = hst,
                             port=3306,
                             user = usr,
                             passwd = pw,
-                            db = "ht_repository")
+                                db = dbn)
     except MySQLdb.Error, e:
         print "Couldn't get connection."
         print "Error %d: %s" % (e.args[0], e.args[1])
@@ -33,12 +33,12 @@ def get_connection(usr, pw):
     return conn
 
 
-def generate_hplot(dbusr, dbpw):
+def generate_hplot(dbhost, dbname, dbusr, dbpw):
 
     access_types = ['allow', 'deny']
     
     # set up DB
-    conn = get_connection(dbusr, dbpw)
+    conn = get_connection(dbhost, dbusr, dbpw)
     cursor = conn.cursor()
     
     # query1 get all members
@@ -93,7 +93,9 @@ def generate_hplot(dbusr, dbpw):
 
 if __name__ == "__main__":
     hc = Hathiconf();
-    dbusr = hc.get('db_user')
-    dbpw  = hc.get('db_pw')
-    generate_hplot(dbusr, dbpw)
+    dbhost = hc.get('db_host')
+    dbname = hc.get('db_name')
+    dbusr  = hc.get('db_user')
+    dbpw   = hc.get('db_pw')
+    generate_hplot(dbhost, dbname, dbusr, dbpw)
     print 'done.'
