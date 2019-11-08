@@ -21,12 +21,15 @@ create table shared_print_commitments (
     INDEX sp_commitment_resolved_oclc (resolved_oclc)
 ); 
 ALTER TABLE shared_print_commitments ADD committed_date DATE DEFAULT '2017-09-30'; -- added 2018-09-26, Jira # HT-812
+ALTER TABLE shared_print_commitments ADD do_not_deprecate tinyint(1) DEFAULT 0; -- added 2019-11-08, Jira # HT-1855
+CREATE INDEX sp_do_not_deprecate ON shared_print_commitments(do_not_deprecate);
+
 create table shared_print_other (
     id 	     	   bigint(20)  NOT NULL,
-    sp_program     ENUM('coppul', 'east', 'flare', 'ivyplus', 'mssc', 'recap', 'ucsp', 'viva', 'other', 'fdlp') NOT NULL,
+    sp_program     ENUM('coppul', 'downsview', 'east', 'flare', 'ivyplus', 'mssc', 'recap', 'ucsp', 'viva', 'other', 'fdlp') NOT NULL,
     retention_date DATE,
     indefinite     TINYINT DEFAULT 0,
     INDEX shared_print_other_id (id),
+    INDEX shared_print_other_program (sp_program),
     INDEX shared_print_other_indefinite (indefinite)
 );
-
