@@ -42,8 +42,8 @@ module Cost
       @coverage          = 0;
 
       # Output goes here.
-      @data = Hathidata::Data.new("costreport/weighted_costreport_$ymd.tsv").open('w');
-      @deet = Hathidata::Data.new("costreport/weighted_costreport_$ymd_details.tsv").open('w');
+      @data = Hathidata::Data.new("costreport/costreport_$ymd.tsv").open('w');
+      @deet = Hathidata::Data.new("costreport/costreport_$ymd_details.tsv").open('w');
 
       return self;
     end

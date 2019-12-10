@@ -45,8 +45,8 @@ module Cost
       @multiply_subtotal = 1.0;
 
       # Output goes here.
-      @data = Hathidata::Data.new("costreport/costreport_$ymd.tsv").open('w');
-      @deet = Hathidata::Data.new("costreport/costreport_$ymd_details.tsv").open('w');
+      @data = Hathidata::Data.new("costreport/oldstyle_costreport_$ymd.tsv").open('w');
+      @deet = Hathidata::Data.new("costreport/oldstyle_costreport_$ymd_details.tsv").open('w');
 
       return self;
     end
