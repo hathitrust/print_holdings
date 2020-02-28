@@ -8,7 +8,7 @@ require 'hathiquery'
 
 # Part of step 8.
 # Parses the output from 'multipart_cluster_mapper.rb' (typically a file
-# called "cluster_htmember_multi.2013xxxx.data" into a file suitable for
+# called "cluster_htmember_multi.data" into a file suitable for
 # upload into the htitem_htmember_jn table.  The file is highly redundant;
 # we'll let the DB deal with that based on the PK
 
