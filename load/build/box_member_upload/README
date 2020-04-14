@@ -1,0 +1,20 @@
+These scripts use curl to crawl & upload files to folders in box
+
+Your .netrc should have: 
+
+machine ftp.box.com
+login hathitrust-cloud-validator@umich.edu
+password ASK_SOMEBODY_FOR_THIS
+
+If you move member folders around, run: 
+
+ruby box_member_urls.rb > member_urls.txt
+
+Otherwise, you can use this cached information to run:
+
+upload_to_folder.sh inst_id filename
+
+e.g.
+
+upload_to_folder.sh umich test.txt
+
