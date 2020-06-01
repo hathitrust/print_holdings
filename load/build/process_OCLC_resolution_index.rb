@@ -30,12 +30,14 @@ def prune_OCLC_resolution_data(pruned_output, log)
   no_numbers = 0;
   hdout = Hathidata::Data.new(pruned_output).open('w');
 
-  concordance_group_sql = "SELECT GROUP_CONCAT(variant) AS ocn_group FROM oclc_concordance GROUP BY resolved";
+  concordance_group_sql = "SELECT resolved, GROUP_CONCAT(variant) AS ocn_group FROM oclc_concordance GROUP BY resolved";
   # only retain lines with HT oclc numbers
   conn.query(concordance_group_sql) do |row|
     count += 1;
 
     ocns = row[:ocn_group].split(',');
+    ocns << row[:resolved];
+
     if (ocns.length == 1)
       no_numbers += 1;
       next;
@@ -43,7 +45,7 @@ def prune_OCLC_resolution_data(pruned_output, log)
 
     ocns.each do |ocn|
       if oclc_h.has_key?(ocn.to_i);
-        hdout.file.puts row[:ocn_group];
+        hdout.file.puts(ocns.join(','));
 	out += 1;
       end
     end
