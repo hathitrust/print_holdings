@@ -1,27 +1,32 @@
 #!ruby
+require 'hathidb'
+require 'hathiquery'
 
-require 'pry'
+db   = Hathidb::Db.new()
+conn = db.get_conn()
 
-dirs=[
-"0 - Estimate only",
-"0 - Purgatory",
-"0 - Waiting for data",
-"1 - Waiting to be checked",
-"2 - Ready to load",
-"3 - Needs Further Investigation",
-"4 - Being Loaded",
-"5 - Done_No Further Action"
-]
+all_members = {}
+conn.query(Hathiquery.get_active_members) do |row|
+  all_members[row[:member_id]] = true
+end
 
-insts = {}
+result = `curl -s -n --list-only "ftps://ftp.box.com/Member Data/"`
+result.each_line do |line|
+  line.strip!
+  if line.match(/^[a-z\-]+$/)
 
-dirs.each do |dir| 
-  result = `curl -s -n --list-only "ftps://ftp.box.com/Print Holdings/#{dir}/"`
-  result.each_line do |line|
-    line.strip!
-    if line.match(/^[a-z]+$/)
-      puts "#{line}	ftps://ftp.box.com/Print Holdings/#{dir}/#{line}/"
-      insts[line] = dir
-    end
+    if all_members.key?(line) then
+      # Deleting seen members from the hash so we can see if there are any left
+      # i.e. missing a box folder.
+      all_members.delete(line)
+    else
+      warn "#{line} is not a member"
+    end    
+    puts "#{line}\tftps://ftp.box.com/Member Data/#{line}/"
   end
 end
+
+all_members.keys.each do |member|
+  warn "did not see a box for member #{member}"
+end
+
