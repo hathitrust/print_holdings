@@ -5,4 +5,4 @@ upload_file=$2
 
 upload_path=$(egrep "^$member_id	" member_urls.txt | cut -f 2)
 
-curl -n -T $upload_file "$upload_path"
+curl -v -n -T $upload_file "$upload_path"
