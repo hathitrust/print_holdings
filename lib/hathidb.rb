@@ -73,10 +73,10 @@ module Hathidb
 
       print "\n";
       print "Prod DB User: >>";
-      db_user = STDIN.noecho(&:gets).strip;
+      db_user = ENV['CMDLINE_ENV_DB_USER'] || STDIN.noecho(&:gets).strip;
       print "\n";
       print "Prod DB Password: >>";
-      db_pw   = STDIN.noecho(&:gets).strip;
+      db_pw   = ENV['CMDLINE_ENV_DB_PASSWORD'] || STDIN.noecho(&:gets).strip;
       print "\n";
       conn = JDBCHelper::Connection.new(
        :driver           => @conf.get('prod_db_driver'),
