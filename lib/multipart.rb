@@ -114,13 +114,13 @@ module Multipart
   end
 
 
-  ### This method is the main implementation of the mapping between multipart records
+  ### This method WAS the main implementation of the mapping between multipart records
   #   provided by members and hathitrust items.  Given a cluster id, this method will
   #   return a set of lines of the format:
   #        oclc n_enum member_id volume_id [counts]
   #   where [counts] is a list of [copy_count, lm_count, wd_count, brt_count, access_count].
   ###
-  def Multipart.map_multipart_cluster_to_members(cluster_id, enum_members_l)
+  def Multipart.map_multipart_cluster_to_members_old(cluster_id, enum_members_l)
     # this subroutine populates the "cluster_htmember_multi" data file
 
     # collect data rows
@@ -280,7 +280,7 @@ module Multipart
     return results
   end
 
-  def Multipart.map_multipart_cluster_to_members_debug(cluster_id, enum_members_l)
+  def Multipart.map_multipart_cluster_to_members(cluster_id, enum_members_l)
     # this subroutine populates the "cluster_htmember_multi" data file
 
     # collect data rows
