@@ -37,15 +37,17 @@ log.i("there are #{count_rows} rows to copy from dev to prod");
 
 # Step 2: clean out the tmp table in prod
 # just in case there is any data left from an incomplete run
-trunc_prod_sql = "TRUNCATE holdings_cluster_htitem_jn_tmp";
-log.i("Truncating prod records: #{trunc_prod_sql}");
-
+# create if it does not exist
 prod_conn = db.get_prod_interactive(); # Prod conn, prompts for username/password
-trunc_prod_q = prod_conn.prepare(trunc_prod_sql);
-trunc_prod_q.execute();
-
-load_prod_sql = "LOAD DATA LOCAL INFILE ? INTO TABLE holdings_cluster_htitem_jn_tmp";
-load_prod_q = prod_conn.prepare(load_prod_sql)
+prod_queries = [
+  "CREATE TABLE IF NOT EXISTS holdings_cluster_htitem_jn_tmp LIKE holdings_cluster_htitem_jn",
+  "TRUNCATE holdings_cluster_htitem_jn_tmp"
+]
+prod_queries.each do |sql|
+  log.i(sql);
+  q = prod_conn.prepare(sql);
+  q.execute();
+end
 
 # Step 3: load records from file into prod tmp table
 # Do a slice at a time until all the rows are exported.
@@ -53,6 +55,9 @@ load_prod_q = prod_conn.prepare(load_prod_sql)
 slice_size = 500_000;
 slice_seen = 0;
 sleeptime  = 0;
+
+load_prod_sql = "LOAD DATA LOCAL INFILE ? INTO TABLE holdings_cluster_htitem_jn_tmp";
+load_prod_q = prod_conn.prepare(load_prod_sql)
 
 hdin = Hathidata::Data.new("builds/current/volume_cluster.tsv").open('r');
 
