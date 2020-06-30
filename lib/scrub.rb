@@ -7,6 +7,9 @@ require 'iconv';
 require 'json';
 require 'open-uri';
 
+NON_PRINT = /^((cd|dvd)(-?rom)?)$/i.freeze
+FACSIMILE = /(fasc\.?\s*\d*)/i
+
 # --- Instructions: ---
 # Set up a directory /data/memberdata/<member_id>/
 # (or /data/memberdata/<member_id>.estimate/).
@@ -292,7 +295,7 @@ class MemberScrubber
 
   def choose_ocn_using_db(ocnline, delim)
     # pick the first matching OCN, or default to the first entry if none found
-    bits = ocnline.split(delim).uniq;
+    bits = ocnline.split(delim).select{|x| x =~ /\d/}.uniq;
     bits.each do |bit|
       bi = bit.to_i;
       next if bi == 0;
@@ -425,6 +428,7 @@ class MemberScrubber
 
     i = 0;
     @hdin.file.each_line do |line|
+      line = line.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
       line.rstrip!;
       i += 1;
       # puts i;
@@ -438,14 +442,9 @@ class MemberScrubber
         # loop over data lines
         count(:total_lines);
         unless line.valid_encoding? # handle invalid encoding
-          newline = line.force_encoding("ISO-8859-1").encode("UTF-8");
-          if newline.valid_encoding?
-            line = newline;
-          else
-            @logger.w("\tFix fail... skipping.");
-            count(:bad_lines);
-            next;
-          end
+          @logger.w("\tEncoding fail... skipping.");
+          count(:bad_encoding);
+          next;
         end
         bits = line.split(@delim);
         bits.map{ |item| item.gsub!(/\"/, '') };
@@ -526,14 +525,19 @@ class MemberScrubber
             # "c.1" intervention
             enum_chron = enum_chron.gsub(/c\.1$/, '');
             enum_chron = enum_chron.gsub(/c\. 1$/, '');
-
+            
             # Filter out some common non-print enumchrons.
-            if enum_chron =~ /^((cd|dvd)(-?rom)?)$/i then
+            if enum_chron =~ NON_PRINT then
               @logger.i("Skipping record with non-print enumchron on line #{i}: (#{enum_chron}) '#{line.strip}'");
               count(:non_print_enumchron);
               next;
             end
-
+            
+            if enum_chron =~ FACSIMILE then
+              @logger.i("Potential facsimile? Line #{i} (#{enum_chron})")
+              count(:facsimile_enumchron);
+            end
+            
             ecparser.parse(enum_chron);
 
             if ecparser.enum_str.length > 0 then
