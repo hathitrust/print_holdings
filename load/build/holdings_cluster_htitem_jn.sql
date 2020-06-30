@@ -4,3 +4,6 @@ CREATE TABLE `holdings_cluster_htitem_jn` (
   PRIMARY KEY (`cluster_id`,`volume_id`),
   KEY `cluster_htitem_jn_volume_id_index` (`volume_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+-- for initial loading into, and swapping with ^^^
+CREATE TABLE holdings_cluster_htitem_jn_tmp LIKE holdings_cluster_htitem_jn;
