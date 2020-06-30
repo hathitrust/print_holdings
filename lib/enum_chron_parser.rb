@@ -242,8 +242,24 @@ class EnumChronParser
     end
     
   end
+
+  def self.parse_file(file)
+    f = File.open(file).each_line do |line|
+      line.strip!
+      ecp = EnumChronParser.new
+      ecp.parse(line)
+      n_enum  = ecp.normalized_enum
+      n_chron = ecp.normalized_chron
+      puts [n_enum,n_chron].join("\t")
+    end
+  end
+
   
   private :add_to_enum, :add_to_chron, :preprocess, :dot_sub, :clear_fields, :enum=
 
+end
+
+if $0 == __FILE__ then
+  EnumChronParser.parse_file(ARGV.shift)
 end
 
