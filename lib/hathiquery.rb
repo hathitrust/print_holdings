@@ -78,4 +78,16 @@ module Hathiquery
     "SELECT DISTINCT member_id FROM holdings_htmember WHERE status = 1 ORDER BY member_id";
   end
 
+  def Hathiquery.get_us_members
+    "SELECT member_id FROM holdings_htmember WHERE country_code = 'us' ORDER BY member_id";
+  end
+
+  def Hathiquery.get_nonus_members
+    "SELECT member_id FROM holdings_htmember WHERE country_code  != 'us' ORDER BY member_id";
+  end
+
+  def Hathiquery.get_shared_print_members
+    "SELECT DISTINCT member_id FROM shared_print_commitments ORDER BY member_id"
+  end
+    
 end
