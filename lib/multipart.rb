@@ -2,9 +2,38 @@ require 'hathidb';
 
 module Multipart
 
+  ALPHANUM_RX = /[A-Z0-9]/i.freeze
+  HYPHEN_COMMA_RX = /[\-,]/.freeze
+
   @@db   = Hathidb::Db.new();
   @@conn = @@db.get_conn();
 
+  Q1 = @@conn.prepare("select distinct oclc from holdings_cluster_oclc where cluster_id = ?")
+
+  Q2 = @@conn.prepare(
+    "SELECT member_id, oclc, n_enum, status, item_condition FROM holdings_memberitem WHERE oclc = ?"
+  )
+
+  Q3 =  @@conn.prepare(
+    "SELECT DISTINCT oclcs, n_enum, chtij.volume_id FROM holdings_htitem AS h,
+       holdings_cluster_htitem_jn AS chtij WHERE h.volume_id = chtij.volume_id
+       AND chtij.cluster_id = ?"
+  )
+
+  Q4 = @@conn.prepare(
+    "SELECT DISTINCT ho.oclc, h.n_enum
+      FROM holdings_htitem  AS h,
+      holdings_htitem_oclc  AS ho,
+      holdings_cluster_oclc AS co,
+      holdings_memberitem   AS mm
+      WHERE h.volume_id = ho.volume_id
+      AND ho.oclc       = co.oclc
+      AND ho.oclc       = mm.oclc
+      AND h.n_enum      = mm.n_enum
+      AND co.cluster_id = ?
+      AND mm.member_id  = ?"
+  )
+  
   class MultiItem
     attr_accessor :id, :oclc, :member_id, :status, :item_condition,
     :process_date, :enum_chron, :item_type, :issn, :n_enum, :n_chron
@@ -70,7 +99,6 @@ module Multipart
 
 
   def Multipart.choose_oclc(cluster_id, member_id)
-
     res = @@conn.query("select co.oclc, count(*) from holdings_memberitem as mm,
                           holdings_cluster_oclc as co where co.oclc = mm.oclc and
                           cluster_id = #{cluster_id} and member_id = '#{member_id}' group by oclc;")
@@ -252,6 +280,134 @@ module Multipart
     return results
   end
 
+  def Multipart.map_multipart_cluster_to_members_debug(cluster_id, enum_members_l)
+    # this subroutine populates the "cluster_htmember_multi" data file
+
+    # collect data rows
+    results = []
+    ocns    = []
+
+    Q1.enumerate(cluster_id) do |row1|
+      ocns << row1[:oclc]
+    end
+
+    ### get all memberdata and construct the memberdata stucture            ###
+    ##  The structure is a bit involved to accommodate all the counts, but   ##
+    ##  basically its member_id[oclc-nenum] -> [copy_count, lm_count, ...]   ##
+    member_data = {}    # this will be a hash of hashes of lists (refactor this)
+    ocns.each do |ocn|
+      Q2.enumerate(ocn) do |row2|
+        data_key  = "#{row2[:oclc]}-#{row2[:n_enum]}"
+        member_id = row2[:member_id]
+        status    = row2[:status]
+        item_cond = row2[:item_condition]
+        # First time we see member_id-data_key, set up array of ints:
+        member_data[member_id]           ||= {}
+        member_data[member_id][data_key] ||= [0, 0, 0, 0, 0]
+        # Every time we see member_id-data_key: incr ints as seen fit.
+        member_data[member_id][data_key][0] += 1
+        member_data[member_id][data_key][1] += 1 if status    == 'LM'
+        member_data[member_id][data_key][2] += 1 if status    == 'WD'
+        member_data[member_id][data_key][3] += 1 if item_cond == 'BRT'
+        member_data[member_id][data_key][4] += 1 if (status == 'LM' or item_cond == 'BRT')
+      end
+    end
+
+    ### get all HT data ###
+    ht_data = []  # this will be a list of lists    
+    Q3.enumerate(cluster_id) do |row3|
+      ht_data << [row3[0], row3[1], row3[2]] # oclcs, n_enum, volume_id
+    end
+
+    ### construct volume_id maps for cluster enums
+    ht_dict = {}
+    ht_data.each do |htd|
+      ht_dict[htd[1]] ||= []
+      ht_dict[htd[1]] << htd[2]
+    end
+
+    ### categorize members ###
+    enum_match_mems = [] # these members will be assigned to items where enum match
+    all_match_mems  = [] # these members will be assigned to all items
+
+    unique_members = member_data.keys
+    unique_members.each do |mem|
+      if not enum_members_l.include?(mem)
+        all_match_mems << mem
+        next
+      end
+      data = member_data[mem]
+      fail = 0
+      data.each_pair do |k,v|
+        k_bits = k.split('-')
+        if not (k_bits[1] =~ ALPHANUM_RX)
+          fail = 1
+          next
+        end
+        if (k_bits[1] =~ HYPHEN_COMMA_RX)
+          fail = 1
+          next
+        end
+      end
+      fail == 0 ? enum_match_mems << mem : all_match_mems << mem
+    end
+
+    ### add 'enum-match' members (should be <= all match) ###
+    enum_match_mems.each do |emm|
+      emm_match_count = 0;
+      Q4.enumerate(cluster_id, emm) do |row4|
+        pkey = "#{row4[1]}"
+        vol_str = ''
+        if ht_dict[pkey]
+          vol_str = ht_dict[pkey].join(',')
+        else
+          puts "Problem: zero length vol_str:\n\t#{cluster_id}\t#{row4[0]}\t#{row4[1]}\t#{emm}"
+        end
+        count_key = "#{row4[0]}-#{row4[1]}"
+        count_str = "1\t0\t0\t0\t0"
+        if member_data[emm].has_key?(count_key)
+          copy_counts = member_data[emm][count_key]
+          count_str = copy_counts.join("\t")
+        end
+        outstr = "#{row4[0]}\t#{row4[1]}\t#{emm}\t#{cluster_id}\t#{vol_str}\t#{count_str}"
+        results << outstr
+        emm_match_count += 1
+      end
+
+      # if no matches (but with member data for oclc), add member to all-match members
+      if emm_match_count == 0 # <--- this used to be broken, used rows4.count()==0, mw 2020-02-17
+        all_match_mems << emm
+      end
+    end
+
+    ### add 'all-match' members ###
+    all_match_mems.each do |amm|
+      ht_data.each do |ht_item|
+        ocn = ht_item[0]
+        if ocn =~ /[,]/          #  this can be optimized, its redundant
+          ocn = Multipart.choose_oclc(cluster_id, amm)
+        end
+        pkey = "#{ht_item[1]}"
+        vol_str = ''
+        if ht_dict[pkey]
+          vol_str = ht_dict[pkey].join(',')
+        else
+          puts "Problem: zero length vol_str:\n\t#{cluster_id}\t#{row4[0]}\t#{row4[1]}\t#{amm}"
+        end
+        count_key = "#{ocn}-#{ht_item[1]}"
+        count_str = "1\t0\t0\t0\t0"
+        if member_data[amm].has_key?(count_key)
+          copy_counts = member_data[amm][count_key]
+          count_str = copy_counts.join("\t")
+        end
+        outstr = "#{ocn}\t#{ht_item[1]}\t#{amm}\t#{cluster_id}\t#{vol_str}\t#{count_str}"
+        results << outstr
+      end
+    end
+
+    return results
+  end
+
 
   ### Modification of the previous routine to only generate a file for an individual member  ###
   def Multipart.map_multipart_cluster_to_individual_member(cluster_id, member_id, member_type)
@@ -382,7 +538,7 @@ module Multipart
     return results
   end
 
-
+  # this seems to be a dead function // mw 2020-02-07
   def calc_H_for_multipart_items()
     # this routine generates data for the cluster_H table for multipart items
 
@@ -411,6 +567,7 @@ module Multipart
   end
 
 
+  # this seems to be a dead function // mw 2020-02-07
   def get_multiH_records_for_cluster(conn, cluster_id)
     results = conn.query("select distinct ho.oclc, h.n_enum, count(distinct mm.member_id)
     from htitem as h, htitem_oclc as ho, cluster_oclc as co, cluster_htmember_jn as chj,
@@ -428,7 +585,7 @@ module Multipart
     return outstrs
   end
 
-
+  # this seems to be a dead function // mw 2020-02-07
   def generate_multi_report_for_cluster(conn, cluster_id)
     # count all the unique ocns that match a cluster_id
     rows1 = conn.query("select distinct oclc from cluster_oclc where cluster_id = #{cluster_id};")
