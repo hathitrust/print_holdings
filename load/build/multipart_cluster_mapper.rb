@@ -6,19 +6,6 @@ require 'multipart';
 # Exports all lines for a cluster to an outfile (also puts them onscreen)
 # useful for debugging
 
-# never actually called:
-def get_cluster_htmember_multi_data(cluster_id, log)
-  log.d("Create cluster dump file for cluster_id #{cluster_id}");
-  multi_members_enum = Multipart.get_multipart_members_list();
-  data = Multipart.map_multipart_cluster_to_members(cluster_id, multi_members_enum);
-  Hathidata.write("cluster_#{cluster_id}") do |hdout|
-    data.each do |line|
-      puts line;
-      hdout.file.puts(line);
-    end
-  end
-end
-
 def generate_cluster_htmember_multi_file(outfilen, log)
   multi_members_enum = Multipart.get_multipart_members_list();
   puts "#{multi_members_enum.length} multipart members.";
