@@ -21,12 +21,20 @@ pi_conn = db.get_prod_interactive();
 
 check_main_table(pi_conn, log);
 
+# Jul 22 2020: adding, somewhat temporarily, for ETAS-hack purposes, the following:
+# "INSERT IGNORE INTO holdings_htitem_htmember_jn_dev (SELECT volume_id, member_id, 1,0,0,0,0 FROM holdings_newitems)",
+# "TRUNCATE holdings_newitems",
+
 [
- "DROP TABLE IF EXISTS holdings_htitem_htmember_old",
- "RENAME TABLE holdings_htitem_htmember TO holdings_htitem_htmember_old",
- "RENAME TABLE holdings_htitem_htmember_jn_dev TO holdings_htitem_htmember",
- "DROP TABLE holdings_htitem_htmember_old",
- "CREATE TABLE holdings_htitem_htmember_jn_dev LIKE holdings_htitem_htmember",
+  "DROP TABLE IF EXISTS holdings_htitem_htmember_old",
+
+  "INSERT IGNORE INTO holdings_htitem_htmember_jn_dev (SELECT volume_id, member_id, 1,0,0,0,0 FROM holdings_newitems)",
+  "TRUNCATE holdings_newitems",
+
+  "RENAME TABLE holdings_htitem_htmember TO holdings_htitem_htmember_old",
+  "RENAME TABLE holdings_htitem_htmember_jn_dev TO holdings_htitem_htmember",
+  "DROP TABLE holdings_htitem_htmember_old",
+  "CREATE TABLE holdings_htitem_htmember_jn_dev LIKE holdings_htitem_htmember",
 ].each do |q|
   log.d("/*PROD:*/ " + q);
   pi_conn.execute(q);
