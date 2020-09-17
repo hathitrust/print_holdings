@@ -15,16 +15,23 @@ log  = Hathilog::Log.new();
 
 log.d("Started");
 # Augmented with group-by item_type.
-query_by_type = conn.prepare(["SELECT item_type, COUNT(distinct ho.oclc) AS numoclc",
-                            "FROM holdings_memberitem AS hm, holdings_htitem_oclc AS ho",
-                            "WHERE ho.oclc = hm.oclc and member_id = ? GROUP BY item_type"].join(' '));
+query_by_type = conn.prepare(
+  %w[
+    SELECT item_type, COUNT(distinct ho.oclc) AS numoclc
+    FROM holdings_memberitem AS hm, holdings_htitem_oclc AS ho
+    WHERE ho.oclc = hm.oclc and member_id = ? GROUP BY item_type
+  ].join(' ')
+);
 
 # The original query. Because count distinct in groups makes it so you can't just add them together,
 # because of course there is always some overlap (e.g. where one oclc is both mono and multi)
-query_no_type = conn.prepare(["SELECT COUNT(distinct ho.oclc) AS numoclc",
-                            "FROM holdings_memberitem AS hm, holdings_htitem_oclc AS ho",
-                            "WHERE ho.oclc = hm.oclc and member_id = ?"].join(' '));
-
+query_no_type = conn.prepare(
+  %w[
+    SELECT COUNT(distinct ho.oclc) AS numoclc
+    FROM holdings_memberitem AS hm, holdings_htitem_oclc AS ho
+    WHERE ho.oclc = hm.oclc and member_id = ?
+  ].join(' ')
+);
 
 Hathidata.write('oclc_matchcounts_$ymd.tsv') do |hdout|
   hdout.file.sync = true;
