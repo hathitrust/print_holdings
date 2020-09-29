@@ -17,6 +17,11 @@ It generates 2 datestamped .tsv files in the data/ directory:
 * costreport_$ymd.tsv contains the actual cost report.
 * costreport_$ymd_details.tsv contains some detailed background figures.
 
+If you don't want those files, or want to redirect output in som other
+way, add --stdout to the invocation thusly:
+
+$ ruby WeightedCostMember.rb <TOTAL_OPERATING_COST> --stdout
+
 =end
 
 module Cost
@@ -41,10 +46,15 @@ module Cost
       @sum_weights       = 0.0;
       @coverage          = 0;
 
+      # Add --stdout to invocation if you don't want to write to files
+      @to_stdout = ARGV.include?("--stdout");
+      
       # Output goes here.
-      @data = Hathidata::Data.new("costreport/costreport_$ymd.tsv").open('w');
-      @deet = Hathidata::Data.new("costreport/costreport_$ymd_details.tsv").open('w');
-
+      unless @to_stdout
+        @data = Hathidata::Data.new("costreport/costreport_$ymd.tsv").open('w');
+        @deet = Hathidata::Data.new("costreport/costreport_$ymd_details.tsv").open('w');
+      end
+      
       return self;
     end
 
@@ -76,7 +86,7 @@ module Cost
         end
       end
 
-      @deet.file.puts "@total_op_cost\t#{@total_op_cost}";
+      deet("@total_op_cost\t#{@total_op_cost}");
       # Get costs.
       @avg_cost_per_vol = calc_avg_cost_per_vol();
       @pd_costs         = calc_pd_costs();
@@ -85,24 +95,29 @@ module Cost
       @cost_per_ic_mpm  = calc_ic('multi');
       @cost_per_ic_ser  = calc_ic('serial');
 
-      @deet.file.puts "Number of members\t#{@members.size}";
-      @deet.file.puts %w[member_id participates_in_pd participates_in_ic ic_spm_count ic_mpm_count ic_ser_count].join("\t");
+      deet("Number of members\t#{@members.size}");
+      deet(%w[member_id participates_in_pd participates_in_ic ic_spm_count ic_mpm_count ic_ser_count].join("\t"));
 
       # Print who does what and what their ic counts are.
       @members.each do |m|
-        @deet.file.puts [m.member_id, m.participates_in_pd, m.participates_in_ic,
-                         m.ic_spm.values.inject(:+),
-                         m.ic_mpm.values.inject(:+),
-                         m.ic_ser.values.inject(:+),
-                        ].join("\t");
+        deet(
+          [
+            m.member_id,
+            m.participates_in_pd,
+            m.participates_in_ic,
+            m.ic_spm.values.inject(:+),
+            m.ic_mpm.values.inject(:+),
+            m.ic_ser.values.inject(:+),
+          ].join("\t")
+        );
       end
 
       # Moar print.
-      @deet.file.puts "@participate_in_ic\t#{@participate_in_ic}";
-      @deet.file.puts "@participate_in_pd\t#{@participate_in_pd}";
-      @deet.file.puts "@avg_cost_per_vol\t#{@avg_cost_per_vol}";
-      @deet.file.puts "sum_weights\t#{@sum_weights}";
-      @deet.file.puts "pd_cost_per_w\t#{pd_cost_per_w}";
+      deet("@participate_in_ic\t#{@participate_in_ic}");
+      deet("@participate_in_pd\t#{@participate_in_pd}");
+      deet("@avg_cost_per_vol\t#{@avg_cost_per_vol}");
+      deet("sum_weights\t#{@sum_weights}");
+      deet("pd_cost_per_w\t#{pd_cost_per_w}");
 
       # Assign cost to members.
       @members.each do |m|
@@ -114,14 +129,14 @@ module Cost
         end
       end
 
-      @deet.file.puts "Raw h sums";
-      @deet.file.puts ['member_id', :spm, :mpm, :ser].join("\t");
+      deet("Raw h sums");
+      deet(['member_id', :spm, :mpm, :ser].join("\t"));
       @members.each do |m|
         row = [m.member_id];
         [:spm, :mpm, :ser].each do |item_type|
           row << m.count_h_sums[item_type];
         end
-        @deet.file.puts row.join("\t");
+        deet(row.join("\t"));
       end
 
       ht_special_rule(); # Covert trickery.
@@ -134,8 +149,8 @@ module Cost
         @members.delete_if { |m| m.member_id == 'hathitrust' };
         ht_cost = ht.costs[:spm] + ht.costs[:mpm] + ht.costs[:ser] + ht.costs[:pd];
         ht_cost_per_pd_member = ht_cost.to_f / @participate_in_pd;
-        @deet.file.puts "ht_cost\t#{ht_cost}";
-        @deet.file.puts "ht_cost_per_pd_member\t#{ht_cost_per_pd_member}";
+        deet("ht_cost\t#{ht_cost}");
+        deet("ht_cost_per_pd_member\t#{ht_cost_per_pd_member}");
         @members.each do |m|
           if m.participates_in_pd then
             m.costs[:extra] += ht_cost_per_pd_member;
@@ -151,12 +166,14 @@ module Cost
         hathi_holdings = row[:c].to_i;
       end
       avg_cost_per_vol = @total_op_cost.to_f / hathi_holdings;
-      @deet.file.puts [
-                       "#{hathi_holdings.to_i} volumes from holdings_htitem form basis of avg_cost_per_vol:",
-                       "avg_cost_per_vol ==",
-                       "(@total_op_cost / hathi_holdings) ==",
-                       "#{@total_op_cost}\t/\t#{hathi_holdings}\t==\t#{avg_cost_per_vol}"
-                      ].join("\n\t");
+      deet(
+        [
+          "#{hathi_holdings.to_i} volumes from holdings_htitem form basis of avg_cost_per_vol:",
+          "avg_cost_per_vol ==",
+          "(@total_op_cost / hathi_holdings) ==",
+          "#{@total_op_cost}\t/\t#{hathi_holdings}\t==\t#{avg_cost_per_vol}"
+        ].join("\n\t")
+      );
       return avg_cost_per_vol;
     end
 
@@ -167,12 +184,14 @@ module Cost
         hathi_pd_holdings = row[:c].to_i;
       end
       pd_costs = hathi_pd_holdings * @avg_cost_per_vol;
-      @deet.file.puts [
-                       "#{hathi_pd_holdings}\tvolumes form basis of pd_costs",
-                       "pd_costs ==",
-                       "hathi_pd_holdings * @avg_cost_per_vol ==",
-                       "#{hathi_pd_holdings}\t*\t#{@avg_cost_per_vol}\t==\tpd_costs"
-                      ].join("\n\t");
+      deet(
+        [
+          "#{hathi_pd_holdings}\tvolumes form basis of pd_costs",
+          "pd_costs ==",
+          "hathi_pd_holdings * @avg_cost_per_vol ==",
+          "#{hathi_pd_holdings}\t*\t#{@avg_cost_per_vol}\t==\tpd_costs"
+        ].join("\n\t")
+      );
       return pd_costs;
     end
 
@@ -205,7 +224,7 @@ module Cost
 
       # Use that diff in setting the ic_cost_per_vol.
       ic_cost_per_vol = @avg_cost_per_vol + diff / old_total_count;
-      @deet.file.puts "ic_#{item_type}_cost_per_vol\t#{ic_cost_per_vol}";
+      deet("ic_#{item_type}_cost_per_vol\t#{ic_cost_per_vol}");
 
       return ic_cost_per_vol;
     end
@@ -219,8 +238,8 @@ module Cost
       puts %w(member_id spm mpm ser pd extra total).join("\t");
       @members.each do |m|
         m.costs[:total] = m.costs[:spm] + m.costs[:mpm] + m.costs[:ser] + m.costs[:pd] + m.costs[:extra];
-        print_cost         = [:spm, :mpm, :ser, :pd, :extra, :total].map{|x| m.costs[x]}.join("\t");
-        puts [m.member_id, print_cost].join("\t");
+        print_cost      = [:spm, :mpm, :ser, :pd, :extra, :total].map{|x| m.costs[x]}.join("\t");
+        puts [m.member_id, print_cost].join("\t") unless @to_stdout;
         @coverage += m.costs[:total];
       end
 
@@ -235,7 +254,7 @@ module Cost
       # If we are off more than one dollar per member, adjust.
       if diff.abs > (@members.size / 100.0) then
         diff_per_member = diff.to_f / @members.size;
-        @deet.file.puts "diff_per_member\t#{diff_per_member}";
+        deet("diff_per_member\t#{diff_per_member}");
         @members.each do |m|
           m.costs[:extra] += diff_per_member;
         end
@@ -246,14 +265,35 @@ module Cost
         puts "... but the diff is so small that we don't care.";
       end
 
-      @data.file.puts %w(member_id spm mpm ser pd weight extra total).join("\t");
+      data(%w(member_id spm mpm ser pd weight extra total).join("\t"));
       @members.each do |m|
-        @data.file.puts m.to_s;
+        data(m.to_s);
       end
-      @data.close();
-      @deet.close();
+
+      unless @to_stdout
+        @data.close();
+        @deet.close();
+      end
     end
 
+    # Puts a string in @deet or stdout depending on @to_stdout
+    def deet(str)
+      if @to_stdout then
+        puts "deet\t#{str}"
+      else
+        @deet.file.puts(str)
+      end
+    end
+
+    # Puts a string in @data or stdout depending on @to_stdout
+    def data(str)
+      if @to_stdout then
+        puts "data\t#{str}"
+      else
+        @data.file.puts(str)
+      end
+    end
+    
   end # class Report
 
   class Member
