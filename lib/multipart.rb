@@ -75,8 +75,9 @@ module Multipart
 
   # returns a list of members who have contributed enum_chron data
   def Multipart.get_multipart_members_list()
-    rows1 = @@conn.query("select member_id from holdings_memberitem
-                        where length(n_enum)>0 group by member_id")
+    rows1 = @@conn.query("SELECT DISTINCT member_id 
+                          FROM holdings_memberitem
+                          WHERE LENGTH(n_enum)>0")
     mem_ids = []
     rows1.each do |row|
       mid = row[:member_id]
@@ -280,7 +281,7 @@ module Multipart
     return results
   end
 
-  def Multipart.map_multipart_cluster_to_members(cluster_id, enum_members_l)
+  def Multipart.map_multipart_cluster_to_members(cluster_id, enum_members_l, debug=false)
     # this subroutine populates the "cluster_htmember_multi" data file
 
     # collect data rows
@@ -291,6 +292,12 @@ module Multipart
       ocns << row1[:oclc]
     end
 
+    if debug then
+      puts "cluster_id: #{cluster_id}"
+      puts "enum_members_l: #{enum_members_l.join(', ')}"
+      puts "OCNS: #{ocns.join(', ')}"
+    end
+    
     ### get all memberdata and construct the memberdata stucture            ###
     ##  The structure is a bit involved to accommodate all the counts, but   ##
     ##  basically its member_id[oclc-nenum] -> [copy_count, lm_count, ...]   ##
@@ -313,10 +320,22 @@ module Multipart
       end
     end
 
+    if debug then
+      puts "member_data:"
+      puts member_data
+    end
+    
     ### get all HT data ###
     ht_data = []  # this will be a list of lists    
     Q3.enumerate(cluster_id) do |row3|
       ht_data << [row3[0], row3[1], row3[2]] # oclcs, n_enum, volume_id
+    end
+
+    if debug then
+      puts "ht_data:"
+      ht_data.each do |row|
+        puts row.join(", ")
+      end
     end
 
     ### construct volume_id maps for cluster enums
@@ -326,6 +345,11 @@ module Multipart
       ht_dict[htd[1]] << htd[2]
     end
 
+    if debug then
+      puts "ht_dict:"
+      puts ht_dict
+    end
+    
     ### categorize members ###
     enum_match_mems = [] # these members will be assigned to items where enum match
     all_match_mems  = [] # these members will be assigned to all items
@@ -349,6 +373,7 @@ module Multipart
           next
         end
       end
+
       fail == 0 ? enum_match_mems << mem : all_match_mems << mem
     end
 
@@ -376,10 +401,15 @@ module Multipart
 
       # if no matches (but with member data for oclc), add member to all-match members
       if emm_match_count == 0 # <--- this used to be broken, used rows4.count()==0, mw 2020-02-17
-        all_match_mems << emm
+        all_match_mems << emm # <--- THIS is dubious. means assign all if no matches found. mw 2020-10-30
       end
     end
 
+    if debug
+      puts "all_match_mems: #{all_match_mems.join(', ')}"
+      puts "enum_match_mems: #{enum_match_mems.join(', ')}"
+    end
+    
     ### add 'all-match' members ###
     all_match_mems.each do |amm|
       ht_data.each do |ht_item|
