@@ -7,7 +7,7 @@ conn = db.get_conn();
 
 =begin
 
-Get all volume_ids in holdings_htitem_htmember_jn
+Get all volume_ids in holdings_htitem
 that aren't held by their collection-mapped member_id.
 
 These are deposited items that haven't yet been reflected
