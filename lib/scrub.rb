@@ -9,6 +9,7 @@ require 'open-uri';
 
 NON_PRINT = /^((cd|dvd)(-?rom)?)$/i.freeze
 FACSIMILE = /(fasc\.?\s*\d*)/i
+EXPONENTL = /[Ee]\+\d+/
 
 # --- Instructions: ---
 # Set up a directory /data/memberdata/<member_id>/
@@ -464,6 +465,12 @@ class MemberScrubber
         end
         ## handle required fields (oclc, local_id)
         rawocn = bits[@mapper.oclc];
+
+        if rawocn =~ EXPONENTL then
+          @logger.i("Exponential OCN on line #{i}: #{rawocn}")
+          count(:exponential_ocn)
+        end
+
         ocn = parse_oclc(rawocn);
         unless test_oclc(ocn)
           @logger.i("Bad OCLC (#{ocn}) on line #{i}: '#{line.strip}'");
