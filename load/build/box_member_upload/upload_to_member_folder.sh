@@ -11,9 +11,9 @@ member_id=$1
 upload_file=$2
 subfolder=$3
 
-if [[ ! $subfolder =~ ^(print holdings|shared print|analysis|test)$ ]]
+if [[ ! $subfolder =~ ^(print holdings|shared print|analysis|ingest|test)$ ]]
 then
-    echo "param 3 must match ^(print holdings|shared print|analysis)$"
+    echo "param 3 must match ^(print holdings|shared print|analysis|ingest)$"
     echo "\"$subfolder\" does not"
 fi
 
