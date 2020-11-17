@@ -28,28 +28,8 @@ OCLC_FILE_GZ=`ls $OCLCDIR | grep -P '^\d+_concordance.txt.gz$' | sort -n | tail 
 OCLC_FILE="";
 
 date;
-if [ -z "$OCLC_FILE_GZ" ]; then
-    echo "Couldnt find gzipped file."
-else
-    echo "Found gzipped file $OCLC_FILE_GZ";
-    echo "gunzipping...";
-    time gunzip $OCLCDIR/$OCLC_FILE_GZ;
-fi
-
-OCLC_FILE=`ls $OCLCDIR | grep -P '^\d+_concordance.txt$' | sort -n | tail -1`;
-
-date;
-if [ -z "$OCLC_FILE" ]; then
-    echo "Couldnt find gunzipped file. Exiting with error";
-    exit 1;
-else
-    echo "Found gunzipped file $OCLC_FILE";
-fi
-
-# Only get the ones where one oclc maps to another oclc.
-date;
-echo "Extracting relevant records from $OCLCDIR/$OCLC_FILE into $OCLCDIR/concordance_1_ne_2.txt";
-time cat $OCLCDIR/$OCLC_FILE | awk -F'\t' '$1 != $2' > $OCLCDIR/concordance_1_ne_2.txt;
+echo "Extracting relevant records from $OCLCDIR/$OCLC_FILE_GZ into $OCLCDIR/concordance_1_ne_2.txt";
+time zcat $OCLCDIR/$OCLC_FILE_GZ | awk -F'\t' '$1 != $2' > $OCLCDIR/concordance_1_ne_2.txt;
 
 date;
 echo "Setting up table";
@@ -60,5 +40,4 @@ echo "Loading data";
 time ruby load_oclc_concordance.rb;
 
 date;
-echo "Gzipping $OCLC_FILE.";
-time gzip $OCLCDIR/$OCLC_FILE;
+echo "DONE.";
