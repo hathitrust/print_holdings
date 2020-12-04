@@ -4,7 +4,7 @@ require 'hathilog';
 
 =begin
 
-Call thusly: 
+Call thusly:
 ruby RecordUpdater.rb <input_file>
 
 Expects a .tsv file as input.
@@ -12,7 +12,7 @@ The file should have a single header line with AT LEAST the columns:
 
   member_id
   local_oclc
-  local_id  
+  local_id
 
 ... and any combination of the following:
 
@@ -39,6 +39,8 @@ loc       555        i555     basement
 We'll look for a match and update local_item_location from 'shed' to 'basement'.
 For each update we also write a revert-update to a file.
 
+Add -n for noop.
+
 =end
 
 class RecordUpdater
@@ -46,8 +48,10 @@ class RecordUpdater
   def main
     # Setup
     infn  = ARGV.shift;
+    @noop = ARGV.include?("-n");
     @hdin = Hathidata::Data.new(infn).open('r');
     @undo = Hathidata::Data.new("#{infn}_undo_$ymd.sql").open('w');
+    @diff = Hathidata::Data.new("#{infn}_diff_$ymd.tsv").open('w');
     @log  = Hathidata::Data.new("#{infn}_$ymd.log").open('w');
     db    = Hathidb::Db.new();
     @conn = db.get_conn();
@@ -58,6 +62,20 @@ class RecordUpdater
       FROM shared_print_commitments
       WHERE member_id = ? AND local_oclc = ? AND local_id = ?
     >.join(' '));
+
+    @get_matching_commitment_ids_q = @conn.prepare(%w<
+      SELECT id
+      FROM shared_print_commitments
+      WHERE member_id = ? AND local_oclc = ? AND local_id = ?
+    >.join(' '));
+
+    @get_commitment_by_id_q = @conn.prepare(%w<
+      SELECT id, member_id, local_oclc, local_id, local_bib_id, local_item_id,
+      oclc_symbol, local_item_location, local_shelving_type, lending_policy,
+      scanning_repro_policy, committed_date, do_not_deprecate
+      FROM shared_print_commitments
+      WHERE id = ?
+    >.join(' '))
 
     # If we don't get a match in main table, see if it was deprecated.
     @check_deprecated_q = @conn.prepare(%w<
@@ -72,11 +90,12 @@ class RecordUpdater
     @header_line       = "";
     @current_line_data = "";
     @current_line_no   = 0;
-
+    
     # Run
     begin
       parse();
     rescue StandardError => e
+      puts $@;
       puts e.message;
       puts "Died while reading file: #{infn}, line: #{@current_line_no}.";
       puts "Data:\n#{@header_line}\n#{@current_line_data}";
@@ -85,6 +104,7 @@ class RecordUpdater
       @conn.close();
       @hdin.close();
       @undo.close();
+      @diff.close();
       @log.close();
     end
     # __F_I_N__
@@ -124,6 +144,11 @@ class RecordUpdater
       if !(@input_req + @input_opt).include?(hc) then
         @log.file.puts("header includes invalid column #{hc}, it will be ignored.");
       else
+        if @col_map.key?(hc) then
+          @log.file.puts("Duplicate column #{hc} in column #{i}, changed to new_#{hc}");
+          hc = "new_#{hc}";
+          @input_opt << hc;
+        end
         @log.file.puts("#{hc} is in column #{i}");
         @col_map[hc] = i; # remember e.g. resolved_oclc is in column 3.
       end
@@ -138,7 +163,7 @@ class RecordUpdater
     # Get the updating fields from the column map.
     updating_fields = [];
     @input_opt.each do |col_name|
-      if @col_map.key?(col_name) then
+      if @col_map.key?(col_name) || col_name.start_with?("new_") then
         updating_fields << col_name;
       end
     end
@@ -146,20 +171,21 @@ class RecordUpdater
     # Now that we know which cols are being updated we can construct
     # the update query and know what to ask for to get the original
     # record, for undo purposes.
-    update_set_str = updating_fields.map{|x| "#{x} = ?"}.join(', ');
+    update_set_str = updating_fields.map{|x| "#{x.gsub('new_','')} = ?"}.join(', ');
+
     @update_sql = %W<
       UPDATE shared_print_commitments
       SET #{update_set_str}
       WHERE member_id = ? AND local_oclc = ? AND local_id = ?
     >.join(' ')
     @update_q = @conn.prepare(@update_sql);
-    
-    @get_original_q = @conn.prepare(%W<      
-      SELECT #{updating_fields.join(', ')} FROM shared_print_commitments
+
+    @get_original_q = @conn.prepare(%W<
+      SELECT #{updating_fields.map{|x| x.gsub("new_", "")}.join(', ')} FROM shared_print_commitments
       WHERE member_id = ? AND local_oclc = ? AND local_id = ?
     >.join(' '));
   end
-  
+
   # Update shared_print_commitments accordingly.
   def process_line (line)
     cols = line.split("\t");
@@ -168,17 +194,23 @@ class RecordUpdater
     local_oclc = cols[@col_map['local_oclc']];
     local_id   = cols[@col_map['local_id']];
 
-    # Only update if we find exactly one matching record.
-    cm = count_matches(member_id, local_oclc, local_id);
-    if cm != 1 then
+    matching_ids = get_matching_commitment_ids(member_id, local_oclc, local_id);
+    cm = matching_ids.size;
+
+    if cm == 0 then
       @log.file.puts("#{cm} matches for {member_id:#{member_id}, local_oclc:#{local_oclc}, local_id:#{local_id}}");
       # Check if there are deprecated records.
       check_deprecated(member_id, local_oclc, local_id).each do |dep_row|
-        @log.file.puts("Deprecated on #{dep_row[:deprecation_date]} with status #{dep_row[:deprecation_status]}");
+        @log.file.puts("Found deprecated on #{dep_row[:deprecation_date]} with status #{dep_row[:deprecation_status]}");
       end
       throw :next_line;
     end
-
+    
+    # Print before
+    get_commitments_by_id(matching_ids).each do |m|
+      @diff.file.puts("BEFORE\t|" + m.join("\t"));
+    end
+    
     # Get the value(s) for the updating field(s)
     updating_vals   = [];
     @input_opt.each do |col_name|
@@ -197,18 +229,27 @@ class RecordUpdater
       ["member_id", "local_oclc", "local_id"].each do |delete_field|
         original.delete(delete_field);
       end
-      set_str = original.map{|k,v| "#{k} = '#{v}'"}.join(', ');
+      set_str = original.map{|k,v| "#{k.gsub('new_','')} = '#{v}'"}.join(', ');
       set_str.gsub!(/''/, 'NULL');
       @undo.file.puts(%W<
-        UPDATE shared_print_commitments 
+        UPDATE shared_print_commitments
         SET #{set_str}
         WHERE member_id = '#{member_id}' AND local_oclc = '#{local_oclc}' AND local_id = '#{local_id}';
       >.join(' '));
     end
-    
+
     # do the actual update.
     @log.file.puts("#{@update_sql}; -- #{updating_vals.join(', ')}, #{[member_id, local_oclc, local_id].join(', ')}");
-    @update_q.execute(*updating_vals, member_id, local_oclc, local_id);
+
+    unless @noop
+      @update_q.execute(*updating_vals, member_id, local_oclc, local_id);
+    end
+    
+    # Print after
+    get_commitments_by_id(matching_ids).each do |m|
+      @diff.file.puts("AFTER\t|" + m.join("\t"));
+    end
+
   end
 
   def count_matches(member_id, local_oclc, local_id)
@@ -217,6 +258,24 @@ class RecordUpdater
       c = row[:c];
     end
     return c;
+  end
+
+  def get_matching_commitment_ids(member_id, local_oclc, local_id)
+    matching_ids = [];
+    @get_matching_commitment_ids_q.enumerate(member_id, local_oclc, local_id) do |row|
+      matching_ids << row[:id];
+    end
+    return matching_ids;
+  end
+
+  def get_commitments_by_id (ids)
+    commitments = [];
+    ids.each do |id|
+      @get_commitment_by_id_q.enumerate(id) do |row|
+        commitments << row.to_a;
+      end
+    end
+    return commitments;
   end
 
   def check_deprecated(member_id, local_oclc, local_id)
