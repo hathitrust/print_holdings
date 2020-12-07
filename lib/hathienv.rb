@@ -16,8 +16,9 @@ module Hathienv
       mxm = Runtime.getRuntime.maxMemory.to_i;
       # byte to megabyte conversion
       mxm_mb = mxm / 1048576;
-      $stderr.puts "#{$0}: Required: #{needed_mb} mb, available #{mxm_mb} mb";
+      $stderr.puts "#{$0}: Required: #{needed_mb} mb RAM";
       if needed_mb > mxm_mb then
+        $stderr.puts "#{$0}: Required: #{needed_mb} mb, available #{mxm_mb} mb. Re-invoke with a higher value for -J-Xmx###m";
         return false;
       end
       return true;
