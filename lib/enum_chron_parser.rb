@@ -246,11 +246,12 @@ class EnumChronParser
   def self.parse_file(file)
     f = File.open(file).each_line do |line|
       line.strip!
+      orig = line.clone
       ecp = EnumChronParser.new
       ecp.parse(line)
       n_enum  = ecp.normalized_enum
       n_chron = ecp.normalized_chron
-      puts [n_enum,n_chron].join("\t")
+      puts [orig, "-->", n_enum, n_chron].join("\t")
     end
   end
 
