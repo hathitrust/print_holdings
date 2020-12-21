@@ -32,7 +32,7 @@ Alter default behavior with:
   --oclc_column=\d
     Give the (zero-indexed) column number where ocn is expected
 
-  --verbose=\d
+  --verbose=0/1
     Give 1 to turn on verbose output
 
   --header=\d
@@ -41,6 +41,9 @@ Alter default behavior with:
   --strict=\d
     Give 0 to turn off strict ocn checking. Under strict, bare numbers
     such as 555 are not considered ocns. Strict ocns must match /oc.+(\d+)/i
+
+  --max_ocn=\d+
+    Reject any OCN greather than --max_ocn.
 
 =cut
 
@@ -52,6 +55,7 @@ my $default = {
     header        => 0,
     strict        => 0,
     semi_strict   => 0,
+    max_ocn       => 0,
 };
 
 # Look for default overrides in @ARGV and set accordingly.
@@ -114,6 +118,13 @@ while (<>) {
 	    $ocn =~ s/(\d)\D+.*/$1/;
 	    # One number can only map to one surface representation.
 	    print "$number => $ocn\n" if $default->{verbose};
+
+	    # Skip any OCN that is too big (if provided --max_ocn=\d+)
+	    if ($default->{max_ocn} && $number && $number > $default->{max_ocn}) {
+		print STDERR "[$ocn] too big! ($number > $default->{max_ocn})\n" if $default->{verbose};
+		next OCN_LOOP;
+	    }
+
 	    $uniq{$number} = $ocn;
 	} else {
 	    print STDERR "[$ocn] lacks  numbers\n" if $default->{verbose};
