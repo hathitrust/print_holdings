@@ -1,5 +1,4 @@
 require 'hathidata';
-require 'hathidb';
 
 # Takes a list of member_ids.
 # For each, count the monos, multis and serials both in holdings_memberitem 
@@ -8,10 +7,6 @@ require 'hathidb';
 # Looks extra pretty if piped through " | column -t "
 
 class Counter
-  db              = Hathidb::Db.new();
-  @@conn          = db.get_conn();
-  @@get_count_sql = "SELECT COUNT(id) AS c FROM holdings_memberitem WHERE member_id = ? AND item_type = ?";
-  @@query         = @@conn.prepare(@@get_count_sql);
 
   attr_reader :member_id, :counts;
 
@@ -36,20 +31,14 @@ class Counter
   def get_old_count (item_type)
     dpath = "loadfiles/HT003_#{@member_id}.#{item_type}.tsv";
     hd    = Hathidata::Data.new(dpath);
-    print "old file #{@member_id} #{item_type} ";
     count = %x{wc -l #{hd.path}}.strip.split(" ")[0];
-    puts count;
-
     return count.to_i;
   end
 
   def get_new_count (item_type)
-    print "file #{@member_id} #{item_type} ";
     dpath = "memberdata/#{@member_id}/HT003_#{@member_id}.#{item_type}.tsv";
     hd    = Hathidata::Data.new(dpath);
     count = %x{wc -l #{hd.path}}.strip.split(" ")[0];
-    puts count;
-
     return count.to_i;
   end
 
