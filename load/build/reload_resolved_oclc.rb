@@ -6,10 +6,13 @@ require 'hathilog';
 Reloads the resolved_oclc field for holdings, commitments, or both.
 Run under db_auth_nohup.sh, because it's going to take a while.
 Pass "holdings" and/or "commitments" as args to reload their ocns.
+Pass -n for noop.
+
 E.g.
-  $ bash under db_auth_nohup.sh ruby reload_resolved_oclc.rb holdings
-  $ bash under db_auth_nohup.sh ruby reload_resolved_oclc.rb commitments
-  $ bash under db_auth_nohup.sh ruby reload_resolved_oclc.rb holdings commitments
+
+  $ bash ../../lib/db_auth_nohup.sh ruby reload_resolved_oclc.rb holdings
+  $ bash ../../lib/db_auth_nohup.sh ruby reload_resolved_oclc.rb commitments
+  $ bash ../../lib/db_auth_nohup.sh ruby reload_resolved_oclc.rb holdings commitments
 
 =end
 
@@ -19,7 +22,13 @@ class Reloader
     @log  = Hathilog::Log.new();    
     db    = Hathidb::Db.new();
     @conn = db.get_interactive();
-
+    @noop = false; # -n
+    
+    if ARGV.include?("-n") then
+      @noop = true
+      ARGV.delete("-n")
+    end
+    
     @update_holdings_sql = %W<
       UPDATE holdings_memberitem 
       SET resolved_oclc = COALESCE(
@@ -57,7 +66,11 @@ class Reloader
   def do_update(sql)
     @log.i(sql);
     update_q = @conn.prepare(sql);
-    # update_q.execute();
+    if @noop then
+      @log.d("Not actually updating because noop=#{@noop}")
+    else
+      update_q.execute() 
+    end
   end
   
 end
