@@ -280,8 +280,8 @@ if $0 == __FILE__ then
     htfiles = copy_files(infiles);
     @conn = @db.get_conn();
     process_htfiles(htfiles);
-    check_values();
-    optimize_table() unless @dry_run;
+    # check_values();
+    # optimize_table() unless @dry_run;
   rescue StandardError => error
     @log.f("Something went wrong:");
     @log.f(error);

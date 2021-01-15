@@ -9,7 +9,7 @@ SCRIPTPATH=`pwd`
 popd > /dev/null
 
 data_dir=`readlink -e $SCRIPTPATH/../../data`;
-latest_hathi_file=`ls -w1 $data_dir/builds/current/ | egrep '^hathi_full.txt$' | sort | tail -1`;
+latest_hathi_file=`ls -w1 $data_dir/builds/current/ | egrep '^hathi_full(_[0-9]+)?.txt$' | sort | tail -1`;
 mhoff_outfile="htitem_oclc.data";
 
 echo "Started `date`";

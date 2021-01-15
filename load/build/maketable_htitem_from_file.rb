@@ -28,7 +28,13 @@ def generate_htitem_table(infilen, serialsfn)
   end
   s.close();
 
-  f    = Hathidata::Data.new('builds/current/' + infilen).open('r');
+  f    = Hathidata::Data.new('builds/current/' + infilen);
+
+  if infilen.end_with?(".gz") then
+    f.inflate()
+  end
+  f.open('r');
+  
   outf = Hathidata::Data.new("builds/current/hathi_full.data").open('w');
   e    = Hathidata::Data.new("builds/current/hathi_full.err").open('w');
 

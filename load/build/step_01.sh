@@ -7,13 +7,20 @@ popd > /dev/null;
 
 source $SCRIPTPATH/build_lib.sh;
 
-# Gets the "latest_hathi_file".
-bash $SCRIPTPATH/hathi_grabber.sh;
-exit_st=$?;
-check_exit_code $exit_st;
+local_hathi_file=$1; # pass in if you have a file locally that you want to use
+latest_hathi_file="";
 
-latest_hathi_file=`ls -w1 $DATADIR/builds/current/ | egrep '^hathi_full.txt$' | sort | tail -1`;
-echo "latest_hathi_file = ${latest_hathi_file}";
+if [ -z $local_hathi_file ]; then
+    # Gets the "latest_hathi_file" from www.
+    bash $SCRIPTPATH/hathi_grabber.sh;
+    exit_st=$?;
+    check_exit_code $exit_st;
+    latest_hathi_file=`ls -w1 $DATADIR/builds/current/ | egrep '^hathi_full.txt$' | sort | tail -1`;
+    echo "latest_hathi_file = ${latest_hathi_file}";
+else
+    echo "using local hathifile = ${local_hathi_file}"
+    latest_hathi_file=$local_hathi_file
+fi
 
 # Assuming this was manually placed here.
 latest_serial_file=`ls -w1 $SERIALDIR | grep -v README | tail -1`;
