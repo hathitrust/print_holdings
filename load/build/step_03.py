@@ -28,7 +28,8 @@ def get_connection():
             user   = hc.get('db_user'),
             passwd = hc.get('db_pw'),
             db     = hc.get('db_name'),
-            local_infile = 1
+            local_infile = 1,
+            connect_timeout = 10000
             )
     except MySQLdb.Error, e:
         print "Couldn't get connection."
@@ -282,7 +283,7 @@ def cluster_main():
         if ((viter % 100000)==0):
             print "%s\t%s" % (time.strftime("%Y-%m-%d %H:%M:%S"), viter)
             sys.stdout.flush()
-            dump_data_structure(Cluster_oclc_d, outfn)
+            # dump_data_structure(Cluster_oclc_d, outfn)
                    
     conn.commit()
     conn.close()         
@@ -294,11 +295,13 @@ def cluster_main():
 def dump_data_structure(dstruct, outfn):
     """ Exports one of the table data structures to a flatfile.  Structs are
     hashes of lists (sets). """
+    print "dumping to file"
     outfile = file(outfn, 'w')
     for k, v in dstruct.iteritems():
         for val in v:
             outline = "%s\t%s\n" % (k, val)
             outfile.write(outline)
+    
     
 if __name__ == '__main__':
     print "Started %s" % time.strftime("%Y-%m-%d %H:%M:%S")
