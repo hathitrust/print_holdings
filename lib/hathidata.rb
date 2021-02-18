@@ -44,6 +44,41 @@ module Hathidata
     hd.close();
   end
 
+  # Memoize: call with a path, a max age (int) and a block.
+  # If the age of the file at path is greater than max_age,
+  # then execute the block. Return the Hathidata::Data object.
+  # Example:
+  # hd = Hathidata.memoize("memo_test.txt", 100) do |hdmem|
+  #   hdmem.file.puts(Time.new);
+  # end
+  #
+  # hd.open('r').file.each_line do |line|
+  #   puts line;
+  # end
+  # hd.close();    
+  def self.memoize(path, max_age=0, &block)
+    hd = Data.new(path);
+    if hd.exists? then
+      # Get how many seconds ago the memoize file was modified
+      memo_age = (Time.now - hd.mtime).to_i;
+      # delete it if older than max_age
+      if memo_age > max_age then
+        hd.delete;
+      end
+    end
+
+    # If the file was deleted, or never existed, eval the block
+    # which presumably contains code that writes to the file.
+    if !hd.exists? then
+      hd.open('w');
+      hd.instance_eval(&block);
+      hd.close();
+    end
+
+    # Return Data object so you can call .open('r') etc.
+    return hd;
+  end
+  
   class Data
     THIS_PATH = Pathname.new(__FILE__).expand_path;
     DATA_PATH = THIS_PATH + '../../data/';
@@ -135,6 +170,10 @@ module Hathidata
       File.exists?(self.backup_path());
     end
 
+    def mtime
+      File.stat(@path).mtime
+    end
+    
     # If you just want to make sure it is there.
     # Will truncate previous contents, if any.
     def touch
