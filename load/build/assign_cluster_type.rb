@@ -26,6 +26,20 @@ def assign_cluster_type()
   cluster_count   = 0;
   sel_cluster_id_sql = "SELECT cluster_id FROM holdings_cluster";
 
+=begin
+
+A prettier & more compact version of sel_item_type_sql would be:
+
+SELECT GROUP_CONCAT(DISTINCT h.item_type ORDER BY h.item_type SEPARATOR "/")
+FROM holdings_htitem            AS h
+JOIN holdings_cluster_htitem_jn AS hchj ON (h.volume_id  = hchj.volume_id)
+JOIN holdings_cluster           AS c    ON (c.cluster_id = hchj.cluster_id)
+WHERE c.cluster_id = ?
+
+... then we just gotta replace ctype->ckey strings: serial->ser, mono->mpm, multi->mpm
+
+=end
+  
   sel_item_type_sql = %w<
     SELECT DISTINCT
       item_type 
