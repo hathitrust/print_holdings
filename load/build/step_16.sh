@@ -34,7 +34,7 @@ exit_st=$?
 check_exit_code $exit_st;
 
 echo "16d, generate delta files and load into db";
-ruby -J-Xmx8000m $SCRIPTPATH/generate_updated_items_list.rb;
+ruby -J-Xmx12000m $SCRIPTPATH/generate_updated_items_list.rb;
 exit_st=$?                     
 check_exit_code $exit_st;      
 
