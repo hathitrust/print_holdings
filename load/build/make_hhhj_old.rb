@@ -5,6 +5,8 @@ require 'hathidb';
 require 'hathilog';
 require 'hathidata';
 
+start_with_member = ARGV.shift;
+
 log = Hathilog::Log.new();
 log.d("Started");
 
@@ -23,8 +25,10 @@ select_q   = conn.prepare(select_sql);
 load_sql = "LOAD DATA LOCAL INFILE ? INTO TABLE holdings_htitem_htmember_jn_old";
 load_q   = conn.prepare(load_sql);
 
-log.d(delete_sql);
-conn.execute(delete_sql);
+if start_with_member.nil? then
+  log.d(delete_sql);
+  conn.execute(delete_sql);
+end
 
 cols = [:volume_id, :member_id, :copy_count, :lm_count, :wd_count, :brt_count, :access_count];
 
@@ -32,6 +36,11 @@ hdout = nil;
 log.d(get_members_sql);
 get_members_q.enumerate() do |member_row|
   member_id = member_row[:member_id];
+
+  if !start_with_member.nil? then
+    next if member_id < start_with_member
+  end
+
   log.d(select_sql);
   log.d(member_id);
   hdout = Hathidata::Data.new('holdings_htitem_htmember_jn_old.dat').open('w');  
