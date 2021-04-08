@@ -17,9 +17,10 @@ conn = db.get_conn(); # Dev conn.
 hdout = Hathidata::Data.new("builds/current/volume_cluster.tsv").open('w');
 count_rows = 0;
 get_sql  = %w<
-  SELECT t1.cluster_id, t1.volume_id
+  SELECT t1.cluster_id, t1.volume_id, t3.n_enum
   FROM holdings_cluster_htitem_jn AS t1
   JOIN holdings_cluster AS t2 ON (t1.cluster_id = t2.cluster_id)
+  JOIN holdings_htitem AS t3 ON (t1.volume_id = t3.volume_id)
   WHERE t2.cluster_type IN ('spm', 'mpm')
 >.join(' ');
 get_q = conn.prepare(get_sql);
@@ -41,7 +42,8 @@ log.i("there are #{count_rows} rows to copy from dev to prod");
 prod_conn = db.get_prod_interactive(); # Prod conn, prompts for username/password
 prod_queries = [
   "CREATE TABLE IF NOT EXISTS holdings_cluster_htitem_jn_tmp LIKE holdings_cluster_htitem_jn",
-  "TRUNCATE holdings_cluster_htitem_jn_tmp"
+  "ALTER TABLE holdings_cluster_htitem_jn_tmp ENGINE=innodb",
+  "TRUNCATE holdings_cluster_htitem_jn_tmp",
 ]
 prod_queries.each do |sql|
   log.i(sql);
@@ -94,6 +96,7 @@ swap_commands = [
   "RENAME TABLE holdings_cluster_htitem_jn_tmp TO holdings_cluster_htitem_jn",
   "DROP TABLE holdings_cluster_htitem_jn_old",
   "CREATE TABLE holdings_cluster_htitem_jn_tmp LIKE holdings_cluster_htitem_jn",
+  "ALTER TABLE holdings_cluster_htitem_jn_tmp ENGINE=innodb",
 ];
 
 swap_commands.each do |sql|

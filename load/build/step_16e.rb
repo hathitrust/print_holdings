@@ -29,6 +29,7 @@ check_main_table(pi_conn, log);
   "DROP TABLE IF EXISTS holdings_htitem_htmember_old",
 
   "INSERT IGNORE INTO holdings_htitem_htmember_jn_dev (SELECT volume_id, member_id, 1,0,0,0,0 FROM holdings_newitems)",
+  "ALTER TABLE holdings_htitem_htmember_jn_dev ENGINE=innodb",
   "TRUNCATE holdings_newitems",
 
   "RENAME TABLE holdings_htitem_htmember TO holdings_htitem_htmember_old",
