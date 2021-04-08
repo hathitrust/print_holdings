@@ -2,6 +2,11 @@
 # <member_id><TAB><(mono|multi|serial)>
 # ... and uploads the corresponding files to AWS.
 
+# Been having problems with timeouts lately. Aaron sez:
+#   "If it keeps failing, it would probably be straightforward to
+#   change it to use awscli (aws s3 cp file s3://bucket-name/whatever),
+#   or aws s3 sync if you want to copy a directory"
+
 pushd `dirname $0` > /dev/null;
 SCRIPTPATH=`pwd`;
 popd > /dev/null;
