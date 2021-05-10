@@ -8,8 +8,8 @@ popd > /dev/null;
 source $SCRIPTPATH/build_lib.sh;
 
 # Get most recent output bucket.
-date=`s3cmd ls s3://$s3_main_bucket/output/ | grep -Po '\/(\d+)\/$' | tr -d '/' | sort | tail -1`;
-awsdir=$DATADIR/aws/$date;
+output_date=`aws s3 ls s3://$s3_main_bucket/output/ | grep -Po '\d+\/$' | tr -d '/' | sort | tail -1`;
+awsdir=$DATADIR/aws/$output_date;
 
 date;
 echo "Started $0";
@@ -31,8 +31,8 @@ if [ -f $awsdir/_SUCCESS ]; then
     fi
 else
     # No existing data here, go get it.
-    echo "GETting files from s3://$s3_main_bucket/output/$date/ to $awsdir/";
-    s3cmd get s3://$s3_main_bucket/output/$date/* $awsdir/;
+    echo "GETting files from s3://$s3_main_bucket/output/$output_date/ to $awsdir/";
+    aws s3 cp s3://$s3_main_bucket/output/$output_date/* $awsdir/;
     # Check success.
     if [ -f $awsdir/_SUCCESS ]; then
 	echo "Looks like the MapReduce was a success.";

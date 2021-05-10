@@ -24,8 +24,13 @@ echo `date` Started;
 
 upload_to_aws () {
     echo member $1 type $2;
-    # Turn on the -n flag for dry-run.
-    s3cmd --no-progress put $HTDIR/HT00*_$1.$2.tsv $input_current/;
+
+    # In the old days we used s3cmd:
+    # s3cmd --no-progress put $HTDIR/HT00*_$1.$2.tsv $input_current/;
+
+    aws_cmd="aws s3 cp $HTDIR/HT00*_$1.$2.tsv $input_current/"
+    echo -e "$aws_cmd"
+    eval "$aws_cmd"
 }
 
 # Skip commented-out lines. Only get ones with a tab.
