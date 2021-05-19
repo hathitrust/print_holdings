@@ -2,12 +2,14 @@
 
 When a commitment does not match holdings, but the member says they still hold it.
 
+ruby do_not_deprecate.rb <member_id> <id_type> <input_file>
+
 =end
 
 require 'hathidata';
 require 'hathidb';
 
-id_types = %w[local_id local_oclc];
+id_types = %w[local_id local_oclc both];
 
 member_id = ARGV.shift;
 
@@ -28,17 +30,33 @@ conn = db.get_conn();
 hdin = Hathidata::Data.new(dnd_file).open('r');
 
 # Perform updates
-sql_u = "UPDATE shared_print_commitments SET do_not_deprecate = 1 WHERE member_id = ? AND #{id_type} = ?";
-q_u   = conn.prepare(sql_u);
-hdin.file.each_line do |line|
-  line.strip!
-  cols = line.split("\t");
-  id = cols[0];
-  if id =~ /\d/ then
-    # puts "update #{member_id} #{id_type} #{id}";
-    q_u.execute(member_id, id);
+if id_type == 'both' then
+  sql_u = "UPDATE shared_print_commitments SET do_not_deprecate = 1 WHERE member_id = ? AND local_oclc = ? AND local_id = ?";
+  q_u   = conn.prepare(sql_u);
+  hdin.file.each_line do |line|
+    line.strip!
+    cols = line.split("\t");
+    local_oclc = cols[0];
+    local_id   = cols[1];
+    if line =~ /\d/ then
+      # puts "update #{member_id} #{id_type} #{local_oclc} + #{local_id}";
+      q_u.execute(member_id, local_oclc, local_id);
+    end
+  end
+else
+  sql_u = "UPDATE shared_print_commitments SET do_not_deprecate = 1 WHERE member_id = ? AND #{id_type} = ?";
+  q_u   = conn.prepare(sql_u);
+  hdin.file.each_line do |line|
+    line.strip!
+    cols = line.split("\t");
+    id = cols[0];
+    if id =~ /\d/ then
+      # puts "update #{member_id} #{id_type} #{id}";
+      q_u.execute(member_id, id);
+    end
   end
 end
+
 hdin.close();
 
 # Output report

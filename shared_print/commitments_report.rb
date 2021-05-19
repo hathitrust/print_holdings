@@ -17,16 +17,20 @@ case mode
 when '--brief'
   # Brief report using --brief
   sql  = %w[
-    SELECT local_id, local_oclc, resolved_oclc
+    SELECT local_id, local_oclc
     FROM shared_print_commitments
     WHERE member_id = ?
     ORDER BY local_id
   ].join(" ");
 
   q = conn.prepare(sql);
-  hdout.file.puts [:local_id, :local_oclc, :resolved_oclc].join("\t");
+  header = true;
   q.enumerate(member_id) do |row|
-    hdout.file.puts [row[:local_id], row[:local_oclc], row[:resolved_oclc]].join("\t");
+    if header then
+      hdout.file.puts row.to_h.keys.join("\t")
+      header = false
+    end
+    hdout.file.puts row.to_a.join("\t")
   end
 else
   # Default to full report, using member profile to make it
@@ -42,7 +46,7 @@ else
     profile.close();
     profile_data = JSON.parse(profile_json.join(' '));
   end
-  cols = ['resolved_oclc'];
+  cols = ['resolved_oclc', 'committed_date'];
   profile_data.sort_by{|k,v| v}.each do |k,v|
     if k == 'other_commitments' then
       # Values stored in another table, so we have to do some tricks with this one.

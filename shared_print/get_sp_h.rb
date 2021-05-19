@@ -4,6 +4,8 @@ require 'hathidb';
 # ruby get_sp_h.rb 555
 # OR
 # echo "555" | ruby get_sp_h.rb
+# OR
+# cat my_ocns.txt | ruby get_sp_h.rb
 
 db   = Hathidb::Db.new();
 conn = db.get_conn();

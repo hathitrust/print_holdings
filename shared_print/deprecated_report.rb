@@ -11,11 +11,11 @@ conn = db.get_conn();
 
 # Get counts on deprecated for member.
 dep_sql = %w{
-  SELECT deprecation_status, resolved_oclc, COUNT(*) AS deprecated_count
+  SELECT DATE_FORMAT(deprecation_date, "%Y-%m-%d") AS deprecation_date, deprecation_status, local_id, local_oclc, resolved_oclc, COUNT(*) AS deprecated_count
   FROM shared_print_deprecated
   WHERE member_id = ?
-  GROUP BY resolved_oclc
-  ORDER BY deprecation_status, resolved_oclc
+  GROUP BY deprecation_date, deprecation_status, local_id, local_oclc, resolved_oclc
+  ORDER BY deprecation_date, deprecation_status, resolved_oclc
 }.join(' ');
 dep_q = conn.prepare(dep_sql);
 
@@ -31,7 +31,7 @@ com_q = conn.prepare(com_sql);
 i = 0;
 dep_q.enumerate(member_id) do |d_row|
   if i == 0 then # header
-    hdout.file.puts(%w[deprecation_status resolved_oclc deprecated_count committed_count].join("\t"));
+    hdout.file.puts(%w[deprecation_date deprecation_status local_id local_oclc resolved_oclc deprecated_count committed_count].join("\t"));
   end
   committed_count = 0;
   com_q.enumerate(member_id, d_row[:resolved_oclc]) do |c_row|

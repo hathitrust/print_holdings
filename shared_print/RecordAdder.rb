@@ -2,6 +2,7 @@ require 'hathibase'
 
 # Generic-ish loader for spc
 # Takes one argument, a tsv file.
+# And after that possibly some flags.
 
 class Script < Hathibase::BaseReport
   def initialize
@@ -29,7 +30,7 @@ class Script < Hathibase::BaseReport
     
     # No-op
     noop = ARGV.include?("-n")
-    
+      
     committed_date = use_date || "2019-02-28"
     header         = []
     sql_cols       = nil
