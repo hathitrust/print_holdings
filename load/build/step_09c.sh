@@ -32,7 +32,7 @@ if [ -f $awsdir/_SUCCESS ]; then
 else
     # No existing data here, go get it.
     echo "GETting files from s3://$s3_main_bucket/output/$output_date/ to $awsdir/";
-    aws s3 cp s3://$s3_main_bucket/output/$output_date/* $awsdir/;
+    aws s3 cp --recursive s3://$s3_main_bucket/output/$output_date/ $awsdir/;
     # Check success.
     if [ -f $awsdir/_SUCCESS ]; then
 	echo "Looks like the MapReduce was a success.";
