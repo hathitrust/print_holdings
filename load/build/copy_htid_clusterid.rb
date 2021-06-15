@@ -42,8 +42,8 @@ log.i("there are #{count_rows} rows to copy from dev to prod");
 prod_conn = db.get_prod_interactive(); # Prod conn, prompts for username/password
 prod_queries = [
   "CREATE TABLE IF NOT EXISTS holdings_cluster_htitem_jn_tmp LIKE holdings_cluster_htitem_jn",
-  "ALTER TABLE holdings_cluster_htitem_jn_tmp ENGINE=innodb",
   "TRUNCATE holdings_cluster_htitem_jn_tmp",
+  "ALTER TABLE holdings_cluster_htitem_jn_tmp ENGINE=innodb",
 ]
 prod_queries.each do |sql|
   log.i(sql);
