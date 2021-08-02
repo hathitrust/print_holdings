@@ -1,10 +1,21 @@
 #!/bin/bash
 
+# Purpose:
+# Add information from a hathifile to a file with volume_ids.
+
 # Invocation:
 # bash append_from_hathifile.sh <inputfile> <hathifile> <fieldsfile> <@fields>
 
 # Output written to <inputfile>.out
 
+if [ $# -eq 0 ]; then
+    # The perhaps most oblique "show help if no args given" I could manage.
+    # Obviously sensitive to comment lines being added/removed.
+    grep -m23 '^# ' $0
+    exit 1
+fi
+
+# Arguments:
 # <inputfile>:
 # A .tsv file where the 1st col is volume_id.
 # There can be any number of additional cols.
@@ -58,14 +69,18 @@ head -1 $inputfile > $inputfile.sort
 egrep -v  '^volume_id' $inputfile | hathisort >> $inputfile.sort
 
 # Get the column numbers for the given column names for cut -f
-colnums=`ruby get_col_num_for_field_name.rb $fieldsfile $appendfields`
+colnums=`ruby get_col_num_for_field_name.rb $fieldsfile $appendfields | grep colnums | cut -f2`
 echo "# colnums: $colnums"
 
-# Trim and sort the hathifile.
+# Getting colnames in the order they appear (because cut -f requires it)
+colnames=`ruby get_col_num_for_field_name.rb $fieldsfile $appendfields | grep colnames | cut -f2 | tr ',' '\t'`
+echo "# colnames: $colnames"
+
+# Trim and sort the hathifile. Always include 1st column (volume_id)
 cut -f1,$colnums $hathifile | hathisort > hathifile.trim.sort
 
 # Combine $inputfile.sort with hathifile.trim.sort, write to $inputfile.out
-ruby append_from_hathifile.rb $inputfile.sort hathifile.trim.sort $appendfields
+ruby append_from_hathifile.rb $inputfile.sort hathifile.trim.sort $colnames
 
 # Remove temporary files.
 rm hathifile.trim.sort

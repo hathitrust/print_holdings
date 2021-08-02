@@ -1,8 +1,11 @@
 field_list_file   = ARGV.shift
 extract_col_names = ARGV.uniq
 
+TAB   = "\t"
+COMMA = ","
+
 field_list        = `head -1 #{field_list_file}`
-field_list_arr    = field_list.chomp.split("\t")
+field_list_arr    = field_list.chomp.split(TAB)
 
 extract = {} # col_num : col_name
 
@@ -17,4 +20,6 @@ extract_col_names.each do |col_name|
 end
 
 sorted_keys = extract.keys.sort
-puts sorted_keys.map{|sk| sk}.join(",")
+
+puts ["colnums", TAB, sorted_keys.join(COMMA)].join
+puts ["colnames", TAB, sorted_keys.map{|sk| extract[sk]}.join(COMMA)].join
